@@ -1,6 +1,6 @@
 package se.jsa.jles.internal;
 
-public enum Indexing {
+public enum IndexType {
 	NONE,
 	SIMPLE,
 	ADVANCED;

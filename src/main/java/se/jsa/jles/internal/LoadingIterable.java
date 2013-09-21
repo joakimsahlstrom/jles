@@ -24,15 +24,15 @@ public class LoadingIterable implements Iterable<Object> {
 		return result;
 	}
 
-	public void register(Iterable<EventIndex> iterable, TypedEventRepo eventRepo) {
+	public void register(Iterable<EventId> iterable, TypedEventRepo eventRepo) {
 		holders.add(new EventIndexHolder(iterable, eventRepo));
 	}
 
 	private class EventIndexHolder {
-		private final Iterable<EventIndex> iterable;
+		private final Iterable<EventId> iterable;
 		private final TypedEventRepo eventRepo;
 
-		public EventIndexHolder(Iterable<EventIndex> iterable, TypedEventRepo eventRepo) {
+		public EventIndexHolder(Iterable<EventId> iterable, TypedEventRepo eventRepo) {
 			this.iterable = iterable;
 			this.eventRepo = eventRepo;
 		}
@@ -43,11 +43,11 @@ public class LoadingIterable implements Iterable<Object> {
 	}
 
 	private class EventIndexFeeder {
-		private final Iterator<EventIndex> iterable;
+		private final Iterator<EventId> iterable;
 		private final TypedEventRepo eventRepo;
-		private EventIndex current = null;
+		private EventId current = null;
 
-		public EventIndexFeeder(Iterator<EventIndex> iterable, TypedEventRepo eventRepo) {
+		public EventIndexFeeder(Iterator<EventId> iterable, TypedEventRepo eventRepo) {
 			this.iterable = iterable;
 			this.eventRepo = eventRepo;
 		}
@@ -61,7 +61,7 @@ public class LoadingIterable implements Iterable<Object> {
 
 		public Object take() {
 			peek();
-			EventIndex res = current;
+			EventId res = current;
 			current = null;
 			return eventRepo.readEvent(res);
 		}
@@ -74,7 +74,7 @@ public class LoadingIterable implements Iterable<Object> {
 			if (currentFeeder == null) {
 				return true;
 			}
-			return current.getEventIndex() < currentFeeder.current.getEventIndex();
+			return current.getEventId() < currentFeeder.current.getEventId();
 		}
 	}
 

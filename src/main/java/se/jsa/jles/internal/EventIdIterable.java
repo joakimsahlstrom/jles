@@ -5,19 +5,19 @@ import java.util.Iterator;
 import se.jsa.jles.internal.IndexFile.IndexEntry;
 import se.jsa.jles.internal.util.Objects;
 
-public class EventIndexIterable<T> implements Iterable<EventIndex> {
+public class EventIdIterable<T> implements Iterable<EventId> {
 	private final Iterable<IndexEntry<T>> indexSource;
 
-	public EventIndexIterable(Iterable<IndexEntry<T>> indexSource) {
+	public EventIdIterable(Iterable<IndexEntry<T>> indexSource) {
 		this.indexSource = Objects.requireNonNull(indexSource);
 	}
 
 	@Override
-	public Iterator<EventIndex> iterator() {
+	public Iterator<EventId> iterator() {
 		return new EventIndexIterator<T>(indexSource.iterator());
 	}
 
-	public static class EventIndexIterator<T> implements Iterator<EventIndex> {
+	public static class EventIndexIterator<T> implements Iterator<EventId> {
 		private final Iterator<IndexEntry<T>> indexSource;
 		private long eventIdByType = 0;
 
@@ -31,8 +31,8 @@ public class EventIndexIterable<T> implements Iterable<EventIndex> {
 		}
 
 		@Override
-		public EventIndex next() {
-			return new EventIndex(indexSource.next().getEventIndex(), eventIdByType++);
+		public EventId next() {
+			return new EventId(indexSource.next().getEventIndex(), eventIdByType++);
 		}
 
 		@Override

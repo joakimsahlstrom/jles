@@ -9,12 +9,12 @@ import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventFieldConstraint;
 import se.jsa.jles.internal.EventFile;
-import se.jsa.jles.internal.EventIndex;
-import se.jsa.jles.internal.EventIndexIterable;
+import se.jsa.jles.internal.EventId;
+import se.jsa.jles.internal.EventIdIterable;
 import se.jsa.jles.internal.EventSerializer;
 import se.jsa.jles.internal.IndexFile;
 import se.jsa.jles.internal.IndexFile.IndexKeyMatcher;
-import se.jsa.jles.internal.Indexing;
+import se.jsa.jles.internal.IndexType;
 import se.jsa.jles.internal.LoadingIterable;
 import se.jsa.jles.internal.TypedEventRepo;
 import se.jsa.jles.internal.eventdefinitions.EventDefinitionFile;
@@ -75,7 +75,7 @@ public class EventStore {
 		LoadingIterable loadingIterable = new LoadingIterable();
 		for (Long eventTypeId : eventDefinitions.getEventTypeIds(eventTypes)) {
 			InternalTypedEventRepo typedEventRepo = new InternalTypedEventRepo(eventTypeId);
-			Iterable<EventIndex> iterable = typedEventRepo.getIterator(new EventFieldConstraint());
+			Iterable<EventId> iterable = typedEventRepo.getIterator(new EventFieldConstraint());
 			loadingIterable.register(iterable, typedEventRepo);
 		}
 		return loadingIterable;
@@ -85,7 +85,7 @@ public class EventStore {
 		LoadingIterable loadingIterable = new LoadingIterable();
 		for (Long eventTypeId : eventDefinitions.getEventTypeIds(eventType)) {
 			InternalTypedEventRepo typedEventRepo = new InternalTypedEventRepo(eventTypeId);
-			Iterable<EventIndex> iterable = match.buildFilteringIterator(typedEventRepo);
+			Iterable<EventId> iterable = match.buildFilteringIterator(typedEventRepo);
 			loadingIterable.register(iterable, typedEventRepo);
 		}
 		return loadingIterable;
@@ -101,27 +101,27 @@ public class EventStore {
 		}
 
 		@Override
-		public Iterable<EventIndex> getIterator(EventFieldConstraint constraint) {
+		public Iterable<EventId> getIterator(EventFieldConstraint constraint) {
 			if (constraint.hasConstraint()) {
 				throw new RuntimeException("Not supported!");
 			}
 
-			return new EventIndexIterable<Long>(eventTypeIndex.readIndicies(Long.class, new EventTypeMatcher(eventTypeId)));
+			return new EventIdIterable<Long>(eventTypeIndex.readIndicies(Long.class, new EventTypeMatcher(eventTypeId)));
 		}
 
 		@Override
-		public Object readEvent(EventIndex eventIndex) {
-			return eventFile.readEvent(eventIndex.getEventIndex(), eventDeserializer);
+		public Object readEvent(EventId eventIndex) {
+			return eventFile.readEvent(eventIndex.getEventId(), eventDeserializer);
 		}
 
 		@Override
-		public Object readEventField(EventIndex eventIndex, String fieldName) {
+		public Object readEventField(EventId eventIndex, String fieldName) {
 			return eventDefinitions.getEventField(eventTypeId, fieldName).getValue(readEvent(eventIndex)); // non indexed
 		}
 
 		@Override
-		public Indexing getIndexing(String fieldName) {
-			return fieldName.equals("First") ? Indexing.SIMPLE : Indexing.NONE;
+		public IndexType getIndexing(String fieldName) {
+			return fieldName.equals("First") ? IndexType.SIMPLE : IndexType.NONE;
 		}
 
 	}
