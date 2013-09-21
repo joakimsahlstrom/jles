@@ -75,10 +75,10 @@ public class IndexFile {
 		this.entryFile = entryFile;
 	}
 
-	public void writeIndex(long eventIndex, Object event) {
+	public void writeIndex(long eventId, Object event) {
 		int eventKeySize = eventKeyField.getSize(event);
 		ByteBuffer output = ByteBuffer.allocate(8 + 4 + eventKeySize);
-		output.putLong(eventIndex);
+		output.putLong(eventId);
 		output.putInt(eventKeySize);
 		eventKeyField.writeToBuffer(event, output);
 		output.rewind();

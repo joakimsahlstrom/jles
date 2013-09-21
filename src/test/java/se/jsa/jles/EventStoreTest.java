@@ -4,10 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
@@ -20,13 +23,14 @@ import org.junit.runners.Parameterized.Parameters;
 
 import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventFile;
-import se.jsa.jles.internal.IndexFile;
+import se.jsa.jles.internal.EventIndex;
+import se.jsa.jles.internal.Indexing;
 import se.jsa.jles.internal.PerformanceTest;
-import se.jsa.jles.internal.fields.StorableLongField;
+import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
+import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
 import se.jsa.jles.internal.file.CachingEntryFile;
 import se.jsa.jles.internal.file.FlippingEntryFile;
 import se.jsa.jles.internal.file.StreamBasedChannelFactory;
-import se.jsa.jles.internal.file.SynchronousEntryFile;
 import se.jsa.jles.internal.testevents.Name;
 import se.jsa.jles.internal.testevents.NonSerializableEvent;
 
@@ -51,7 +55,7 @@ public class EventStoreTest {
 	public static class EmptyEvent2 {
 		@Override
 		public boolean equals(Object obj) {
-			return obj instanceof EmptyEvent;
+			return obj instanceof EmptyEvent3;
 		}
 		@Override
 		public int hashCode() {
@@ -60,6 +64,21 @@ public class EventStoreTest {
 		@Override
 		public String toString() {
 			return "EmptyEvent2";
+		}
+	}
+
+	public static class EmptyEvent3 {
+		@Override
+		public boolean equals(Object obj) {
+			return obj instanceof EmptyEvent3;
+		}
+		@Override
+		public int hashCode() {
+			return 1;
+		}
+		@Override
+		public String toString() {
+			return "EmptyEvent3";
 		}
 	}
 
@@ -131,16 +150,16 @@ public class EventStoreTest {
 	@Parameters
 	public static Collection<Object[]> entryFiles() {
 		return Arrays.asList(
-				new Object[] {
-						new EntryFileFactory() {
-							@Override
-							public EntryFile create(String fileName) {
-								return new SynchronousEntryFile(fileName);
-							}
-							@Override
-							public String toString() { return "SynchronousEntryFile"; }
-						}
-					},
+//				new Object[] {
+//						new EntryFileFactory() {
+//							@Override
+//							public EntryFile create(String fileName) {
+//								return new SynchronousEntryFile(fileName);
+//							}
+//							@Override
+//							public String toString() { return "SynchronousEntryFile"; }
+//						}
+//					},
 				new Object[] {
 						new EntryFileFactory() {
 							@Override
@@ -165,7 +184,6 @@ public class EventStoreTest {
 	}
 
 	private final EventFile eventFile;;
-	private final IndexFile eventTypeIndexFile;
 	private final EventStore eventStore;
 	private final EntryFile eventEntryFile;
 	private final EntryFile indexEntryFile;
@@ -176,8 +194,7 @@ public class EventStoreTest {
 		this.eventEntryFile = entryFileFactory.create("events.ef");
 		this.indexEntryFile = entryFileFactory.create("eventIndexes.if");
 		this.eventFile = new EventFile(eventEntryFile);
-		this.eventTypeIndexFile = new IndexFile(new StorableLongField(), indexEntryFile);
-		this.eventStore = new EventStore(eventFile, eventTypeIndexFile);
+		this.eventStore = new EventStore(eventFile, indexEntryFile);
 	}
 
 	@Before
@@ -361,6 +378,55 @@ public class EventStoreTest {
 		long end = System.nanoTime();
 
 		System.out.println("Scenario run time: " + TimeUnit.NANOSECONDS.toMillis(end - start) + " ms.");
+	}
+
+
+	@Test
+	public void indexPerformanceTest() throws Exception {
+		new File("2.if").delete();
+		List<Object> events = createEEvents(3000, 0.01d);
+		MappingEventDefinitions eventDefinitions = new MappingEventDefinitions(new MemoryBasedEventDefinitions());
+		Long indexedEventId = eventDefinitions.getEventTypeIds(EmptyEvent3.class).iterator().next();
+		EntryFile emptyEventIndex = entryFileFactory.create("2.if");
+		EventIndex eventIndex = new EventIndex(emptyEventIndex, indexedEventId);
+
+		EventStore es = new EventStore(eventFile, new Indexing(indexEntryFile, Collections.singletonMap(indexedEventId, eventIndex)), eventDefinitions);
+
+		for (Object event : events) {
+			es.write(event);
+		}
+
+		long start2 = System.nanoTime();
+		es.collectEvents(EmptyEvent2.class);
+		long end2 = System.nanoTime();
+
+		long start3 = System.nanoTime();
+		es.collectEvents(EmptyEvent3.class);
+		long end3 = System.nanoTime();
+
+		long unindexedRead = end2 - start2;
+		long indexedRead = end3 - start3;
+		assertTrue("Indexed read should be at least a factor 10 faster under conditions given in this test case", indexedRead * 10 < unindexedRead);
+
+		emptyEventIndex.close();
+		new File("2.if").delete();
+	}
+
+	private static Random random = new Random(System.nanoTime());
+	public static List<Object> createEEvents(int num, double d) {
+		List<Object> result = new ArrayList<Object>(num);
+		int hits = 0;
+		for (int i = 0; i < num; i++) {
+			if (random.nextDouble() < d) {
+				result.add(new EmptyEvent2());
+				result.add(new EmptyEvent3());
+				hits++;
+			} else {
+				result.add(new EmptyEvent());
+			}
+		}
+		System.out.println("#Hits: " + hits);
+		return result;
 	}
 
 }

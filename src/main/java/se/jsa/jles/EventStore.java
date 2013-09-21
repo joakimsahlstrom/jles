@@ -3,50 +3,51 @@ package se.jsa.jles;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
+import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventFieldConstraint;
 import se.jsa.jles.internal.EventFile;
 import se.jsa.jles.internal.EventId;
-import se.jsa.jles.internal.EventIdIterable;
+import se.jsa.jles.internal.EventIndex;
 import se.jsa.jles.internal.EventSerializer;
-import se.jsa.jles.internal.IndexFile;
-import se.jsa.jles.internal.IndexFile.IndexKeyMatcher;
 import se.jsa.jles.internal.IndexType;
+import se.jsa.jles.internal.Indexing;
 import se.jsa.jles.internal.LoadingIterable;
 import se.jsa.jles.internal.TypedEventRepo;
 import se.jsa.jles.internal.eventdefinitions.EventDefinitionFile;
 import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.PersistingEventDefinitions;
-import se.jsa.jles.internal.fields.StorableLongField;
 import se.jsa.jles.internal.file.FlippingEntryFile;
 import se.jsa.jles.internal.util.Objects;
 
 public class EventStore {
 
 	final EventFile eventFile;
-	final IndexFile eventTypeIndex;
+	final Indexing indexing;
 	final EventDefinitions eventDefinitions;
 
-	EventStore(EventFile eventFile, IndexFile eventTypeIndex) {
-		this(eventFile, eventTypeIndex, new MappingEventDefinitions(new MemoryBasedEventDefinitions()));
+	EventStore(EventFile eventFile, EntryFile eventTypeIndexFile) {
+		this(eventFile,
+				new Indexing(eventTypeIndexFile, Collections.<Long, EventIndex>emptyMap()),
+				new MappingEventDefinitions(new MemoryBasedEventDefinitions()));
 	}
 
-	EventStore(EventFile eventFile, IndexFile eventTypeIndex, EventDefinitions eventDefinitions) {
+	EventStore(EventFile eventFile, Indexing indexing, EventDefinitions eventDefinitions) {
 		this.eventFile = eventFile;
-		this.eventTypeIndex = eventTypeIndex;
+		this.indexing = indexing;
 		this.eventDefinitions = eventDefinitions;
 	}
 
 	public static final EventStore create(FileChannelFactory fileChannelFactory) {
 		EventFile eventFile = new EventFile(new FlippingEntryFile("events.ef", fileChannelFactory, true));
-		IndexFile eventTypeIndex = new IndexFile(new StorableLongField(), new FlippingEntryFile("events.if", fileChannelFactory, true));
+		EntryFile eventTypeIndexFile = new FlippingEntryFile("events.if", fileChannelFactory, true);
 		EventDefinitionFile eventDefinitionFile = new EventDefinitionFile(new FlippingEntryFile("events.def", fileChannelFactory, true));
 		EventDefinitions eventDefinitions = new MappingEventDefinitions(new PersistingEventDefinitions(eventDefinitionFile));
-		return new EventStore(eventFile, eventTypeIndex, eventDefinitions);
+		Indexing indexing = new Indexing(eventTypeIndexFile, Collections.<Long, EventIndex>emptyMap());
+		return new EventStore(eventFile, indexing, eventDefinitions);
 	}
 
 	public void init() {
@@ -55,8 +56,8 @@ public class EventStore {
 
 	public void write(Object event) {
 		EventSerializer ed = eventDefinitions.getEventSerializer(event);
-		long eventIndex = eventFile.writeEvent(event, ed);
-		eventTypeIndex.writeIndex(eventIndex, ed.getEventTypeId());
+		long eventId = eventFile.writeEvent(event, ed);
+		indexing.onNewEvent(eventId, ed);
 	}
 
 	public List<Object> collectEvents(Class<?>... eventTypes) {
@@ -106,7 +107,7 @@ public class EventStore {
 				throw new RuntimeException("Not supported!");
 			}
 
-			return new EventIdIterable<Long>(eventTypeIndex.readIndicies(Long.class, new EventTypeMatcher(eventTypeId)));
+			return indexing.readIndicies(Long.class, eventTypeId);
 		}
 
 		@Override
@@ -124,20 +125,6 @@ public class EventStore {
 			return fieldName.equals("First") ? IndexType.SIMPLE : IndexType.NONE;
 		}
 
-	}
-
-	private class EventTypeMatcher implements IndexKeyMatcher<Long> {
-		private final Set<Long> acceptedTypes;
-		public EventTypeMatcher(Set<Long> acceptedEventTypes) {
-			this.acceptedTypes = acceptedEventTypes;
-		}
-		public EventTypeMatcher(Long eventTypeId) {
-			this(Collections.singleton(eventTypeId));
-		}
-		@Override
-		public boolean accepts(Long t) {
-			return acceptedTypes.contains(t);
-		}
 	}
 
 }

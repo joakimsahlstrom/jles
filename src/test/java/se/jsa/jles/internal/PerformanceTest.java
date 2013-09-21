@@ -28,6 +28,15 @@ public class PerformanceTest {
 		// empty by design
 	}
 
+	public static class EmptyEvent2 {
+		// empty by design
+	}
+
+	public static class EmptyEvent3 {
+		// empty by design
+	}
+
+
 	public static class IntegerStringEvent {
 		public int i;
 		public String s;
