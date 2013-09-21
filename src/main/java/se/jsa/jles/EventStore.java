@@ -13,10 +13,10 @@ import se.jsa.jles.internal.EventIndex;
 import se.jsa.jles.internal.EventIndexIterable;
 import se.jsa.jles.internal.EventSerializer;
 import se.jsa.jles.internal.IndexFile;
-import se.jsa.jles.internal.Indexing;
-import se.jsa.jles.internal.TypedEventRepo;
 import se.jsa.jles.internal.IndexFile.IndexKeyMatcher;
+import se.jsa.jles.internal.Indexing;
 import se.jsa.jles.internal.LoadingIterable;
+import se.jsa.jles.internal.TypedEventRepo;
 import se.jsa.jles.internal.eventdefinitions.EventDefinitionFile;
 import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
@@ -106,7 +106,7 @@ public class EventStore {
 				throw new RuntimeException("Not supported!");
 			}
 
-			return new EventIndexIterable(eventTypeIndex.readIndicies(Long.class, new EventTypeMatcher(eventTypeId)));
+			return new EventIndexIterable<Long>(eventTypeIndex.readIndicies(Long.class, new EventTypeMatcher(eventTypeId)));
 		}
 
 		@Override

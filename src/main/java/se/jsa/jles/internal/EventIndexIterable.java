@@ -5,23 +5,23 @@ import java.util.Iterator;
 import se.jsa.jles.internal.IndexFile.IndexEntry;
 import se.jsa.jles.internal.util.Objects;
 
-public class EventIndexIterable implements Iterable<EventIndex> {
-	private final Iterable<IndexEntry<Long>> indexSource;
+public class EventIndexIterable<T> implements Iterable<EventIndex> {
+	private final Iterable<IndexEntry<T>> indexSource;
 
-	public EventIndexIterable(Iterable<IndexEntry<Long>> indexSource) {
+	public EventIndexIterable(Iterable<IndexEntry<T>> indexSource) {
 		this.indexSource = Objects.requireNonNull(indexSource);
 	}
 
 	@Override
 	public Iterator<EventIndex> iterator() {
-		return new EventIndexIterator(indexSource.iterator());
+		return new EventIndexIterator<T>(indexSource.iterator());
 	}
 
-	public static class EventIndexIterator implements Iterator<EventIndex> {
-		private final Iterator<IndexEntry<Long>> indexSource;
+	public static class EventIndexIterator<T> implements Iterator<EventIndex> {
+		private final Iterator<IndexEntry<T>> indexSource;
 		private long eventIdByType = 0;
 
-		public EventIndexIterator(Iterator<IndexEntry<Long>> indexSource) {
+		public EventIndexIterator(Iterator<IndexEntry<T>> indexSource) {
 			this.indexSource = Objects.requireNonNull(indexSource);
 		}
 

@@ -7,6 +7,6 @@ public class EventFieldConstraint {
 	}
 
 	// getFieldName
-	// getComparison Comparison isSatisfied(Object eventFieldValue)
+	// getComparisons Comparison isSatisfied(Object eventFieldValue)
 
 }

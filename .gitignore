@@ -17,6 +17,18 @@ local.properties
 .loadpath
 target/
 
+# jles
+events.def
+events.if
+events.ed
+perf.def
+perf.if
+perf.ed
+test.def
+test.if
+test.ef
+_todo.txt
+
 # External tool builders
 .externalToolBuilders/
 
