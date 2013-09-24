@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import se.jsa.jles.internal.IndexFile.IndexEntry;
 import se.jsa.jles.internal.IndexFile.IndexKeyMatcher;
 import se.jsa.jles.internal.fields.StorableLongField;
 
@@ -16,22 +17,32 @@ public class Indexing {
 		this.eventIndicies = eventIndicies;
 	}
 
-	@SuppressWarnings("unchecked")
-	@Deprecated
-	public <T> EventIdIterable<T> readIndicies(Class<T> keyType, Long eventTypeId) {
-		if (keyType.equals(Long.class) && eventIndicies.containsKey(eventTypeId)) {
-			return (EventIdIterable<T>) new EventIdIterable<Long>(eventIndicies.get(eventTypeId).readIndicies());
+	public Iterable<EventId> readIndicies(Long eventTypeId, EventFieldConstraint constraint, TypedEventRepo typedEventRepo) {
+		if (!constraint.hasConstraint()) {
+			return new EventIdIterable<Long>(getIndexEntryIterable(eventTypeId));
 		}
-		if (keyType.equals(Long.class)) {
-			return (EventIdIterable<T>) new EventIdIterable<Long>(fallbackIndexFile.readIndicies(Long.class, new EventTypeMatcher(eventTypeId)));
+		EventIdIterable<Long> baseIter = new EventIdIterable<Long>(getIndexEntryIterable(eventTypeId));
+		return new FallbackFilteringEventIdIterable(baseIter, constraint, typedEventRepo);
+	}
+
+	private Iterable<IndexEntry<Long>> getIndexEntryIterable(Long eventTypeId) {
+		if (eventIndicies.containsKey(eventTypeId)) {
+			return eventIndicies.get(eventTypeId).readIndicies();
 		}
-		throw new RuntimeException("No indexing of type " + keyType + " for eventTypeId " + eventTypeId);
+		return fallbackIndexFile.readIndicies(Long.class, new EventTypeMatcher(eventTypeId));
 	}
 
 	public void onNewEvent(long eventId, EventSerializer ed) {
 		fallbackIndexFile.writeIndex(eventId, ed.getEventTypeId());
 		if (eventIndicies.containsKey(ed.getEventTypeId())) {
 			eventIndicies.get(ed.getEventTypeId()).writeIndex(eventId);
+		}
+	}
+
+	public void stop() {
+		fallbackIndexFile.close();
+		for (EventIndex ei : eventIndicies.values()) {
+			ei.close();
 		}
 	}
 
@@ -46,13 +57,6 @@ public class Indexing {
 		@Override
 		public boolean accepts(Long t) {
 			return acceptedTypes.contains(t);
-		}
-	}
-
-	public void stop() {
-		fallbackIndexFile.close();
-		for (EventIndex ei : eventIndicies.values()) {
-			ei.close();
 		}
 	}
 

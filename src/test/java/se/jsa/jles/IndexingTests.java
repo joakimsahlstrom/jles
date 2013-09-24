@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Test;
 
 import se.jsa.jles.EventStoreTest.EmptyEvent;
@@ -16,14 +17,14 @@ import se.jsa.jles.internal.file.StreamBasedChannelFactory;
 
 public class IndexingTests {
 
+	private final EventStoreConfigurer configurer = new EventStoreConfigurer(new StreamBasedChannelFactory())
+		.addIndexing(EmptyEvent3.class)
+		.testableEventDefinitions();
+	private final EventStore es = configurer.configure();
+
 	@Test
 	public void indexPerformanceTest() throws Exception {
 		List<Object> events = createEEvents(3000, 0.01d);
-
-		EventStoreConfigurer configurer = new EventStoreConfigurer(new StreamBasedChannelFactory())
-			.addIndexing(EmptyEvent3.class)
-			.testableEventDefinitions();
-		EventStore es = configurer.configure();
 
 		for (Object event : events) {
 			es.write(event);
@@ -40,8 +41,13 @@ public class IndexingTests {
 		long unindexedRead = end2 - start2;
 		long indexedRead = end3 - start3;
 		assertTrue("Indexed read should be at least a factor 10 faster under conditions given in this test case (" + indexedRead + " vs " + unindexedRead + ")", indexedRead * 10 < unindexedRead);
-		es.stop();
 
+		teardown();
+	}
+
+	@After
+	public void teardown() {
+		es.stop();
 		for (String fileName : configurer.getFiles()) {
 			delete(fileName);
 		}

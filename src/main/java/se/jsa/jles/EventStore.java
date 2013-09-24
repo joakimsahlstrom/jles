@@ -64,7 +64,7 @@ public class EventStore {
 		LoadingIterable loadingIterable = new LoadingIterable();
 		for (Long eventTypeId : eventDefinitions.getEventTypeIds(eventTypes)) {
 			InternalTypedEventRepo typedEventRepo = new InternalTypedEventRepo(eventTypeId);
-			Iterable<EventId> iterable = typedEventRepo.getIterator(new EventFieldConstraint());
+			Iterable<EventId> iterable = typedEventRepo.getIterator(EventFieldConstraint.none());
 			loadingIterable.register(iterable, typedEventRepo);
 		}
 		return loadingIterable;
@@ -95,7 +95,7 @@ public class EventStore {
 				throw new RuntimeException("Not supported!");
 			}
 
-			return indexing.readIndicies(Long.class, eventTypeId);
+			return indexing.readIndicies(eventTypeId, constraint, this);
 		}
 
 		@Override

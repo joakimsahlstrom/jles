@@ -17,10 +17,12 @@ import se.jsa.jles.internal.testevents.NonSerializableEvent;
 
 public class EventStoreSessionTest {
 
-	StreamBasedChannelFactory fileChannelFactory = new StreamBasedChannelFactory();
+	private final StreamBasedChannelFactory fileChannelFactory = new StreamBasedChannelFactory();
+	private EventStore eventStore = new EventStoreConfigurer(fileChannelFactory).configure();
 
 	@After
 	public void teardown() {
+		eventStore.stop();
 		delete("events.if");
 		delete("events.ef");
 		delete("events.def");
@@ -32,7 +34,6 @@ public class EventStoreSessionTest {
 
 	@Test
 	public void canReadEventFromDifferentSerializableVersions() throws Exception {
-		EventStore eventStore = buildEventStore();
 		eventStore.init();
 
 		NonSerializableEvent.SerializableEventV1 e1 = new NonSerializableEvent.SerializableEventV1(new NonSerializableEvent(Name.valueOf("1"), new Date(2L)));
@@ -42,7 +43,7 @@ public class EventStoreSessionTest {
 		eventStore.write(e2);
 
 		eventStore.stop();
-		eventStore = buildEventStore();
+		eventStore = new EventStoreConfigurer(fileChannelFactory).configure();
 		eventStore.init();
 
 		List<Object> events = eventStore.collectEvents(NonSerializableEvent.class);
@@ -57,11 +58,6 @@ public class EventStoreSessionTest {
 		assertEquals(2, 	nse2.getDate().getTime());
 
 		assertEquals(3, eventStore.collectEvents().size());
-		eventStore.stop();
-	}
-
-	private EventStore buildEventStore() {
-		return new EventStoreConfigurer(fileChannelFactory).configure();
 	}
 
 }

@@ -10,7 +10,7 @@ public abstract class Match {
 	public static Match MATCH_ALL = new Match() {
 		@Override
 		public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
-			return eventRepo.getIterator(new EventFieldConstraint());
+			return eventRepo.getIterator(EventFieldConstraint.none());
 		}
 	};
 

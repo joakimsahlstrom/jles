@@ -13,7 +13,6 @@ import se.jsa.jles.internal.fields.StorableField;
  *
  */
 public class EventIndex {
-
 	private final IndexFile indexFile;
 
 	public EventIndex(EntryFile entryFile, Long eventTypeId) {
