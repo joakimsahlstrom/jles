@@ -1,5 +1,7 @@
 package se.jsa.jles.internal.file;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -13,10 +15,12 @@ public class FlippingEntryFile implements EntryFile {
 	private final String fileName;
 	private final EntryFileSerializer entryReader = new EntryFileSerializer();
 
+	private FileInputStream inputStream = null;
 	private FileChannel inputChannel = null;
+	private FileOutputStream outputStream = null;
 	private FileChannel outputChannel = null;
 	private Long size = null;
-	private final FileChannelFactory fileChannelFactory;
+	private FileChannelFactory fileChannelFactory;
 	private final boolean safeWrite;
 
 	public FlippingEntryFile(String fileName, FileChannelFactory fileChannelFactory) {
@@ -54,60 +58,76 @@ public class FlippingEntryFile implements EntryFile {
 	@Override
 	public long size() {
 		if (size == null) {
-			FileChannel channel = null;
 			try {
-				channel = fileChannelFactory.getInputChannel(fileName);
-				size = channel.size();
+				size = getInputChannel().size();
 			} catch (Exception e) {
 				size = 0L;
-			} finally {
-				if (channel != null) {
-					try {
-						channel.close();
-					} catch (IOException e) {
-						// do nothing;
-					}
-				}
 			}
 		}
 		return size;
 	}
 
-	@Override
-	public void close() {
-		if (inputChannel != null) {
-			try { inputChannel.close(); } catch (IOException e) { /**/ }
-			inputChannel = null;
-		}
-		if (outputChannel != null) {
-			try { outputChannel.close(); } catch (IOException e) { /**/ }
-			outputChannel = null;
-		}
-	}
-
-	private FileChannel getOutputChannel() throws IOException {
+	private FileChannel getOutputChannel() {
 		size = null;
 		if (outputChannel != null) {
 			return outputChannel;
 		}
-		if (inputChannel != null) {
-			inputChannel.close();
-			inputChannel = null;
-		}
-		outputChannel = fileChannelFactory.getOutputChannel(fileName);
+		closeInputStream();
+		outputStream = fileChannelFactory.getOutputChannel(fileName);
+		outputChannel = outputStream.getChannel();
 		return outputChannel;
 	}
 
-	private FileChannel getInputChannel() throws IOException {
+	private FileChannel getInputChannel() {
 		if (inputChannel != null) {
 			return inputChannel;
 		}
+		closeOutputStream();
+		inputStream = fileChannelFactory.getInputChannel(fileName);
+		inputChannel = inputStream.getChannel();
+		return inputChannel;
+	}
+
+	@Override
+	public void close() {
+		closeInputStream();
+		closeOutputStream();
+		fileChannelFactory = null;
+	}
+
+	private void closeInputStream() {
+		if (inputChannel != null) {
+			try { inputChannel.close(); } catch (IOException e) {
+				System.out.println("Could not close input channel: " + e);
+			}
+			inputChannel = null;
+		}
+		if (inputStream != null) {
+			try { inputStream.close(); } catch (IOException e) {
+				System.out.println("Could not close input stream: " + e);
+			}
+			inputStream = null;
+		}
+	}
+
+	private void closeOutputStream() {
 		if (outputChannel != null) {
-			outputChannel.close();
+			try { outputChannel.close(); } catch (IOException e) {
+				System.out.println("Could not close output channel: " + e);
+			}
 			outputChannel = null;
 		}
-		inputChannel = fileChannelFactory.getInputChannel(fileName);
-		return inputChannel;
+		if (outputStream != null) {
+			try {
+				outputStream.flush();
+			} catch (IOException e) {
+				System.out.println("Could not flush output stream: " + e);
+			}
+			try { outputStream.close(); } catch (IOException e) {
+				System.out.println("Could not close output stream: " + e);
+			}
+			outputStream = null;
+		}
 	}
 
 }

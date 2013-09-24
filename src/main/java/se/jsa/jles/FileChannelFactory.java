@@ -1,8 +1,9 @@
 package se.jsa.jles;
 
-import java.nio.channels.FileChannel;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
 public interface FileChannelFactory {
-	FileChannel getOutputChannel(String fileName);
-	FileChannel getInputChannel(String fileName);
+	FileOutputStream getOutputChannel(String fileName);
+	FileInputStream getInputChannel(String fileName);
 }

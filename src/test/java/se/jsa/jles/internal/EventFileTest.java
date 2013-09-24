@@ -7,12 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
-import se.jsa.jles.internal.EventDefinitions;
-import se.jsa.jles.internal.EventFile;
-import se.jsa.jles.internal.EventSerializer;
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
 import se.jsa.jles.internal.file.FlippingEntryFile;
 import se.jsa.jles.internal.file.StreamBasedChannelFactory;
@@ -464,15 +460,16 @@ public class EventFileTest {
 
 	}
 
+	private final EventFile eventFile = new EventFile(new FlippingEntryFile("test.ef", new StreamBasedChannelFactory()));
+
 	@After
-	@Before
 	public void teardown() {
+		eventFile.close();
 		new File("test.ef").delete();
 	}
 
 	@Test
 	public void eventTypesCanBeSerializedAndDeserialized() throws Exception {
-		EventFile eventFile = new EventFile(new FlippingEntryFile("test.ef", new StreamBasedChannelFactory()));
 
 		List<Object> events = Arrays.asList(
 				new EmptyEvent(),

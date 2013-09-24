@@ -45,6 +45,11 @@ public class MemoryBasedEventDefinitions implements EventDefinitions {
 		// do nothing
 	}
 
+	@Override
+	public void close() {
+		// do nothing
+	}
+
 	public void init(Collection<EventDefinition> definitions, Set<Flag> flags) {
 		for (EventDefinition ed : definitions) {
 			if (flags.contains(Flag.VerifyDatamodel)) {

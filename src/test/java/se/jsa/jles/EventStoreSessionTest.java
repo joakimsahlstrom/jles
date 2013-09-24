@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import se.jsa.jles.EventStoreTest.EmptyEvent;
@@ -18,7 +17,8 @@ import se.jsa.jles.internal.testevents.NonSerializableEvent;
 
 public class EventStoreSessionTest {
 
-	@Before
+	StreamBasedChannelFactory fileChannelFactory = new StreamBasedChannelFactory();
+
 	@After
 	public void teardown() {
 		delete("events.if");
@@ -41,6 +41,7 @@ public class EventStoreSessionTest {
 		eventStore.write(new EmptyEvent());
 		eventStore.write(e2);
 
+		eventStore.stop();
 		eventStore = buildEventStore();
 		eventStore.init();
 
@@ -56,10 +57,11 @@ public class EventStoreSessionTest {
 		assertEquals(2, 	nse2.getDate().getTime());
 
 		assertEquals(3, eventStore.collectEvents().size());
+		eventStore.stop();
 	}
 
 	private EventStore buildEventStore() {
-		return EventStore.create(new StreamBasedChannelFactory());
+		return new EventStoreConfigurer(fileChannelFactory).configure();
 	}
 
 }

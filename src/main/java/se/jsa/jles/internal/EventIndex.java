@@ -56,5 +56,8 @@ public class EventIndex {
 		}
 	}
 
+	public void close() {
+		indexFile.close();
+	}
 
 }

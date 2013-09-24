@@ -11,7 +11,6 @@ import java.nio.ByteBuffer;
  *
  */
 public class EventFile {
-
 	private final EntryFile entryFile;
 
 	public EventFile(EntryFile entryFile) {
@@ -37,6 +36,10 @@ public class EventFile {
 
 		Object result = ed.deserializeEvent(input);
 		return result;
+	}
+
+	public void close() {
+		entryFile.close();
 	}
 
 }

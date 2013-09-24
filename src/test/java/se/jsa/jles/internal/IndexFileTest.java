@@ -7,10 +7,8 @@ import java.io.File;
 import java.util.Iterator;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
-import se.jsa.jles.internal.IndexFile;
 import se.jsa.jles.internal.IndexFile.IndexEntry;
 import se.jsa.jles.internal.fields.LongField;
 import se.jsa.jles.internal.fields.StorableLongField;
@@ -19,10 +17,18 @@ import se.jsa.jles.internal.file.SynchronousEntryFile;
 
 public class IndexFileTest {
 
-	@Before
 	@After
 	public void setup() {
-		new File("test.if").delete();
+		delete("test.if");
+	}
+
+	private boolean delete(String fileName) {
+		File file = new File(fileName);
+		int count = 0;
+		while (file.exists() && !file.delete() && count++ < 10) {
+			System.out.println("Failed to delete file: " + fileName);
+		}
+		return true;
 	}
 
 	@Test
@@ -33,6 +39,8 @@ public class IndexFileTest {
 		Iterator<IndexEntry<Long>> iterator = indexes.iterator();
 		assertEquals(Long.valueOf(23), iterator.next().getKey());
 		assertFalse(iterator.hasNext());
+
+		indexFile.close();
 	}
 
 	@Test
@@ -50,12 +58,15 @@ public class IndexFileTest {
 		assertEquals(3L, ie2.getEventIndex());
 		assertEquals(Long.valueOf(23), ie1.getKey());
 		assertEquals(Long.valueOf(100239923L), ie2.getKey());
+
+		indexFile.close();
 	}
 
 	@Test
 	public void severalStringIndexCanBeWrittenAndReadBack() throws Exception {
 		IndexFile indexFile = new IndexFile(new StringField(EventFileTest.SingleStringEvent.class, "Val"), new SynchronousEntryFile("test.if"));
-		indexFile.writeIndex(0, new EventFileTest.SingleStringEvent("apa"));
+		EventFileTest.SingleStringEvent event = new EventFileTest.SingleStringEvent("apa");
+		indexFile.writeIndex(0, event);
 		indexFile.writeIndex(3, new EventFileTest.SingleStringEvent("bapa"));
 		indexFile.writeIndex(27, new EventFileTest.SingleStringEvent("kanin�ra"));
 		Iterable<IndexEntry<String>> indexes = indexFile.readIndicies(String.class);
@@ -71,6 +82,8 @@ public class IndexFileTest {
 		assertEquals("apa", ie1.getKey());
 		assertEquals("bapa", ie2.getKey());
 		assertEquals("kanin�ra", ie3.getKey());
+
+		indexFile.close();
 	}
 
 	@Test
@@ -96,6 +109,8 @@ public class IndexFileTest {
 		assertEquals(Long.valueOf(1201), ie2.getKey());
 		assertEquals(Long.valueOf(12), ie3.getKey());
 		assertEquals(Long.valueOf(13), ie4.getKey());
+
+		indexFile.close();
 	}
 
 }

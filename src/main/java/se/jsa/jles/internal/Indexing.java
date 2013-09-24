@@ -49,4 +49,11 @@ public class Indexing {
 		}
 	}
 
+	public void stop() {
+		fallbackIndexFile.close();
+		for (EventIndex ei : eventIndicies.values()) {
+			ei.close();
+		}
+	}
+
 }

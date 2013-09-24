@@ -97,4 +97,8 @@ public class EventDefinitionFile {
 		}
 	}
 
+	public void close() {
+		entryFile.close();
+	}
+
 }

@@ -26,6 +26,11 @@ public class PersistingEventDefinitions implements EventDefinitions, MemoryBased
 	}
 
 	@Override
+	public void close() {
+		eventDefinitionFile.close();
+	}
+
+	@Override
 	public Class<?>[] getRegisteredEventTypes() {
 		return eventDefinitionCache.getRegisteredEventTypes();
 	}

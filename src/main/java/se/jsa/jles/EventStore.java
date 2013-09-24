@@ -16,11 +16,8 @@ import se.jsa.jles.internal.IndexType;
 import se.jsa.jles.internal.Indexing;
 import se.jsa.jles.internal.LoadingIterable;
 import se.jsa.jles.internal.TypedEventRepo;
-import se.jsa.jles.internal.eventdefinitions.EventDefinitionFile;
 import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
-import se.jsa.jles.internal.eventdefinitions.PersistingEventDefinitions;
-import se.jsa.jles.internal.file.FlippingEntryFile;
 import se.jsa.jles.internal.util.Objects;
 
 public class EventStore {
@@ -39,15 +36,6 @@ public class EventStore {
 		this.eventFile = eventFile;
 		this.indexing = indexing;
 		this.eventDefinitions = eventDefinitions;
-	}
-
-	public static final EventStore create(FileChannelFactory fileChannelFactory) {
-		EventFile eventFile = new EventFile(new FlippingEntryFile("events.ef", fileChannelFactory, true));
-		EntryFile eventTypeIndexFile = new FlippingEntryFile("events.if", fileChannelFactory, true);
-		EventDefinitionFile eventDefinitionFile = new EventDefinitionFile(new FlippingEntryFile("events.def", fileChannelFactory, true));
-		EventDefinitions eventDefinitions = new MappingEventDefinitions(new PersistingEventDefinitions(eventDefinitionFile));
-		Indexing indexing = new Indexing(eventTypeIndexFile, Collections.<Long, EventIndex>emptyMap());
-		return new EventStore(eventFile, indexing, eventDefinitions);
 	}
 
 	public void init() {
@@ -125,6 +113,12 @@ public class EventStore {
 			return fieldName.equals("First") ? IndexType.SIMPLE : IndexType.NONE;
 		}
 
+	}
+
+	public void stop() {
+		eventFile.close();
+		indexing.stop();
+		eventDefinitions.close();
 	}
 
 }

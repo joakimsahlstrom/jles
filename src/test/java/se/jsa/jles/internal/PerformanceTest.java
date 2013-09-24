@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,9 +79,9 @@ public class PerformanceTest {
 		this.entryFile = entryFile;
 	}
 
-	@Before
 	@After
 	public void teardown() {
+		entryFile.close();
 		new File("perf.ed").delete();
 	}
 

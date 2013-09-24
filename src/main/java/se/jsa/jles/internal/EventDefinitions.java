@@ -7,6 +7,7 @@ import se.jsa.jles.internal.fields.EventField;
 public interface EventDefinitions {
 
 	void init();
+	void close();
 
 	Class<?>[] getRegisteredEventTypes();
 
@@ -17,5 +18,6 @@ public interface EventDefinitions {
 	EventDeserializer getEventDeserializer(Long eventTypeId);
 
 	EventField getEventField(Long eventTypeId, String fieldName);
+
 
 }

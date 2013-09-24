@@ -170,4 +170,8 @@ public class IndexFile {
 
 	}
 
+	public void close() {
+		entryFile.close();
+	}
+
 }

@@ -6,7 +6,6 @@ import java.io.File;
 import java.util.Arrays;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import se.jsa.jles.internal.EventFileTest;
@@ -16,16 +15,16 @@ import se.jsa.jles.internal.file.SynchronousEntryFile;
 public class EventDefinitionFileTest {
 
 	private final EventFieldFactory eventFieldFactory = new EventFieldFactory();
+	private final EventDefinitionFile edf = new EventDefinitionFile(new SynchronousEntryFile("events.edf"));
 
-	@Before
 	@After
 	public void clearTestFiles() {
+		edf.close();
 		new File("events.edf").delete();
 	}
 
 	@Test
 	public void writeAndReadSingleEventDefinition() throws Exception {
-		EventDefinitionFile edf = new EventDefinitionFile(new SynchronousEntryFile("events.edf"));
 		EventDefinition eventDefinition = createEventDefinition(EventFileTest.MultipleFieldsEvent.class);
 		edf.write(eventDefinition);
 
@@ -35,7 +34,6 @@ public class EventDefinitionFileTest {
 
 	@Test
 	public void writeAndReadMultipleEventDefinitions() throws Exception {
-		EventDefinitionFile edf = new EventDefinitionFile(new SynchronousEntryFile("events.edf"));
 		EventDefinition ed1 = createEventDefinition(EventFileTest.MultipleFieldsEvent.class);
 		EventDefinition ed2 = createEventDefinition(EventFileTest.SingleIntegerEvent.class);
 		EventDefinition ed3 = createEventDefinition(EventFileTest.SingleCharEvent.class);

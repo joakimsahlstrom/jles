@@ -30,6 +30,11 @@ public class MappingEventDefinitions implements EventDefinitions {
 	}
 
 	@Override
+	public void close() {
+		definitions.close();
+	}
+
+	@Override
 	public Class<?>[] getRegisteredEventTypes() {
 		return definitions.getRegisteredEventTypes();
 	}

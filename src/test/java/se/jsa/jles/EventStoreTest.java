@@ -4,17 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,11 +19,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventFile;
-import se.jsa.jles.internal.EventIndex;
-import se.jsa.jles.internal.Indexing;
 import se.jsa.jles.internal.PerformanceTest;
-import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
-import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
 import se.jsa.jles.internal.file.CachingEntryFile;
 import se.jsa.jles.internal.file.FlippingEntryFile;
 import se.jsa.jles.internal.file.StreamBasedChannelFactory;
@@ -197,13 +189,13 @@ public class EventStoreTest {
 		this.eventStore = new EventStore(eventFile, indexEntryFile);
 	}
 
-	@Before
 	@After
-	public void setup() {
-		eventEntryFile.close();
-		indexEntryFile.close();
+	public void cleanup() {
+		eventStore.stop();
 		delete("events.ef");
 		delete("eventIndexes.if");
+		delete("events.def");
+		delete("events.if");
 	}
 
 	private boolean delete(String fileName) {
@@ -214,7 +206,6 @@ public class EventStoreTest {
 		}
 		return true;
 	}
-
 
 	@Test
 	public void emptyListWhenNoPresentEvents() throws Exception {
@@ -378,55 +369,6 @@ public class EventStoreTest {
 		long end = System.nanoTime();
 
 		System.out.println("Scenario run time: " + TimeUnit.NANOSECONDS.toMillis(end - start) + " ms.");
-	}
-
-
-	@Test
-	public void indexPerformanceTest() throws Exception {
-		new File("2.if").delete();
-		List<Object> events = createEEvents(3000, 0.01d);
-		MappingEventDefinitions eventDefinitions = new MappingEventDefinitions(new MemoryBasedEventDefinitions());
-		Long indexedEventId = eventDefinitions.getEventTypeIds(EmptyEvent3.class).iterator().next();
-		EntryFile emptyEventIndex = entryFileFactory.create("2.if");
-		EventIndex eventIndex = new EventIndex(emptyEventIndex, indexedEventId);
-
-		EventStore es = new EventStore(eventFile, new Indexing(indexEntryFile, Collections.singletonMap(indexedEventId, eventIndex)), eventDefinitions);
-
-		for (Object event : events) {
-			es.write(event);
-		}
-
-		long start2 = System.nanoTime();
-		es.collectEvents(EmptyEvent2.class);
-		long end2 = System.nanoTime();
-
-		long start3 = System.nanoTime();
-		es.collectEvents(EmptyEvent3.class);
-		long end3 = System.nanoTime();
-
-		long unindexedRead = end2 - start2;
-		long indexedRead = end3 - start3;
-		assertTrue("Indexed read should be at least a factor 10 faster under conditions given in this test case", indexedRead * 10 < unindexedRead);
-
-		emptyEventIndex.close();
-		new File("2.if").delete();
-	}
-
-	private static Random random = new Random(System.nanoTime());
-	public static List<Object> createEEvents(int num, double d) {
-		List<Object> result = new ArrayList<Object>(num);
-		int hits = 0;
-		for (int i = 0; i < num; i++) {
-			if (random.nextDouble() < d) {
-				result.add(new EmptyEvent2());
-				result.add(new EmptyEvent3());
-				hits++;
-			} else {
-				result.add(new EmptyEvent());
-			}
-		}
-		System.out.println("#Hits: " + hits);
-		return result;
 	}
 
 }
