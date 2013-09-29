@@ -1,9 +1,11 @@
 package se.jsa.jles;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -13,6 +15,11 @@ import org.junit.Test;
 import se.jsa.jles.EventStoreTest.EmptyEvent;
 import se.jsa.jles.EventStoreTest.EmptyEvent2;
 import se.jsa.jles.EventStoreTest.EmptyEvent3;
+import se.jsa.jles.EventStoreTest.TestEvent;
+import se.jsa.jles.internal.EventFieldConstraint;
+import se.jsa.jles.internal.EventId;
+import se.jsa.jles.internal.FieldConstraint;
+import se.jsa.jles.internal.TypedEventRepo;
 import se.jsa.jles.internal.file.StreamBasedChannelFactory;
 
 public class IndexingTests {
@@ -23,8 +30,30 @@ public class IndexingTests {
 	private final EventStore es = configurer.configure();
 
 	@Test
+	public void canSupplyConstraint() throws Exception {
+		es.write(new TestEvent("a", 0, true));
+		es.write(new TestEvent("a", 1, true));
+		es.write(new TestEvent("a", 2, true));
+		List<Object> events = EventStore.collect(
+			es.readEvents(TestEvent.class, new Match() {
+				@Override
+				public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
+					return eventRepo.getIterator(EventFieldConstraint.create("Id", new FieldConstraint() {
+						@Override
+						public boolean isSatisfied(Object eventFieldValue) {
+							boolean res = Long.valueOf(1).equals(eventFieldValue);
+							return res;
+						}
+					}));
+				}
+			})
+		);
+		assertEquals(Arrays.asList(new TestEvent("a", 1, true)), events);
+	}
+
+	@Test
 	public void indexPerformanceTest() throws Exception {
-		List<Object> events = createEEvents(3000, 0.01d);
+		List<Object> events = createEEvents(5000, 0.01d);
 
 		for (Object event : events) {
 			es.write(event);
@@ -65,17 +94,14 @@ public class IndexingTests {
 	private static Random random = new Random(System.nanoTime());
 	public static List<Object> createEEvents(int num, double d) {
 		List<Object> result = new ArrayList<Object>(num);
-		int hits = 0;
 		for (int i = 0; i < num; i++) {
 			if (random.nextDouble() < d) {
 				result.add(new EmptyEvent2());
 				result.add(new EmptyEvent3());
-				hits++;
 			} else {
 				result.add(new EmptyEvent());
 			}
 		}
-		System.out.println("#Hits: " + hits);
 		return result;
 	}
 

@@ -97,35 +97,25 @@ public class FlippingEntryFile implements EntryFile {
 
 	private void closeInputStream() {
 		if (inputChannel != null) {
-			try { inputChannel.close(); } catch (IOException e) {
-				System.out.println("Could not close input channel: " + e);
-			}
+			try { inputChannel.close(); } catch (IOException e) { }
 			inputChannel = null;
 		}
 		if (inputStream != null) {
-			try { inputStream.close(); } catch (IOException e) {
-				System.out.println("Could not close input stream: " + e);
-			}
+			try { inputStream.close(); } catch (IOException e) { }
 			inputStream = null;
 		}
 	}
 
 	private void closeOutputStream() {
 		if (outputChannel != null) {
-			try { outputChannel.close(); } catch (IOException e) {
-				System.out.println("Could not close output channel: " + e);
-			}
+			try { outputChannel.close(); } catch (IOException e) { }
 			outputChannel = null;
 		}
 		if (outputStream != null) {
 			try {
 				outputStream.flush();
-			} catch (IOException e) {
-				System.out.println("Could not flush output stream: " + e);
-			}
-			try { outputStream.close(); } catch (IOException e) {
-				System.out.println("Could not close output stream: " + e);
-			}
+			} catch (IOException e) { }
+			try { outputStream.close(); } catch (IOException e) { }
 			outputStream = null;
 		}
 	}

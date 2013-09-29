@@ -21,10 +21,9 @@ import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
 import se.jsa.jles.internal.util.Objects;
 
 public class EventStore {
-
-	final EventFile eventFile;
-	final Indexing indexing;
-	final EventDefinitions eventDefinitions;
+	private final EventFile eventFile;
+	private final Indexing indexing;
+	private final EventDefinitions eventDefinitions;
 
 	EventStore(EventFile eventFile, EntryFile eventTypeIndexFile) {
 		this(eventFile,
@@ -91,10 +90,6 @@ public class EventStore {
 
 		@Override
 		public Iterable<EventId> getIterator(EventFieldConstraint constraint) {
-			if (constraint.hasConstraint()) {
-				throw new RuntimeException("Not supported!");
-			}
-
 			return indexing.readIndicies(eventTypeId, constraint, this);
 		}
 

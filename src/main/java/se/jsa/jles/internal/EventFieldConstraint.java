@@ -5,20 +5,24 @@ import se.jsa.jles.internal.util.Objects;
 public class EventFieldConstraint {
 
 	private final String fieldName;
-	private final FieldConstraint comparison;
+	private final FieldConstraint constraint;
 
 	EventFieldConstraint() {
 		this.fieldName = null;
-		this.comparison = null;
+		this.constraint = null;
 	}
 
-	EventFieldConstraint(String fieldName, FieldConstraint comparison) {
+	EventFieldConstraint(String fieldName, FieldConstraint constraint) {
 		this.fieldName = Objects.requireNonNull(fieldName);
-		this.comparison = Objects.requireNonNull(comparison);
+		this.constraint = Objects.requireNonNull(constraint);
 	}
 
 	public static EventFieldConstraint none() {
 		return new EventFieldConstraint();
+	}
+
+	public static EventFieldConstraint create(String fieldName, FieldConstraint constraint) {
+		return new EventFieldConstraint(fieldName, constraint);
 	}
 
 	public boolean hasConstraint() {
@@ -33,10 +37,10 @@ public class EventFieldConstraint {
 	}
 
 	public FieldConstraint getComparison() {
-		return comparison;
+		return constraint;
 	}
 
 	public boolean accepts(Object eventFieldValue) {
-		return comparison.isSatisfied(eventFieldValue);
+		return constraint.isSatisfied(eventFieldValue);
 	}
 }

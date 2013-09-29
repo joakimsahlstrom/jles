@@ -49,7 +49,6 @@ public class EventStoreConfigurer {
 	private Indexing createIndexing(EventDefinitions eventDefinitions) {
 		HashMap<Long, EventIndex> eventIndicies = new HashMap<Long, EventIndex>();
 		for (Long eventTypeId : eventDefinitions.getEventTypeIds(indexedEventTypes.toArray(new Class<?>[indexedEventTypes.size()]))) {
-			System.out.println("eventTypeId: " + eventTypeId);
 			eventIndicies.put(eventTypeId, new EventIndex(createEntryFile("events_" + eventTypeId + ".if", fileChannelFactory), eventTypeId));
 		}
 		return new Indexing(fallbackIndexFile, eventIndicies);
