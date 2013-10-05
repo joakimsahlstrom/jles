@@ -8,11 +8,11 @@ import se.jsa.jles.internal.util.Objects;
 
 public class FallbackFilteringEventIdIterable implements Iterable<EventId> {
 
-	private final EventIdIterable<Long> baseIter;
+	private final Iterable<EventId> baseIter;
 	private final EventFieldConstraint constraint;
 	private final TypedEventRepo typedEventRepo;
 
-	public FallbackFilteringEventIdIterable(EventIdIterable<Long> baseIter, EventFieldConstraint constraint, TypedEventRepo typedEventRepo) {
+	public FallbackFilteringEventIdIterable(Iterable<EventId> baseIter, EventFieldConstraint constraint, TypedEventRepo typedEventRepo) {
 		this.baseIter = Objects.requireNonNull(baseIter);
 		this.constraint = Objects.requireNonNull(constraint);
 		this.typedEventRepo = Objects.requireNonNull(typedEventRepo);

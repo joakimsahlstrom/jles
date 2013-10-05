@@ -18,6 +18,7 @@ public class IndexFile {
 
 	public interface IndexKeyMatcher<T> {
 		boolean accepts(T t);
+		T cast(Object o);
 	}
 
 	public class IndexEntry<T> {
@@ -60,13 +61,6 @@ public class IndexFile {
 		}
 	}
 
-	private static IndexKeyMatcher<Object> ALWAYS_MATCHER = new IndexKeyMatcher<Object>() {
-		@Override
-		public boolean accepts(Object t) {
-			return true;
-		}
-	};
-
 	final StorableField eventKeyField;
 	final EntryFile entryFile;
 
@@ -86,46 +80,38 @@ public class IndexFile {
 		entryFile.append(output);
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> Iterable<IndexEntry<T>> readIndicies(Class<T> keyType) {
-		return readIndicies(keyType, (IndexKeyMatcher<T>)ALWAYS_MATCHER);
+	public <T> Iterable<EventId> readIndicies(IndexKeyMatcher<T> matcher) {
+		return new IndexIterable<T>(matcher);
 	}
 
-	public <T> Iterable<IndexEntry<T>> readIndicies(Class<T> keyType, IndexKeyMatcher<T> matcher) {
-		return new IndexIterable<T>(keyType, matcher);
-	}
-
-	private class IndexIterable<T> implements Iterable<IndexEntry<T>> {
-		private final Class<T> keyType;
+	private class IndexIterable<T> implements Iterable<EventId> {
 		private final IndexKeyMatcher<T> matcher;
-		public IndexIterable(Class<T> keyType, IndexKeyMatcher<T> matcher) {
-			this.keyType = keyType;
+		public IndexIterable(IndexKeyMatcher<T> matcher) {
 			this.matcher = matcher;
 		}
 		@Override
-		public Iterator<IndexEntry<T>> iterator() {
-			return new IndexIterator<T>(keyType, matcher, entryFile.size());
+		public Iterator<EventId> iterator() {
+			return new IndexIterator<T>(matcher, entryFile.size());
 		}
 	}
 
-	private class IndexIterator<T> implements Iterator<IndexEntry<T>> {
-		private final Class<T> keyType;
+	private class IndexIterator<T> implements Iterator<EventId> {
 		private final IndexKeyMatcher<T> matcher;
 		private final long fileSize;
 
 		private long position = 0;
-		private IndexEntry<T> nextEntry = null;
+		private long eventIdByType = 0;
+		private EventId nextEntry = null;
 
-		public IndexIterator(Class<T> keyType, IndexKeyMatcher<T> matcher, long fileSize) {
-			this.keyType = keyType;
+		public IndexIterator(IndexKeyMatcher<T> matcher, long fileSize) {
 			this.matcher = matcher;
 			this.fileSize = fileSize;
 		}
 
 		@Override
-		public IndexEntry<T> next() {
+		public EventId next() {
 			if (hasNext()) {
-				IndexEntry<T> result = nextEntry;
+				EventId result = nextEntry;
 				nextEntry = null;
 				return result;
 			} else {
@@ -150,15 +136,17 @@ public class IndexFile {
 			ByteBuffer entry;
 			long eventIndex;
 			T indexKey;
+			EventId result;
 			do {
 				entry = entryFile.readEntry(position);
 				eventIndex = entry.getLong();
 				entry.getInt(); // size
-				indexKey = keyType.cast(eventKeyField.readFromBuffer(entry));
+				indexKey = matcher.cast(eventKeyField.readFromBuffer(entry));
+				result = new EventId(eventIndex, eventIdByType++);
 			} while (!matcher.accepts(indexKey) && (position += entry.limit()) < fileSize);
 
 			if (position < fileSize) {
-				nextEntry = new IndexEntry<T>(eventIndex, indexKey);
+				nextEntry = result;
 				position += entry.limit();
 			}
 		}
@@ -167,7 +155,6 @@ public class IndexFile {
 		public void remove() {
 			throw new UnsupportedOperationException("Remove not supported.");
 		}
-
 	}
 
 	public void close() {

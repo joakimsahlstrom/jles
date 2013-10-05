@@ -97,25 +97,25 @@ public class FlippingEntryFile implements EntryFile {
 
 	private void closeInputStream() {
 		if (inputChannel != null) {
-			try { inputChannel.close(); } catch (IOException e) { }
+			try { inputChannel.close(); } catch (IOException e) { /*TODO: Logging*/ }
 			inputChannel = null;
 		}
 		if (inputStream != null) {
-			try { inputStream.close(); } catch (IOException e) { }
+			try { inputStream.close(); } catch (IOException e) { /*TODO: Logging*/ }
 			inputStream = null;
 		}
 	}
 
 	private void closeOutputStream() {
 		if (outputChannel != null) {
-			try { outputChannel.close(); } catch (IOException e) { }
+			try { outputChannel.close(); } catch (IOException e) { /*TODO: Logging*/ }
 			outputChannel = null;
 		}
 		if (outputStream != null) {
 			try {
 				outputStream.flush();
-			} catch (IOException e) { }
-			try { outputStream.close(); } catch (IOException e) { }
+			} catch (IOException e) { /*TODO: Logging*/ }
+			try { outputStream.close(); } catch (IOException e) { /*TODO: Logging*/ }
 			outputStream = null;
 		}
 	}

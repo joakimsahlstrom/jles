@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import se.jsa.jles.internal.IndexFile.IndexEntry;
 import se.jsa.jles.internal.IndexFile.IndexKeyMatcher;
 import se.jsa.jles.internal.fields.StorableLongField;
 
@@ -19,17 +18,17 @@ public class Indexing {
 
 	public Iterable<EventId> readIndicies(Long eventTypeId, EventFieldConstraint constraint, TypedEventRepo typedEventRepo) {
 		if (!constraint.hasConstraint()) {
-			return new EventIdIterable<Long>(getIndexEntryIterable(eventTypeId));
+			return getIndexEntryIterable(eventTypeId);
 		}
-		EventIdIterable<Long> baseIter = new EventIdIterable<Long>(getIndexEntryIterable(eventTypeId));
+		Iterable<EventId> baseIter = getIndexEntryIterable(eventTypeId);
 		return new FallbackFilteringEventIdIterable(baseIter, constraint, typedEventRepo);
 	}
 
-	private Iterable<IndexEntry<Long>> getIndexEntryIterable(Long eventTypeId) {
+	private Iterable<EventId> getIndexEntryIterable(Long eventTypeId) {
 		if (eventIndicies.containsKey(eventTypeId)) {
 			return eventIndicies.get(eventTypeId).readIndicies();
 		}
-		return fallbackIndexFile.readIndicies(Long.class, new EventTypeMatcher(eventTypeId));
+		return fallbackIndexFile.readIndicies(new EventTypeMatcher(eventTypeId));
 	}
 
 	public void onNewEvent(long eventId, EventSerializer ed) {
@@ -57,6 +56,10 @@ public class Indexing {
 		@Override
 		public boolean accepts(Long t) {
 			return acceptedTypes.contains(t);
+		}
+		@Override
+		public Long cast(Object o) {
+			return Long.class.cast(o);
 		}
 	}
 

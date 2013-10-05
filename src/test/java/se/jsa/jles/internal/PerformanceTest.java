@@ -19,7 +19,7 @@ import se.jsa.jles.internal.file.FlippingEntryFile;
 import se.jsa.jles.internal.file.StreamBasedChannelFactory;
 import se.jsa.jles.internal.file.SynchronousEntryFile;
 
-@Ignore
+@Ignore("takes too much time and not working properly due FlippingEntryFile:s closing behavior")
 @RunWith(value = Parameterized.class)
 public class PerformanceTest {
 
@@ -81,6 +81,7 @@ public class PerformanceTest {
 
 	@After
 	public void teardown() {
+		System.out.println("Closing: " + entryFile);
 		entryFile.close();
 		new File("perf.ed").delete();
 	}
@@ -92,7 +93,7 @@ public class PerformanceTest {
 		System.out.println("\nEntryFile type: " + entryFile.getClass().getSimpleName());
 		EventFile ef = new EventFile(entryFile);
 
-		final int COUNT = 100000;
+		final int COUNT = 20000;
 		List<EmptyEvent> events = createEEEvent(COUNT);
 		EventSerializer es = ed.getEventSerializer(events.get(0));
 		long start = System.nanoTime();
@@ -118,7 +119,7 @@ public class PerformanceTest {
 	public void measureWrites() throws Exception {
 		EventFile ef = new EventFile(entryFile);
 
-		final int COUNT = 100000;
+		final int COUNT = 20000;
 		List<Object> events = createISEvent(COUNT);
 		EventSerializer es = ed.getEventSerializer(events.get(0));
 		long start = System.nanoTime();

@@ -19,5 +19,4 @@ public interface EventDefinitions {
 
 	EventField getEventField(Long eventTypeId, String fieldName);
 
-
 }

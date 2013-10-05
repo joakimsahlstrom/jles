@@ -2,7 +2,7 @@ package se.jsa.jles.internal;
 
 import java.nio.ByteBuffer;
 
-import se.jsa.jles.internal.IndexFile.IndexEntry;
+import se.jsa.jles.internal.IndexFile.IndexKeyMatcher;
 import se.jsa.jles.internal.fields.StorableField;
 
 /**
@@ -19,8 +19,19 @@ public class EventIndex {
 		this.indexFile = new IndexFile(new NullEventTypeField(eventTypeId), entryFile);
 	}
 
-	public Iterable<IndexEntry<Long>> readIndicies() {
-		return indexFile.readIndicies(Long.class);
+	public static IndexKeyMatcher<Object> ALWAYS_MATCHER = new IndexKeyMatcher<Object>() {
+		@Override
+		public boolean accepts(Object t) {
+			return true;
+		}
+		@Override
+		public Object cast(Object o) {
+			return o;
+		}
+	};
+
+	public Iterable<EventId> readIndicies() {
+		return indexFile.readIndicies(ALWAYS_MATCHER);
 	}
 
 	public void writeIndex(long eventId) {

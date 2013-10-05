@@ -3,16 +3,15 @@ package se.jsa.jles.internal;
 import se.jsa.jles.internal.util.Objects;
 
 public class EventFieldConstraint {
-
 	private final String fieldName;
-	private final FieldConstraint constraint;
+	private final FieldConstraint<?> constraint;
 
 	EventFieldConstraint() {
 		this.fieldName = null;
 		this.constraint = null;
 	}
 
-	EventFieldConstraint(String fieldName, FieldConstraint constraint) {
+	EventFieldConstraint(String fieldName, FieldConstraint<?> constraint) {
 		this.fieldName = Objects.requireNonNull(fieldName);
 		this.constraint = Objects.requireNonNull(constraint);
 	}
@@ -21,7 +20,7 @@ public class EventFieldConstraint {
 		return new EventFieldConstraint();
 	}
 
-	public static EventFieldConstraint create(String fieldName, FieldConstraint constraint) {
+	public static EventFieldConstraint create(String fieldName, FieldConstraint<?> constraint) {
 		return new EventFieldConstraint(fieldName, constraint);
 	}
 
@@ -36,11 +35,7 @@ public class EventFieldConstraint {
 		return fieldName;
 	}
 
-	public FieldConstraint getComparison() {
-		return constraint;
-	}
-
 	public boolean accepts(Object eventFieldValue) {
-		return constraint.isSatisfied(eventFieldValue);
+		return constraint.isSatisfiedBy(eventFieldValue);
 	}
 }

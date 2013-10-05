@@ -38,11 +38,15 @@ public class IndexingTests {
 			es.readEvents(TestEvent.class, new Match() {
 				@Override
 				public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
-					return eventRepo.getIterator(EventFieldConstraint.create("Id", new FieldConstraint() {
+					return eventRepo.getIterator(EventFieldConstraint.create("Id", new FieldConstraint<Long>() {
 						@Override
-						public boolean isSatisfied(Object eventFieldValue) {
+						public boolean isSatisfied(Long eventFieldValue) {
 							boolean res = Long.valueOf(1).equals(eventFieldValue);
 							return res;
+						}
+						@Override
+						public Class<Long> getFieldType() {
+							return Long.class;
 						}
 					}));
 				}
