@@ -41,5 +41,6 @@ public interface EventFieldIndex {
 	public Iterable<EventId> getIterable(EventFieldConstraint constraint);
 	public void onNewEvent(long eventId, Object event);
 
+	public void close();
 
 }

@@ -6,11 +6,11 @@ import se.jsa.jles.internal.fields.EventField;
 public class SimpleEventFieldIndex implements EventFieldIndex {
 
 	private final EventFieldId eventFieldId;
-	private final IndexFile entries;
+	private final IndexFile entriesFile;
 
 	public SimpleEventFieldIndex(Long eventTypeId, EventField eventField, EntryFile indexEntryFile) {
 		this.eventFieldId = new EventFieldId(eventTypeId, eventField.getPropertyName());
-		this.entries = new IndexFile(eventField, indexEntryFile);
+		this.entriesFile = new IndexFile(eventField, indexEntryFile);
 	}
 
 	@Override
@@ -25,7 +25,7 @@ public class SimpleEventFieldIndex implements EventFieldIndex {
 
 	@Override
 	public Iterable<EventId> getIterable(final EventFieldConstraint constraint) {
-		return entries.readIndicies(new IndexKeyMatcher() {
+		return entriesFile.readIndicies(new IndexKeyMatcher() {
 			@Override
 			public boolean accepts(Object t) {
 				return constraint.accepts(t);
@@ -39,7 +39,12 @@ public class SimpleEventFieldIndex implements EventFieldIndex {
 	}
 
 	private void register(long eventId, Object event) {
-		entries.writeIndex(eventId, event);
+		entriesFile.writeIndex(eventId, event);
+	}
+
+	@Override
+	public void close() {
+		entriesFile.close();
 	}
 
 }

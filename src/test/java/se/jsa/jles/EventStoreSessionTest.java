@@ -34,8 +34,6 @@ public class EventStoreSessionTest {
 
 	@Test
 	public void canReadEventFromDifferentSerializableVersions() throws Exception {
-		eventStore.init();
-
 		NonSerializableEvent.SerializableEventV1 e1 = new NonSerializableEvent.SerializableEventV1(new NonSerializableEvent(Name.valueOf("1"), new Date(2L)));
 		NonSerializableEvent.SerializableEventV2 e2 = new NonSerializableEvent.SerializableEventV2(new NonSerializableEvent(Name.valueOf("2"), new Date(2L)));
 		eventStore.write(e1);
@@ -44,7 +42,6 @@ public class EventStoreSessionTest {
 
 		eventStore.stop();
 		eventStore = new EventStoreConfigurer(fileChannelFactory).configure();
-		eventStore.init();
 
 		List<Object> events = eventStore.collectEvents(NonSerializableEvent.class);
 		assertEquals(2, events.size());

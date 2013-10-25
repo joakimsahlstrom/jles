@@ -15,12 +15,12 @@ import se.jsa.jles.internal.util.Objects;
  *
  */
 public class Indexing {
-	private final IndexFile fallbackIndexFile;
+	private final IndexFile eventTypeIndexFile;
 	private final Map<Long, EventIndex> eventIndicies;
-	private final Map<EventFieldIndex.EventFieldId, EventFieldIndex> eventFieldIds;
+	private final Map<EventFieldId, EventFieldIndex> eventFieldIds;
 
-	public Indexing(EntryFile fallbackIndexFile, Map<Long, EventIndex> eventIndicies, Map<EventFieldIndex.EventFieldId, EventFieldIndex> eventFieldIds) {
-		this.fallbackIndexFile = new IndexFile(new StorableLongField(), fallbackIndexFile);
+	public Indexing(EntryFile eventTypeIndexFile, Map<Long, EventIndex> eventIndicies, Map<EventFieldId, EventFieldIndex> eventFieldIds) {
+		this.eventTypeIndexFile = new IndexFile(new StorableLongField(), eventTypeIndexFile);
 		this.eventIndicies = Objects.requireNonNull(eventIndicies);
 		this.eventFieldIds = Objects.requireNonNull(eventFieldIds);
 	}
@@ -29,7 +29,7 @@ public class Indexing {
 		if (!constraint.hasConstraint()) {
 			return getIndexEntryIterable(eventTypeId);
 		}
-		EventFieldId eventFieldId = new EventFieldIndex.EventFieldId(eventTypeId, constraint.getFieldName());
+		EventFieldId eventFieldId = new EventFieldId(eventTypeId, constraint.getFieldName());
 		if (eventFieldIds.containsKey(eventFieldId)) {
 			return eventFieldIds.get(eventFieldId).getIterable(constraint);
 		} else {
@@ -42,11 +42,11 @@ public class Indexing {
 		if (eventIndicies.containsKey(eventTypeId)) {
 			return eventIndicies.get(eventTypeId).readIndicies();
 		}
-		return fallbackIndexFile.readIndicies(new EventTypeMatcher(eventTypeId));
+		return eventTypeIndexFile.readIndicies(new EventTypeMatcher(eventTypeId));
 	}
 
 	public void onNewEvent(long eventId, EventSerializer ed, Object event) {
-		fallbackIndexFile.writeIndex(eventId, ed.getEventTypeId());
+		eventTypeIndexFile.writeIndex(eventId, ed.getEventTypeId());
 		if (eventIndicies.containsKey(ed.getEventTypeId())) {
 			eventIndicies.get(ed.getEventTypeId()).writeIndex(eventId);
 		}
@@ -58,9 +58,12 @@ public class Indexing {
 	}
 
 	public void stop() {
-		fallbackIndexFile.close();
+		eventTypeIndexFile.close();
 		for (EventIndex ei : eventIndicies.values()) {
 			ei.close();
+		}
+		for (EventFieldIndex efi : eventFieldIds.values()) {
+			efi.close();
 		}
 	}
 

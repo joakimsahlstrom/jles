@@ -45,13 +45,18 @@ public class EventStoreConfigurer {
 	}
 
 	public EventStore configure() {
-		return new EventStore(eventFile, createIndexing(eventDefinitions), eventDefinitions);
+		eventDefinitions.init();
+		Indexing indexing = createIndexing(eventDefinitions);
+		EventStore result = new EventStore(eventFile, indexing, eventDefinitions);
+		return result;
 	}
 
 	private Indexing createIndexing(EventDefinitions eventDefinitions) {
 		HashMap<Long, EventIndex> eventIndicies = new HashMap<Long, EventIndex>();
-		for (Long eventTypeId : eventDefinitions.getEventTypeIds(indexedEventTypes.toArray(new Class<?>[indexedEventTypes.size()]))) {
-			eventIndicies.put(eventTypeId, new EventIndex(createEntryFile("events_" + eventTypeId + ".if", fileChannelFactory), eventTypeId));
+		for (Class<?> indexedEventType : indexedEventTypes) {
+			for (Long eventTypeId : eventDefinitions.getEventTypeIds(indexedEventType)) {
+				eventIndicies.put(eventTypeId, new EventIndex(createEntryFile("events_" + eventTypeId + ".if", fileChannelFactory), eventTypeId));
+			}
 		}
 		return new Indexing(fallbackIndexFile, eventIndicies, Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>emptyMap());
 	}

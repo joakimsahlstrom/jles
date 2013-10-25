@@ -5,7 +5,6 @@ import java.util.NoSuchElementException;
 
 import se.jsa.jles.internal.util.Objects;
 
-
 public class FallbackFilteringEventIdIterable implements Iterable<EventId> {
 
 	private final Iterable<EventId> baseIter;

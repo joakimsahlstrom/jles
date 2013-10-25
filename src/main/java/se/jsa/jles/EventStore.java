@@ -44,10 +44,6 @@ public class EventStore {
 		this.eventDefinitions = eventDefinitions;
 	}
 
-	public void init() {
-		eventDefinitions.init();
-	}
-
 	public void write(Object event) {
 		EventSerializer ed = eventDefinitions.getEventSerializer(event);
 		long eventId = eventFile.writeEvent(event, ed);
