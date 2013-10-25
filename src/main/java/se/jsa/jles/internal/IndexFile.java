@@ -16,9 +16,8 @@ import se.jsa.jles.internal.fields.StorableField;
  */
 public class IndexFile {
 
-	public interface IndexKeyMatcher<T> {
-		boolean accepts(T t);
-		T cast(Object o);
+	public interface IndexKeyMatcher {
+		boolean accepts(Object o);
 	}
 
 	public class IndexEntry<T> {
@@ -80,30 +79,30 @@ public class IndexFile {
 		entryFile.append(output);
 	}
 
-	public <T> Iterable<EventId> readIndicies(IndexKeyMatcher<T> matcher) {
-		return new IndexIterable<T>(matcher);
+	public Iterable<EventId> readIndicies(IndexKeyMatcher matcher) {
+		return new IndexIterable(matcher);
 	}
 
-	private class IndexIterable<T> implements Iterable<EventId> {
-		private final IndexKeyMatcher<T> matcher;
-		public IndexIterable(IndexKeyMatcher<T> matcher) {
+	private class IndexIterable implements Iterable<EventId> {
+		private final IndexKeyMatcher matcher;
+		public IndexIterable(IndexKeyMatcher matcher) {
 			this.matcher = matcher;
 		}
 		@Override
 		public Iterator<EventId> iterator() {
-			return new IndexIterator<T>(matcher, entryFile.size());
+			return new IndexIterator(matcher, entryFile.size());
 		}
 	}
 
-	private class IndexIterator<T> implements Iterator<EventId> {
-		private final IndexKeyMatcher<T> matcher;
+	private class IndexIterator implements Iterator<EventId> {
+		private final IndexKeyMatcher matcher;
 		private final long fileSize;
 
 		private long position = 0;
 		private long eventIdByType = 0;
 		private EventId nextEntry = null;
 
-		public IndexIterator(IndexKeyMatcher<T> matcher, long fileSize) {
+		public IndexIterator(IndexKeyMatcher matcher, long fileSize) {
 			this.matcher = matcher;
 			this.fileSize = fileSize;
 		}
@@ -135,13 +134,13 @@ public class IndexFile {
 		private void tryLoadNextEntry() {
 			ByteBuffer entry;
 			long eventIndex;
-			T indexKey;
+			Object indexKey;
 			EventId result;
 			do {
 				entry = entryFile.readEntry(position);
 				eventIndex = entry.getLong();
 				entry.getInt(); // size
-				indexKey = matcher.cast(eventKeyField.readFromBuffer(entry));
+				indexKey = eventKeyField.readFromBuffer(entry);
 				result = new EventId(eventIndex, eventIdByType++);
 			} while (!matcher.accepts(indexKey) && (position += entry.limit()) < fileSize);
 

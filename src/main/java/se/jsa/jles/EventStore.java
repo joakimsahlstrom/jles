@@ -8,6 +8,7 @@ import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventFieldConstraint;
+import se.jsa.jles.internal.EventFieldIndex;
 import se.jsa.jles.internal.EventFile;
 import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.EventIndex;
@@ -20,6 +21,12 @@ import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
 import se.jsa.jles.internal.util.Objects;
 
+
+/**
+ * The class defining the basic interactions with jles
+ * @author joakim Joakim Sahlström
+ *
+ */
 public class EventStore {
 	private final EventFile eventFile;
 	private final Indexing indexing;
@@ -27,8 +34,8 @@ public class EventStore {
 
 	EventStore(EventFile eventFile, EntryFile eventTypeIndexFile) {
 		this(eventFile,
-				new Indexing(eventTypeIndexFile, Collections.<Long, EventIndex>emptyMap()),
-				new MappingEventDefinitions(new MemoryBasedEventDefinitions()));
+			 new Indexing(eventTypeIndexFile, Collections.<Long, EventIndex>emptyMap(), Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>emptyMap()),
+			 new MappingEventDefinitions(new MemoryBasedEventDefinitions()));
 	}
 
 	EventStore(EventFile eventFile, Indexing indexing, EventDefinitions eventDefinitions) {
@@ -44,7 +51,7 @@ public class EventStore {
 	public void write(Object event) {
 		EventSerializer ed = eventDefinitions.getEventSerializer(event);
 		long eventId = eventFile.writeEvent(event, ed);
-		indexing.onNewEvent(eventId, ed);
+		indexing.onNewEvent(eventId, ed, event);
 	}
 
 	public List<Object> collectEvents(Class<?>... eventTypes) {

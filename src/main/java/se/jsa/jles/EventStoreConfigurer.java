@@ -1,12 +1,14 @@
 package se.jsa.jles;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import se.jsa.jles.internal.EventDefinitions;
+import se.jsa.jles.internal.EventFieldIndex;
 import se.jsa.jles.internal.EventFile;
 import se.jsa.jles.internal.EventIndex;
 import se.jsa.jles.internal.Indexing;
@@ -51,7 +53,7 @@ public class EventStoreConfigurer {
 		for (Long eventTypeId : eventDefinitions.getEventTypeIds(indexedEventTypes.toArray(new Class<?>[indexedEventTypes.size()]))) {
 			eventIndicies.put(eventTypeId, new EventIndex(createEntryFile("events_" + eventTypeId + ".if", fileChannelFactory), eventTypeId));
 		}
-		return new Indexing(fallbackIndexFile, eventIndicies);
+		return new Indexing(fallbackIndexFile, eventIndicies, Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>emptyMap());
 	}
 
 	private FlippingEntryFile createEntryFile(String fileName, FileChannelFactory fileChannelFactory) {

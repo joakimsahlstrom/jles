@@ -5,6 +5,10 @@ public abstract class FieldConstraint<T> {
 	protected abstract Class<T> getFieldType();
 
 	public final boolean isSatisfiedBy(Object eventFieldValue) {
-		return isSatisfied(getFieldType().cast(eventFieldValue));
+		try {
+			return isSatisfied(getFieldType().cast(eventFieldValue));
+		} catch (ClassCastException e) {
+			throw new ClassCastException("Could not cast " + eventFieldValue.getClass() + " to " + getFieldType());
+		}
 	}
 }

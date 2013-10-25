@@ -19,14 +19,10 @@ public class EventIndex {
 		this.indexFile = new IndexFile(new NullEventTypeField(eventTypeId), entryFile);
 	}
 
-	public static IndexKeyMatcher<Object> ALWAYS_MATCHER = new IndexKeyMatcher<Object>() {
+	public static IndexKeyMatcher ALWAYS_MATCHER = new IndexKeyMatcher() {
 		@Override
 		public boolean accepts(Object t) {
 			return true;
-		}
-		@Override
-		public Object cast(Object o) {
-			return o;
 		}
 	};
 
