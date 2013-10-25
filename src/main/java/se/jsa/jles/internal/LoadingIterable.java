@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import se.jsa.jles.internal.util.Objects;
 
@@ -101,6 +102,9 @@ public class LoadingIterable implements Iterable<Object> {
 
 		@Override
 		public Object next() {
+			if (!hasNext()) {
+				throw new NoSuchElementException();
+			}
 			Object result = currentFeeder.take();
 			currentFeeder = null;
 			return result;

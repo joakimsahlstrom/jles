@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
+import se.jsa.jles.internal.fields.StorableLongField;
 import se.jsa.jles.internal.file.SynchronousEntryFile;
 import se.jsa.jles.internal.testevents.TestEvent;
 import se.jsa.jles.internal.util.Objects;
@@ -33,7 +34,7 @@ public class IndexingTest {
 		return true;
 	}
 
-	private final SynchronousEntryFile fallbackIndexFile = new SynchronousEntryFile("test.if");
+	private final SynchronousEntryFile eventTypeIndexFile = new SynchronousEntryFile("test.if");
 	private final SynchronousEntryFile fieldIndexFile = new SynchronousEntryFile("field.if");
 	private final MemoryBasedEventDefinitions eventDefinitions = new MemoryBasedEventDefinitions();
 	private final Set<Long> eventTypeIds = eventDefinitions.getEventTypeIds(TestEvent.class);
@@ -92,7 +93,7 @@ public class IndexingTest {
 	}
 
 	private Indexing createIndexing(SimpleEventFieldIndex eventFieldIndex) {
-		return new Indexing(fallbackIndexFile,
+		return new Indexing(new IndexFile(new StorableLongField(), eventTypeIndexFile),
 				Collections.<Long, EventIndex>emptyMap(),
 				Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>singletonMap(eventFieldIndex.getFieldId(), eventFieldIndex));
 	}

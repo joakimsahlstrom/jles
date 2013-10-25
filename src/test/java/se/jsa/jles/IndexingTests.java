@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -25,8 +26,7 @@ import se.jsa.jles.internal.file.StreamBasedChannelFactory;
 public class IndexingTests {
 
 	private final EventStoreConfigurer configurer = new EventStoreConfigurer(new StreamBasedChannelFactory())
-		.addIndexing(EmptyEvent3.class)
-		.testableEventDefinitions();
+		.addIndexing(EmptyEvent3.class);
 	private final EventStore es = configurer.configure();
 
 	@Test
@@ -56,6 +56,22 @@ public class IndexingTests {
 	}
 
 	@Test
+	public void indexCanBeAddedAtLaterStartup() throws Exception {
+		es.write(new TestEvent("a", 0, true));
+		es.write(new TestEvent("a", 1, true));
+		es.write(new TestEvent("a", 2, true));
+		es.stop();
+
+		EventStore es = configurer
+				.addIndexing(TestEvent.class)
+				.configure();
+		Iterator<Object> events = es.readEvents(TestEvent.class).iterator();
+		assertEquals(0L, ((TestEvent)events.next()).getId());
+		assertEquals(1L, ((TestEvent)events.next()).getId());
+		assertEquals(2L, ((TestEvent)events.next()).getId());
+	}
+
+	@Test
 	public void indexPerformanceTest() throws Exception {
 		List<Object> events = createEEvents(5000, 0.01d);
 
@@ -74,8 +90,6 @@ public class IndexingTests {
 		long unindexedRead = end2 - start2;
 		long indexedRead = end3 - start3;
 		assertTrue("Indexed read should be at least a factor 10 faster under conditions given in this test case (" + indexedRead + " vs " + unindexedRead + ")", indexedRead * 10 < unindexedRead);
-
-		teardown();
 	}
 
 	@After

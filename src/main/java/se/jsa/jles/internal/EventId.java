@@ -18,4 +18,29 @@ public class EventId {
 		return eventIdByType;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (obj == this) {
+			return true;
+		}
+		if (!(obj instanceof EventId)) {
+			return false;
+		}
+		EventId other = (EventId)obj;
+		return eventId == other.eventId && eventIdByType == other.eventIdByType;
+	}
+
+	@Override
+	public int hashCode() {
+		return (int) (eventId * 997 + eventIdByType);
+	}
+
+	@Override
+	public String toString() {
+		return "EventId [eventId=" + eventId + ", eventIdByType=" + eventIdByType + "]";
+	}
+
 }

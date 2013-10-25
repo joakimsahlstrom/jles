@@ -13,12 +13,14 @@ import se.jsa.jles.internal.EventFile;
 import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.EventIndex;
 import se.jsa.jles.internal.EventSerializer;
+import se.jsa.jles.internal.IndexFile;
 import se.jsa.jles.internal.IndexType;
 import se.jsa.jles.internal.Indexing;
 import se.jsa.jles.internal.LoadingIterable;
 import se.jsa.jles.internal.TypedEventRepo;
 import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
+import se.jsa.jles.internal.fields.StorableLongField;
 import se.jsa.jles.internal.util.Objects;
 
 
@@ -34,7 +36,7 @@ public class EventStore {
 
 	EventStore(EventFile eventFile, EntryFile eventTypeIndexFile) {
 		this(eventFile,
-			 new Indexing(eventTypeIndexFile, Collections.<Long, EventIndex>emptyMap(), Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>emptyMap()),
+			 new Indexing(new IndexFile(new StorableLongField(), eventTypeIndexFile), Collections.<Long, EventIndex>emptyMap(), Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>emptyMap()),
 			 new MappingEventDefinitions(new MemoryBasedEventDefinitions()));
 	}
 

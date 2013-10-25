@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import se.jsa.jles.internal.IndexFile.IndexKeyMatcher;
 import se.jsa.jles.internal.fields.StorableField;
+import se.jsa.jles.internal.util.Objects;
 
 /**
  * A very simple kind of index only indexing where in the event repo file events
@@ -14,9 +15,11 @@ import se.jsa.jles.internal.fields.StorableField;
  */
 public class EventIndex {
 	private final IndexFile indexFile;
+	private final Long eventTypeId;
 
 	public EventIndex(EntryFile entryFile, Long eventTypeId) {
 		this.indexFile = new IndexFile(new NullEventTypeField(eventTypeId), entryFile);
+		this.eventTypeId = Objects.requireNonNull(eventTypeId);
 	}
 
 	public static IndexKeyMatcher ALWAYS_MATCHER = new IndexKeyMatcher() {
@@ -32,6 +35,10 @@ public class EventIndex {
 
 	public void writeIndex(long eventId) {
 		indexFile.writeIndex(eventId, null);
+	}
+
+	public Long getEventTypeId() {
+		return eventTypeId;
 	}
 
 	private static class NullEventTypeField extends StorableField {

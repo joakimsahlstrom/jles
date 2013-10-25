@@ -6,7 +6,6 @@ import java.util.Set;
 
 import se.jsa.jles.internal.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.IndexFile.IndexKeyMatcher;
-import se.jsa.jles.internal.fields.StorableLongField;
 import se.jsa.jles.internal.util.Objects;
 
 /**
@@ -19,8 +18,8 @@ public class Indexing {
 	private final Map<Long, EventIndex> eventIndicies;
 	private final Map<EventFieldId, EventFieldIndex> eventFieldIds;
 
-	public Indexing(EntryFile eventTypeIndexFile, Map<Long, EventIndex> eventIndicies, Map<EventFieldId, EventFieldIndex> eventFieldIds) {
-		this.eventTypeIndexFile = new IndexFile(new StorableLongField(), eventTypeIndexFile);
+	public Indexing(IndexFile eventTypeIndexFile, Map<Long, EventIndex> eventIndicies, Map<EventFieldId, EventFieldIndex> eventFieldIds) {
+		this.eventTypeIndexFile = eventTypeIndexFile;
 		this.eventIndicies = Objects.requireNonNull(eventIndicies);
 		this.eventFieldIds = Objects.requireNonNull(eventFieldIds);
 	}
@@ -67,7 +66,7 @@ public class Indexing {
 		}
 	}
 
-	private class EventTypeMatcher implements IndexKeyMatcher {
+	public static class EventTypeMatcher implements IndexKeyMatcher {
 		private final Set<Long> acceptedTypes;
 		public EventTypeMatcher(Set<Long> acceptedEventTypes) {
 			this.acceptedTypes = acceptedEventTypes;
