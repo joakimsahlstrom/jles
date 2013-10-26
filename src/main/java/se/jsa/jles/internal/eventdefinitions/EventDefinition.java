@@ -11,6 +11,7 @@ import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventSerializer;
 import se.jsa.jles.internal.fields.EventField;
 import se.jsa.jles.internal.fields.FieldSerializer;
+import se.jsa.jles.internal.util.NullFieldMap;
 import se.jsa.jles.internal.util.Objects;
 
 class EventDefinition implements EventSerializer, EventDeserializer {
@@ -52,10 +53,15 @@ class EventDefinition implements EventSerializer, EventDeserializer {
 
 	@Override
 	public ByteBuffer serializeEvent(Object event) {
-		int totalSize = calculateSize(event);
+		NullFieldMap nullFieldMap = NullFieldMap.buildFromEvent(fields, event);
+		int totalSize = calculateSize(event, nullFieldMap);
+
 		ByteBuffer result = ByteBuffer.allocate(totalSize);
+		result.put(nullFieldMap.getMask());
 		for (EventField pf : fields) {
-			pf.writeToBuffer(event, result);
+			if (!nullFieldMap.isFieldNull(pf)) {
+				pf.writeToBuffer(event, result);
+			}
 		}
 		result.rewind();
 		return result;
@@ -70,8 +76,11 @@ class EventDefinition implements EventSerializer, EventDeserializer {
 		try {
 			Constructor<?> constructor = eventType.getConstructor();
 			instance = constructor.newInstance();
+			NullFieldMap nullFieldMap = NullFieldMap.buildFromBuffer(fields, buffer);
 			for (EventField pf : fields) {
-				pf.readFromBuffer(instance, buffer);
+				if (!nullFieldMap.isFieldNull(pf)) {
+					pf.readFromBuffer(instance, buffer);
+				}
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("Could not deserialize type: " + eventType + ". Found constructors: " + Arrays.asList(eventType.getConstructors()), e);
@@ -98,10 +107,12 @@ class EventDefinition implements EventSerializer, EventDeserializer {
 		}
 	}
 
-	private int calculateSize(Object event) {
-		int size = 0;
-		for (EventField pf : fields) {
-			size += pf.getSize(event);
+	private int calculateSize(Object event, NullFieldMap nullFieldMap) {
+		int size = NullFieldMap.getSizeInBytes(fields);
+		for (EventField ef : fields) {
+			if (!nullFieldMap.isFieldNull(ef)) {
+				size += ef.getSize(event);
+			}
 		}
 		return size;
 	}

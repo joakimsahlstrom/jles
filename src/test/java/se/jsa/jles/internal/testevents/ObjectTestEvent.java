@@ -43,16 +43,20 @@ public class ObjectTestEvent {
 	public boolean equals(Object obj) {
 		if (obj instanceof ObjectTestEvent) {
 			ObjectTestEvent other = (ObjectTestEvent) obj;
-			return name.equals(other.name)
-					&& id.equals(other.id)
-					&& first.equals(other.first);
+			return eq(name, other.name)
+					&& eq(id, other.id)
+					&& eq(first, other.first);
 		}
 		return false;
 	}
 
+	private boolean eq(Object o1, Object o2) {
+		return o1 == null ? o2 == null : o1.equals(o2);
+	}
+
 	@Override
 	public int hashCode() {
-		return ((name.hashCode() * 31 + id.hashCode()) * 31 + (first ? 1 : 0));
+		return (name.hashCode() * 31 + id.hashCode()) * 31 + (first ? 1 : 0);
 	}
 
 	@Override

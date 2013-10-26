@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
@@ -509,7 +508,6 @@ public class EventFileTest {
 	}
 
 	@Test
-	@Ignore("Not yet supported")
 	public void canWriteNullEventField() throws Exception {
 		ObjectTestEvent event = new ObjectTestEvent(null, null, Boolean.TRUE);
 
