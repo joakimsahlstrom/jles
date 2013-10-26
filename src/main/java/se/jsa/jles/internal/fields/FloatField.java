@@ -14,11 +14,6 @@ public class FloatField extends EventField {
 	}
 
 	@Override
-	public Class<?> getFieldType() {
-		return Float.TYPE;
-	}
-
-	@Override
 	public int getSize(Object event) {
 		return 4;
 	}
@@ -31,11 +26,6 @@ public class FloatField extends EventField {
 	@Override
 	public Object readFromBuffer(ByteBuffer buffer) {
 		return buffer.getFloat();
-	}
-
-	@Override
-	public boolean isOfType(Class<?> type) {
-		return Float.TYPE.equals(type) || Float.class.equals(type);
 	}
 
 }

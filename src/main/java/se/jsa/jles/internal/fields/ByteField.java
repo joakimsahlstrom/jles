@@ -14,11 +14,6 @@ public class ByteField extends EventField {
 	}
 
 	@Override
-	public Class<?> getFieldType() {
-		return Byte.TYPE;
-	}
-
-	@Override
 	public int getSize(Object event) {
 		return 1;
 	}
@@ -31,11 +26,6 @@ public class ByteField extends EventField {
 	@Override
 	public Object readFromBuffer(ByteBuffer buffer) {
 		return buffer.get();
-	}
-
-	@Override
-	public boolean isOfType(Class<?> type) {
-		return Byte.TYPE.equals(type) || Byte.class.equals(type);
 	}
 
 }

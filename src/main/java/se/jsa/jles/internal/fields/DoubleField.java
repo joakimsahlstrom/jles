@@ -14,11 +14,6 @@ public class DoubleField extends EventField {
 	}
 
 	@Override
-	public Class<?> getFieldType() {
-		return Double.TYPE;
-	}
-
-	@Override
 	public int getSize(Object event) {
 		return 8;
 	}
@@ -31,11 +26,6 @@ public class DoubleField extends EventField {
 	@Override
 	public Object readFromBuffer(ByteBuffer buffer) {
 		return buffer.getDouble();
-	}
-
-	@Override
-	public boolean isOfType(Class<?> type) {
-		return Double.TYPE.equals(type) || Double.class.equals(type);
 	}
 
 }

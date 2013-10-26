@@ -14,11 +14,6 @@ public class IntegerField extends EventField {
 	}
 
 	@Override
-	public Class<?> getFieldType() {
-		return Integer.TYPE;
-	}
-
-	@Override
 	public int getSize(Object event) {
 		return 4;
 	}
@@ -31,11 +26,6 @@ public class IntegerField extends EventField {
 	@Override
 	public Object readFromBuffer(ByteBuffer buffer) {
 		return buffer.getInt();
-	}
-
-	@Override
-	public boolean isOfType(Class<?> type) {
-		return Integer.TYPE.equals(type) || Integer.class.equals(type);
 	}
 
 }

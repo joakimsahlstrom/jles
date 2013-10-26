@@ -58,23 +58,23 @@ public class EventFieldFactory {
 	}
 
 	public EventField createEventField(Class<?> fieldType, String name, Class<?> eventType) {
-		if (fieldType.equals(Boolean.TYPE)) {
+		if (fieldType.equals(Boolean.TYPE) || fieldType.equals(Boolean.class)) {
 			return new BooleanField(eventType, name);
-		} else if (fieldType.equals(Integer.TYPE)) {
+		} else if (fieldType.equals(Integer.TYPE) || fieldType.equals(Integer.class)) {
 			return new IntegerField(eventType, name);
 		} else if (fieldType.equals(String.class)) {
 			return new StringField(eventType, name);
-		} else if (fieldType.equals(Byte.TYPE)) {
+		} else if (fieldType.equals(Byte.TYPE) || fieldType.equals(Byte.class)) {
 			return new ByteField(eventType, name);
-		} else if (fieldType.equals(Short.TYPE)) {
+		} else if (fieldType.equals(Short.TYPE) || fieldType.equals(Short.class)) {
 			return new ShortField(eventType, name);
-		} else if (fieldType.equals(Long.TYPE)) {
+		} else if (fieldType.equals(Long.TYPE) || fieldType.equals(Long.class)) {
 			return new LongField(eventType, name);
-		} else if (fieldType.equals(Float.TYPE)) {
+		} else if (fieldType.equals(Float.TYPE) || fieldType.equals(Float.class)) {
 			return new FloatField(eventType, name);
-		} else if (fieldType.equals(Double.TYPE)) {
+		} else if (fieldType.equals(Double.TYPE) || fieldType.equals(Double.class)) {
 			return new DoubleField(eventType, name);
-		} else if (fieldType.equals(Character.TYPE)) {
+		} else if (fieldType.equals(Character.TYPE) || fieldType.equals(Character.class)) {
 			return new CharField(eventType, name);
 		}
 		throw new RuntimeException("Cannot create EventField for type " + fieldType);

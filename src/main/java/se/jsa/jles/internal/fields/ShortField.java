@@ -14,11 +14,6 @@ public class ShortField extends EventField {
 	}
 
 	@Override
-	public Class<?> getFieldType() {
-		return Short.TYPE;
-	}
-
-	@Override
 	public int getSize(Object event) {
 		return 2;
 	}
@@ -31,11 +26,6 @@ public class ShortField extends EventField {
 	@Override
 	public Object readFromBuffer(ByteBuffer buffer) {
 		return buffer.getShort();
-	}
-
-	@Override
-	public boolean isOfType(Class<?> type) {
-		return Short.TYPE.equals(type) || Short.class.equals(type);
 	}
 
 }

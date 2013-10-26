@@ -14,11 +14,6 @@ public class LongField extends EventField {
 	}
 
 	@Override
-	public Class<?> getFieldType() {
-		return Long.TYPE;
-	}
-
-	@Override
 	public int getSize(Object event) {
 		return 8;
 	}
@@ -31,11 +26,6 @@ public class LongField extends EventField {
 	@Override
 	public Object readFromBuffer(ByteBuffer buffer) {
 		return buffer.getLong();
-	}
-
-	@Override
-	public boolean isOfType(Class<?> type) {
-		return Long.TYPE.equals(type) || Long.class.equals(type);
 	}
 
 }

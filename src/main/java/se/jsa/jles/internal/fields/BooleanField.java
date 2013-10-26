@@ -14,11 +14,6 @@ public class BooleanField extends EventField {
 	}
 
 	@Override
-	public Class<?> getFieldType() {
-		return Boolean.TYPE;
-	}
-
-	@Override
 	public int getSize(Object event) {
 		return 1;
 	}
@@ -31,11 +26,6 @@ public class BooleanField extends EventField {
 	@Override
 	public Object readFromBuffer(ByteBuffer buffer) {
 		return buffer.get() == 1 ? true : false;
-	}
-
-	@Override
-	public boolean isOfType(Class<?> type) {
-		return Boolean.TYPE.equals(type) || Boolean.class.equals(type);
 	}
 
 }

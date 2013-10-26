@@ -1,4 +1,4 @@
 jles [jealous]
 ==============
 
-A lightweight event store in java
+A lightweight event repository in java

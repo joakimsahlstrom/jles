@@ -58,7 +58,10 @@ public abstract class EventField extends StorableField {
 		return propertyName;
 	}
 
-	public abstract boolean isOfType(Class<?> type);
+	@Override
+	public final Class<?> getFieldType() {
+		return getMethod.getReturnType();
+	}
 
 	@Override
 	public int hashCode() {

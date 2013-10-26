@@ -14,11 +14,6 @@ public class CharField extends EventField {
 	}
 
 	@Override
-	public Class<?> getFieldType() {
-		return Character.TYPE;
-	}
-
-	@Override
 	public int getSize(Object event) {
 		return 2;
 	}
@@ -31,11 +26,6 @@ public class CharField extends EventField {
 	@Override
 	public Object readFromBuffer(ByteBuffer buffer) {
 		return buffer.getChar();
-	}
-
-	@Override
-	public boolean isOfType(Class<?> type) {
-		return Character.TYPE.equals(type) || Character.class.equals(type);
 	}
 
 }

@@ -7,11 +7,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
 import se.jsa.jles.internal.file.FlippingEntryFile;
 import se.jsa.jles.internal.file.StreamBasedChannelFactory;
+import se.jsa.jles.internal.testevents.ObjectTestEvent;
 
 public class EventFileTest {
 
@@ -470,7 +472,6 @@ public class EventFileTest {
 
 	@Test
 	public void eventTypesCanBeSerializedAndDeserialized() throws Exception {
-
 		List<Object> events = Arrays.asList(
 				new EmptyEvent(),
 				new EmptyEvent2(),
@@ -489,12 +490,34 @@ public class EventFileTest {
 
 		EventDefinitions ed = new MemoryBasedEventDefinitions();
 		for (Object event : events) {
-
 			EventSerializer eventSerializer = ed.getEventSerializer(event);
 			long position = eventFile.writeEvent(event, eventSerializer);
 			Object output = eventFile.readEvent(position, ed.getEventDeserializer(eventSerializer.getEventTypeId()));
 			assertEquals(event, output);
 		}
+	}
+
+	@Test
+	public void canWriteObjectVersionsOfPrimitives() throws Exception {
+		ObjectTestEvent event = new ObjectTestEvent("name", 1L, Boolean.TRUE);
+
+		EventDefinitions ed = new MemoryBasedEventDefinitions();
+		EventSerializer eventSerializer = ed.getEventSerializer(event);
+		long position = eventFile.writeEvent(event, eventSerializer);
+		Object output = eventFile.readEvent(position, ed.getEventDeserializer(eventSerializer.getEventTypeId()));
+		assertEquals(event, output);
+	}
+
+	@Test
+	@Ignore("Not yet supported")
+	public void canWriteNullEventField() throws Exception {
+		ObjectTestEvent event = new ObjectTestEvent(null, null, Boolean.TRUE);
+
+		EventDefinitions ed = new MemoryBasedEventDefinitions();
+		EventSerializer eventSerializer = ed.getEventSerializer(event);
+		long position = eventFile.writeEvent(event, eventSerializer);
+		Object output = eventFile.readEvent(position, ed.getEventDeserializer(eventSerializer.getEventTypeId()));
+		assertEquals(event, output);
 	}
 
 }

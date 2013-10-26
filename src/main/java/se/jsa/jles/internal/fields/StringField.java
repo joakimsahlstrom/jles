@@ -14,11 +14,6 @@ public class StringField extends EventField {
 	}
 
 	@Override
-	public Class<?> getFieldType() {
-		return String.class;
-	}
-
-	@Override
 	public int getSize(Object event) {
 		return 4 + String.class.cast(getValue(event)).getBytes().length;
 	}
@@ -38,11 +33,6 @@ public class StringField extends EventField {
 		buffer.get(stringData);
 
 		return new String(stringData);
-	}
-
-	@Override
-	public boolean isOfType(Class<?> type) {
-		return String.class.equals(type);
 	}
 
 }
