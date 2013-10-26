@@ -8,5 +8,7 @@ public abstract class StorableField {
 	public abstract int getSize(Object event);
 	public abstract void writeToBuffer(Object obj, ByteBuffer buffer);
 	public abstract Object readFromBuffer(ByteBuffer buffer);
+	public abstract boolean isNullable();
+	public abstract boolean isNull(Object event);
 
 }

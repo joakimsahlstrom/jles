@@ -64,6 +64,16 @@ public abstract class EventField extends StorableField {
 	}
 
 	@Override
+	public boolean isNullable() {
+		return !getFieldType().isPrimitive();
+	}
+
+	@Override
+	public boolean isNull(Object event) {
+		return getValue(event) == null;
+	}
+
+	@Override
 	public int hashCode() {
 		return getMethod.hashCode();
 	}

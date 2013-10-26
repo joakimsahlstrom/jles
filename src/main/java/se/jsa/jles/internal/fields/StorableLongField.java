@@ -24,4 +24,14 @@ public class StorableLongField extends StorableField {
 		return buffer.getLong();
 	}
 
+	@Override
+	public boolean isNullable() {
+		return false; // This class is used for writing indexes and they are never null
+	}
+
+	@Override
+	public boolean isNull(Object event) {
+		return false;
+	}
+
 }

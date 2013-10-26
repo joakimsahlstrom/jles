@@ -67,6 +67,16 @@ public class EventIndex {
 		public Object readFromBuffer(ByteBuffer buffer) {
 			return eventTypeId;
 		}
+
+		@Override
+		public boolean isNullable() {
+			return false;
+		}
+
+		@Override
+		public boolean isNull(Object event) {
+			return false;
+		}
 	}
 
 	public void close() {

@@ -23,6 +23,7 @@ import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.FieldConstraint;
 import se.jsa.jles.internal.TypedEventRepo;
 import se.jsa.jles.internal.file.StreamBasedChannelFactory;
+import se.jsa.jles.internal.testevents.ObjectTestEvent;
 
 public class IndexingTests {
 
@@ -91,12 +92,29 @@ public class IndexingTests {
 		es = configurer
 				.addIndexing(TestEvent.class, "Id")
 				.configure();
-		Iterator<Object> events = es.readEvents(TestEvent.class, createMatch()).iterator();
+		Iterator<Object> events = es.readEvents(TestEvent.class, createIdMatch()).iterator();
 		assertEquals(1L, ((TestEvent)events.next()).getId());
 		assertFalse(events.hasNext());
 	}
 
-	private Match createMatch() {
+	@Test
+	public void canIndexNullValues() throws Exception {
+		es.stop();
+		es = configurer
+				.addIndexing(ObjectTestEvent.class, "First")
+				.configure();
+
+		es.write(new ObjectTestEvent("a", 0L, null));
+		es.write(new ObjectTestEvent("a", 1L, true));
+		es.write(new ObjectTestEvent("a", 2L, null));
+
+		Iterator<Object> events = es.readEvents(ObjectTestEvent.class, createNullMatch()).iterator();
+		assertEquals(Long.valueOf(0L), ((ObjectTestEvent)events.next()).getId());
+		assertEquals(Long.valueOf(2L), ((ObjectTestEvent)events.next()).getId());
+		assertFalse(events.hasNext());
+	}
+
+	private Match createIdMatch() {
 		return new Match() {
 			@Override
 			public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
@@ -109,6 +127,24 @@ public class IndexingTests {
 					@Override
 					public Class<Long> getFieldType() {
 						return Long.class;
+					}
+				}));
+			}
+		};
+	}
+
+	private Match createNullMatch() {
+		return new Match() {
+			@Override
+			public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
+				return eventRepo.getIterator(EventFieldConstraint.create("First", new FieldConstraint<Boolean>() {
+					@Override
+					public boolean isSatisfied(Boolean eventFieldValue) {
+						return eventFieldValue == null;
+					}
+					@Override
+					public Class<Boolean> getFieldType() {
+						return Boolean.class;
 					}
 				}));
 			}
