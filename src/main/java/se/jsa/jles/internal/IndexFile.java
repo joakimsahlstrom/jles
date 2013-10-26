@@ -20,46 +20,6 @@ public class IndexFile {
 		boolean accepts(Object o);
 	}
 
-	public class IndexEntry<T> {
-		private final long eventIndex;
-		private final T key;
-
-		IndexEntry(long eventIndex, T key) {
-			this.eventIndex = eventIndex;
-			this.key = key;
-		}
-
-		public long getEventIndex() {
-			return eventIndex;
-		}
-
-		public T getKey() {
-			return key;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof IndexEntry) {
-				@SuppressWarnings("unchecked")
-				IndexEntry<T> other = (IndexEntry<T>)obj;
-				return eventIndex == other.eventIndex
-						&& key.equals(other.key);
-			}
-			return false;
-		}
-
-		@Override
-		public int hashCode() {
-			return (int) (eventIndex * 31 + key.hashCode());
-		}
-
-		@Override
-		public String toString() {
-			return "IndexEntry [eventIndex=" + eventIndex + ", key=" + key
-					+ "]";
-		}
-	}
-
 	final StorableField eventKeyField;
 	final EntryFile entryFile;
 

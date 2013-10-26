@@ -114,7 +114,6 @@ public class LoadingIterable implements Iterable<Object> {
 		public void remove() {
 			throw new UnsupportedOperationException();
 		}
-
 	}
 
 }

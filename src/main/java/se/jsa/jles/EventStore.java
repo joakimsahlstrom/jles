@@ -25,12 +25,12 @@ import se.jsa.jles.internal.util.Objects;
 
 
 /**
- * The class defining the basic interactions with jles
+ * The class defining and implementing methods for basic interactions with jles
  * @author joakim Joakim Sahlström
  *
  */
 public class EventStore {
-	private final EventFile eventFile;
+	private final EventFile eventFile; // Wrap this in "Events"?
 	private final Indexing indexing;
 	private final EventDefinitions eventDefinitions;
 

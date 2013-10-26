@@ -27,10 +27,10 @@ public interface EventFieldIndex {
 			if (obj == this) {
 				return true;
 			}
-			if (!(obj instanceof EventFieldIndex.EventFieldId)) {
+			if (!(obj instanceof EventFieldId)) {
 				return false;
 			}
-			EventFieldIndex.EventFieldId other = (EventFieldIndex.EventFieldId)obj;
+			EventFieldId other = (EventFieldId) obj;
 			return eventTypeId.equals(other.eventTypeId) && fieldName.equals(other.fieldName);
 		}
 	}
