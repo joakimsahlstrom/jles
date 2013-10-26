@@ -202,6 +202,9 @@ public class EventStoreTest {
 		File file = new File(fileName);
 		int count = 0;
 		while (file.exists() && !file.delete() && count++ < 10) {
+			System.out.println("Failed to delete file: " + fileName + " retrying...");
+		}
+		if (file.exists()) {
 			System.out.println("Failed to delete file: " + fileName);
 		}
 		return true;

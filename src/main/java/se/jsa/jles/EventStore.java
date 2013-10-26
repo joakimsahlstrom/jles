@@ -68,7 +68,7 @@ public class EventStore {
 		LoadingIterable loadingIterable = new LoadingIterable();
 		for (Long eventTypeId : eventDefinitions.getEventTypeIds(eventTypes)) {
 			InternalTypedEventRepo typedEventRepo = new InternalTypedEventRepo(eventTypeId);
-			Iterable<EventId> iterable = typedEventRepo.getIterator(EventFieldConstraint.none());
+			Iterable<EventId> iterable = typedEventRepo.getIterator(EventFieldConstraint.noConstraint());
 			loadingIterable.register(iterable, typedEventRepo);
 		}
 		return loadingIterable;

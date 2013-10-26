@@ -19,6 +19,11 @@ public class SimpleEventFieldIndex implements EventFieldIndex {
 	}
 
 	@Override
+	public Long getEventTypeId() {
+		return eventFieldId.getEventTypeId();
+	}
+
+	@Override
 	public boolean indexes(long eventTypeId) {
 		return eventFieldId.getEventTypeId().equals(eventTypeId);
 	}

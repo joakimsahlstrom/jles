@@ -1,5 +1,6 @@
 package se.jsa.jles.internal;
 
+
 public interface EventFieldIndex {
 
 	class EventFieldId {
@@ -36,6 +37,7 @@ public interface EventFieldIndex {
 	}
 
 	public EventFieldId getFieldId();
+	public Long getEventTypeId();
 	public boolean indexes(long eventTypeId);
 
 	public Iterable<EventId> getIterable(EventFieldConstraint constraint);

@@ -18,18 +18,27 @@ import se.jsa.jles.internal.testevents.NonSerializableEvent;
 public class EventStoreSessionTest {
 
 	private final StreamBasedChannelFactory fileChannelFactory = new StreamBasedChannelFactory();
-	private EventStore eventStore = new EventStoreConfigurer(fileChannelFactory).configure();
+	private final EventStoreConfigurer configurer = new EventStoreConfigurer(fileChannelFactory);
+	private EventStore eventStore = configurer.configure();
 
 	@After
 	public void teardown() {
 		eventStore.stop();
-		delete("events.if");
-		delete("events.ef");
-		delete("events.def");
+		for (String fileName : configurer.getFiles()) {
+			delete(fileName);
+		}
 	}
 
-	private void delete(String fileName) {
-		new File(fileName).delete();
+	private boolean delete(String fileName) {
+		File file = new File(fileName);
+		int count = 0;
+		while (file.exists() && !file.delete() && count++ < 10) {
+			System.out.println("Failed to delete file: " + fileName + " retrying...");
+		}
+		if (file.exists()) {
+			System.out.println("Failed to delete file: " + fileName);
+		}
+		return true;
 	}
 
 	@Test

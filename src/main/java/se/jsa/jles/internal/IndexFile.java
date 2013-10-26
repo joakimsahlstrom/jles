@@ -120,4 +120,9 @@ public class IndexFile {
 		entryFile.close();
 	}
 
+	@Override
+	public String toString() {
+		return "IndexFile [eventKeyField=" + eventKeyField + ", entryFile=" + entryFile + "]";
+	}
+
 }

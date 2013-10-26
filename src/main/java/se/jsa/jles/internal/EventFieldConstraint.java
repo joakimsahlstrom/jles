@@ -16,7 +16,7 @@ public class EventFieldConstraint {
 		this.constraint = Objects.requireNonNull(constraint);
 	}
 
-	public static EventFieldConstraint none() {
+	public static EventFieldConstraint noConstraint() {
 		return new EventFieldConstraint();
 	}
 

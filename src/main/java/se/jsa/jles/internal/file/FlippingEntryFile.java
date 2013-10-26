@@ -38,7 +38,7 @@ public class FlippingEntryFile implements EntryFile {
 		try {
 			long result = entryReader.append(data, getOutputChannel());
 			if (safeWrite) {
-				close();
+				closeOutputStream();
 			}
 			return result;
 		} catch (IOException e) {
@@ -97,27 +97,34 @@ public class FlippingEntryFile implements EntryFile {
 
 	private void closeInputStream() {
 		if (inputChannel != null) {
-			try { inputChannel.close(); } catch (IOException e) { /*TODO: Logging*/ }
+			try { inputChannel.close(); } catch (IOException e) { System.out.println("Could not close file. Reason: " + e);/*TODO: Logging*/ }
 			inputChannel = null;
 		}
 		if (inputStream != null) {
-			try { inputStream.close(); } catch (IOException e) { /*TODO: Logging*/ }
+			try { inputStream.close(); } catch (IOException e) { System.out.println("Could not close file. Reason: " + e);/*TODO: Logging*/ }
 			inputStream = null;
 		}
 	}
 
 	private void closeOutputStream() {
 		if (outputChannel != null) {
-			try { outputChannel.close(); } catch (IOException e) { /*TODO: Logging*/ }
+			try { outputChannel.close(); } catch (IOException e) { System.out.println("Could not close file. Reason: " + e);/*TODO: Logging*/ }
 			outputChannel = null;
 		}
 		if (outputStream != null) {
 			try {
 				outputStream.flush();
 			} catch (IOException e) { /*TODO: Logging*/ }
-			try { outputStream.close(); } catch (IOException e) { /*TODO: Logging*/ }
+			try { outputStream.close(); } catch (IOException e) { System.out.println("Could not close file. Reason: " + e);/*TODO: Logging*/ }
 			outputStream = null;
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "FlippingEntryFile [fileName=" + fileName + ", entryReader="
+				+ entryReader + ", size=" + size + ", fileChannelFactory="
+				+ fileChannelFactory + ", safeWrite=" + safeWrite + "]";
 	}
 
 }

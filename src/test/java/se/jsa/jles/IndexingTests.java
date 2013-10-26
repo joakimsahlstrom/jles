@@ -1,6 +1,7 @@
 package se.jsa.jles;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -27,7 +28,15 @@ public class IndexingTests {
 
 	private final EventStoreConfigurer configurer = new EventStoreConfigurer(new StreamBasedChannelFactory())
 		.addIndexing(EmptyEvent3.class);
-	private final EventStore es = configurer.configure();
+	private EventStore es = configurer.configure();
+
+	@After
+	public void teardown() {
+		es.stop();
+		for (String fileName : configurer.getFiles()) {
+			delete(fileName);
+		}
+	}
 
 	@Test
 	public void canSupplyConstraint() throws Exception {
@@ -62,13 +71,48 @@ public class IndexingTests {
 		es.write(new TestEvent("a", 2, true));
 		es.stop();
 
-		EventStore es = configurer
+		es = configurer
 				.addIndexing(TestEvent.class)
 				.configure();
 		Iterator<Object> events = es.readEvents(TestEvent.class).iterator();
 		assertEquals(0L, ((TestEvent)events.next()).getId());
 		assertEquals(1L, ((TestEvent)events.next()).getId());
 		assertEquals(2L, ((TestEvent)events.next()).getId());
+		assertFalse(events.hasNext());
+	}
+
+	@Test
+	public void fieldIndexCanBeAddedAtLaterStartup() throws Exception {
+		es.write(new TestEvent("a", 0, true));
+		es.write(new TestEvent("a", 1, true));
+		es.write(new TestEvent("a", 2, true));
+		es.stop();
+
+		es = configurer
+				.addIndexing(TestEvent.class, "Id")
+				.configure();
+		Iterator<Object> events = es.readEvents(TestEvent.class, createMatch()).iterator();
+		assertEquals(1L, ((TestEvent)events.next()).getId());
+		assertFalse(events.hasNext());
+	}
+
+	private Match createMatch() {
+		return new Match() {
+			@Override
+			public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
+				return eventRepo.getIterator(EventFieldConstraint.create("Id", new FieldConstraint<Long>() {
+					@Override
+					public boolean isSatisfied(Long eventFieldValue) {
+						boolean res = Long.valueOf(1).equals(eventFieldValue);
+						return res;
+					}
+					@Override
+					public Class<Long> getFieldType() {
+						return Long.class;
+					}
+				}));
+			}
+		};
 	}
 
 	@Test
@@ -92,18 +136,18 @@ public class IndexingTests {
 		assertTrue("Indexed read should be at least a factor 10 faster under conditions given in this test case (" + indexedRead + " vs " + unindexedRead + ")", indexedRead * 10 < unindexedRead);
 	}
 
-	@After
-	public void teardown() {
-		es.stop();
-		for (String fileName : configurer.getFiles()) {
-			delete(fileName);
-		}
-	}
-
 	private boolean delete(String fileName) {
 		File file = new File(fileName);
 		int count = 0;
 		while (file.exists() && !file.delete() && count++ < 10) {
+			System.out.println("Failed to delete file: " + fileName + " retrying...");
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		if (file.exists()) {
 			System.out.println("Failed to delete file: " + fileName);
 		}
 		return true;
