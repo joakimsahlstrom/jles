@@ -95,7 +95,8 @@ public class IndexingTest {
 	private Indexing createIndexing(SimpleEventFieldIndex eventFieldIndex) {
 		return new Indexing(new IndexFile(new StorableLongField(), eventTypeIndexFile),
 				Collections.<Long, EventIndex>emptyMap(),
-				Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>singletonMap(eventFieldIndex.getFieldId(), eventFieldIndex));
+				Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>singletonMap(eventFieldIndex.getFieldId(), eventFieldIndex),
+				false);
 	}
 
 }

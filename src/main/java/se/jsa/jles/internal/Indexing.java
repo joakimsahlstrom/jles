@@ -3,6 +3,11 @@ package se.jsa.jles.internal;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import se.jsa.jles.internal.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.IndexFile.IndexKeyMatcher;
@@ -17,11 +22,17 @@ public class Indexing {
 	private final IndexFile eventTypeIndexFile;
 	private final Map<Long, EventIndex> eventIndicies;
 	private final Map<EventFieldId, EventFieldIndex> eventFieldIds;
+	private final IndexUpdater indexUpdater;
 
-	public Indexing(IndexFile eventTypeIndexFile, Map<Long, EventIndex> eventIndicies, Map<EventFieldId, EventFieldIndex> eventFieldIds) {
+	public Indexing(IndexFile eventTypeIndexFile, Map<Long, EventIndex> eventIndicies, Map<EventFieldId, EventFieldIndex> eventFieldIds, boolean multiThreadedEnvironment) {
 		this.eventTypeIndexFile = eventTypeIndexFile;
 		this.eventIndicies = Objects.requireNonNull(eventIndicies);
 		this.eventFieldIds = Objects.requireNonNull(eventFieldIds);
+		this.indexUpdater = createIndexUpdater(eventTypeIndexFile, eventIndicies, eventFieldIds, multiThreadedEnvironment);
+	}
+
+	private static IndexUpdater createIndexUpdater(IndexFile eventTypeIndexFile, Map<Long, EventIndex> eventIndicies, Map<EventFieldId, EventFieldIndex> eventFieldIds, boolean multiThreadedEnvironment) {
+		return multiThreadedEnvironment ? new ThreadsafeIndexUpdater(eventTypeIndexFile, eventIndicies, eventFieldIds) : new SimpleIndexUpdater(eventTypeIndexFile, eventIndicies, eventFieldIds);
 	}
 
 	public Iterable<EventId> readIndicies(Long eventTypeId, EventFieldConstraint constraint, TypedEventRepo typedEventRepo) {
@@ -45,15 +56,7 @@ public class Indexing {
 	}
 
 	public void onNewEvent(long eventId, EventSerializer ed, Object event) {
-		eventTypeIndexFile.writeIndex(eventId, ed.getEventTypeId());
-		if (eventIndicies.containsKey(ed.getEventTypeId())) {
-			eventIndicies.get(ed.getEventTypeId()).writeIndex(eventId);
-		}
-		for (EventFieldIndex efi : eventFieldIds.values()) {
-			if (efi.indexes(ed.getEventTypeId())) {
-				efi.onNewEvent(eventId, event);
-			}
-		}
+		indexUpdater.onNewEvent(eventId, ed, event);
 	}
 
 	public void stop() {
@@ -85,6 +88,108 @@ public class Indexing {
 		public boolean accepts(Object t) {
 			return acceptedTypes.contains(Long.class.cast(t));
 		}
+	}
+
+	private interface IndexUpdater {
+		void onNewEvent(long eventId, EventSerializer ed, Object event);
+		void stop();
+	}
+
+	private static class SimpleIndexUpdater implements IndexUpdater {
+		private final IndexFile eventTypeIndexFile;
+		private final Map<Long, EventIndex> eventIndicies;
+		private final Map<EventFieldId, EventFieldIndex> eventFieldIds;
+
+		public SimpleIndexUpdater(IndexFile eventTypeIndexFile, Map<Long, EventIndex> eventIndicies, Map<EventFieldId, EventFieldIndex> eventFieldIds) {
+			this.eventTypeIndexFile = Objects.requireNonNull(eventTypeIndexFile);
+			this.eventIndicies = Objects.requireNonNull(eventIndicies);
+			this.eventFieldIds = Objects.requireNonNull(eventFieldIds);
+		}
+
+		@Override
+		public void onNewEvent(long eventId, EventSerializer ed, Object event) {
+			eventTypeIndexFile.writeIndex(eventId, ed.getEventTypeId());
+			if (eventIndicies.containsKey(ed.getEventTypeId())) {
+				eventIndicies.get(ed.getEventTypeId()).writeIndex(eventId);
+			}
+			for (EventFieldIndex efi : eventFieldIds.values()) {
+				if (efi.indexes(ed.getEventTypeId())) {
+					efi.onNewEvent(eventId, event);
+				}
+			}
+		}
+
+		@Override
+		public void stop() {
+			/* do nothing */
+		}
+
+		@Override
+		public String toString() {
+			return "SimpleIndexUpdater [eventTypeIndexFile=" + eventTypeIndexFile + ", eventIndicies=" + eventIndicies + ", eventFieldIds=" + eventFieldIds + "]";
+		}
+	}
+
+	private static class ThreadsafeIndexUpdater implements IndexUpdater {
+		final IndexFile eventTypeIndexFile;
+		final Map<Long, EventIndex> eventIndicies;
+		final Map<EventFieldId, EventFieldIndex> eventFieldIds;
+		private final ExecutorService executor = Executors.newSingleThreadExecutor();
+
+		public ThreadsafeIndexUpdater(IndexFile eventTypeIndexFile, Map<Long, EventIndex> eventIndicies, Map<EventFieldId, EventFieldIndex> eventFieldIds) {
+			this.eventTypeIndexFile = Objects.requireNonNull(eventTypeIndexFile);
+			this.eventIndicies = Objects.requireNonNull(eventIndicies);
+			this.eventFieldIds = Objects.requireNonNull(eventFieldIds);
+		}
+
+		@Override
+		public void onNewEvent(long eventId, EventSerializer ed, Object event) {
+			Future<Void> future = executor.submit(new IndexUpdaterJob(eventId, ed, event));
+			try {
+				future.get();
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			} catch (ExecutionException e) {
+				Throwable cause = e.getCause();
+				if (cause instanceof RuntimeException) {
+					throw (RuntimeException) cause;
+				} else {
+					throw new RuntimeException("Could not execute indexing command", cause);
+				}
+			}
+		}
+
+		@Override
+		public void stop() {
+			executor.shutdown();
+		}
+
+		private class IndexUpdaterJob implements Callable<Void> {
+			private final long eventId;
+			private final EventSerializer ed;
+			private final Object event;
+
+			public IndexUpdaterJob(long eventId, EventSerializer ed, Object event) {
+				this.eventId = Objects.requireNonNull(eventId);
+				this.ed = Objects.requireNonNull(ed);
+				this.event = Objects.requireNonNull(event);
+			}
+
+			@Override
+			public Void call() throws Exception {
+				eventTypeIndexFile.writeIndex(eventId, ed.getEventTypeId());
+				if (eventIndicies.containsKey(ed.getEventTypeId())) {
+					eventIndicies.get(ed.getEventTypeId()).writeIndex(eventId);
+				}
+				for (EventFieldIndex efi : eventFieldIds.values()) {
+					if (efi.indexes(ed.getEventTypeId())) {
+						efi.onNewEvent(eventId, event);
+					}
+				}
+				return null;
+			}
+		}
+
 	}
 
 }

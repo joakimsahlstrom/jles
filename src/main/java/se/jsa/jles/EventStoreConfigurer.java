@@ -56,11 +56,6 @@ public class EventStoreConfigurer {
 		return this;
 	}
 
-	public EventStoreConfigurer testableEventDefinitions() {
-		this.useFileBasedEventDefinitions = false;
-		return this;
-	}
-
 	public EventStoreConfigurer multiThreadedEnvironment() {
 		this.multiThreadedEnvironment = true;
 		return this;
@@ -71,13 +66,18 @@ public class EventStoreConfigurer {
 		return this;
 	}
 
+	public EventStoreConfigurer testableEventDefinitions() {
+		this.useFileBasedEventDefinitions = false;
+		return this;
+	}
+
 	public EventStore configure() {
 		EntryFile eventTypeIndexFile = createEntryFile("events.if", fileChannelFactory);
 		EventFile eventFile = new EventFile(createEntryFile("events.ef", fileChannelFactory));
 		EventDefinitions eventDefinitions = createEventDefinitions();
 		Indexing indexing = createIndexing(eventTypeIndexFile, eventDefinitions, eventFile);
 
-		EventStore result = new EventStore(eventFile, indexing, eventDefinitions, multiThreadedEnvironment);
+		EventStore result = new EventStore(eventFile, indexing, eventDefinitions);
 		return result;
 	}
 
@@ -97,7 +97,7 @@ public class EventStoreConfigurer {
 		HashMap<Long, EventIndex> eventIndicies = createEventIndicies(eventDefinitions, eventIndexPreparer);
 		HashMap<EventFieldIndex.EventFieldId, EventFieldIndex> eventFieldIndicies = createEventFieldIndicies(eventDefinitions, eventIndexPreparer);
 
-		return new Indexing(eventTypeIndex, eventIndicies, eventFieldIndicies);
+		return new Indexing(eventTypeIndex, eventIndicies, eventFieldIndicies, multiThreadedEnvironment);
 	}
 
 	private HashMap<EventFieldIndex.EventFieldId, EventFieldIndex> createEventFieldIndicies(EventDefinitions eventDefinitions, EventIndexPreparer eventIndexPreparer) {
@@ -144,11 +144,13 @@ public class EventStoreConfigurer {
 		private final IndexFile eventTypeIndex;
 		private final EventFile eventFile;
 		private final EventDefinitions eventDefinitions;
+
 		public EventIndexPreparer(IndexFile eventTypeIndex, EventDefinitions eventDefinitions, EventFile eventFile) {
 			this.eventTypeIndex = Objects.requireNonNull(eventTypeIndex);
 			this.eventFile = Objects.requireNonNull(eventFile);
 			this.eventDefinitions = Objects.requireNonNull(eventDefinitions);
 		}
+
 		public void prepare(EventIndex index) {
 			Iterator<EventId> existingIndicies = index.readIndicies().iterator();
 			Iterator<EventId> sourceIndicies = eventTypeIndex.readIndicies(new Indexing.EventTypeMatcher(index.getEventTypeId())).iterator();
@@ -164,6 +166,7 @@ public class EventStoreConfigurer {
 				index.writeIndex(sourceIndicies.next().getEventId());
 			}
 		}
+
 		public void prepare(EventFieldIndex eventFieldIndex) {
 			Iterator<EventId> existingIndicies = eventFieldIndex.getIterable(EventFieldConstraint.noConstraint()).iterator();
 			Iterator<EventId> sourceIndicies = eventTypeIndex.readIndicies(new Indexing.EventTypeMatcher(eventFieldIndex.getEventTypeId())).iterator();

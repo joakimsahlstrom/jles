@@ -42,20 +42,19 @@ public class EventStore {
 
 	EventStore(EventFile eventFile, EntryFile eventTypeIndexFile) {
 		this(eventFile,
-			 new Indexing(new IndexFile(new StorableLongField(), eventTypeIndexFile), Collections.<Long, EventIndex>emptyMap(), Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>emptyMap()),
-			 new MappingEventDefinitions(new MemoryBasedEventDefinitions()),
-			 false);
+			 new Indexing(new IndexFile(new StorableLongField(), eventTypeIndexFile), Collections.<Long, EventIndex>emptyMap(), Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>emptyMap(), false),
+			 new MappingEventDefinitions(new MemoryBasedEventDefinitions()));
 	}
 
-	EventStore(EventFile eventFile, Indexing indexing, EventDefinitions eventDefinitions, boolean multithreadedEnvironment) {
+	EventStore(EventFile eventFile, Indexing indexing, EventDefinitions eventDefinitions) {
 		this.eventFile = eventFile;
 		this.indexing = indexing;
 		this.eventDefinitions = eventDefinitions;
-		this.eventWriter = createEventWriter(eventFile, indexing, multithreadedEnvironment);
+		this.eventWriter = createEventWriter(eventFile, indexing);
 	}
 
-	private static EventWriter createEventWriter(EventFile eventFile, Indexing indexing, boolean multithreadedEnvironment) {
-		return multithreadedEnvironment ? new ThreadsafeEventWriter(eventFile, indexing) : new SimpleEventWriter(eventFile, indexing);
+	private static EventWriter createEventWriter(EventFile eventFile, Indexing indexing) {
+		return new SimpleEventWriter(eventFile, indexing);
 	}
 
 	public void write(Object event) {
@@ -134,6 +133,7 @@ public class EventStore {
 		}
 	}
 
+	// Is this really necessary or should the thread safing be done in Indexing instead?
 	private interface EventWriter {
 		void onNewEvent(Object event, EventSerializer ed);
 		void stop();
@@ -165,6 +165,8 @@ public class EventStore {
 		}
 	}
 
+	/* Remove this once sure that it is not necessary to maintain correct state in a multithreaded environment */
+	@SuppressWarnings("unused")
 	private static class ThreadsafeEventWriter implements EventWriter {
 		final EventFile eventFile;
 		final Indexing indexing;
