@@ -21,13 +21,13 @@ import se.jsa.jles.internal.util.Objects;
 public class Indexing {
 	private final IndexFile eventTypeIndexFile;
 	private final Map<Long, EventIndex> eventIndicies;
-	private final Map<EventFieldId, EventFieldIndex> eventFieldIds;
+	private final Map<EventFieldId, EventFieldIndex> eventFieldIndicies;
 	private final IndexUpdater indexUpdater;
 
 	public Indexing(IndexFile eventTypeIndexFile, Map<Long, EventIndex> eventIndicies, Map<EventFieldId, EventFieldIndex> eventFieldIds, boolean multiThreadedEnvironment) {
 		this.eventTypeIndexFile = eventTypeIndexFile;
 		this.eventIndicies = Objects.requireNonNull(eventIndicies);
-		this.eventFieldIds = Objects.requireNonNull(eventFieldIds);
+		this.eventFieldIndicies = Objects.requireNonNull(eventFieldIds);
 		this.indexUpdater = createIndexUpdater(eventTypeIndexFile, eventIndicies, eventFieldIds, multiThreadedEnvironment);
 	}
 
@@ -40,8 +40,8 @@ public class Indexing {
 			return getIndexEntryIterable(eventTypeId);
 		}
 		EventFieldId eventFieldId = new EventFieldId(eventTypeId, constraint.getFieldName());
-		if (eventFieldIds.containsKey(eventFieldId)) {
-			return eventFieldIds.get(eventFieldId).getIterable(constraint);
+		if (eventFieldIndicies.containsKey(eventFieldId)) {
+			return eventFieldIndicies.get(eventFieldId).getIterable(constraint);
 		} else {
 			Iterable<EventId> baseIter = getIndexEntryIterable(eventTypeId);
 			return new FallbackFilteringEventIdIterable(baseIter, constraint, typedEventRepo);
@@ -59,19 +59,26 @@ public class Indexing {
 		indexUpdater.onNewEvent(eventId, ed, event);
 	}
 
+	public IndexType getIndexing(Long eventTypeId, String fieldName) {
+		if (eventFieldIndicies.containsKey(new EventFieldId(eventTypeId, fieldName))) {
+			return IndexType.SIMPLE; // Advanced indexing not yet supported
+		}
+		return IndexType.NONE;
+	}
+
 	public void stop() {
 		eventTypeIndexFile.close();
 		for (EventIndex ei : eventIndicies.values()) {
 			ei.close();
 		}
-		for (EventFieldIndex efi : eventFieldIds.values()) {
+		for (EventFieldIndex efi : eventFieldIndicies.values()) {
 			efi.close();
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "Indexing [eventTypeIndexFile=" + eventTypeIndexFile + ", eventIndicies=" + eventIndicies + ", eventFieldIds=" + eventFieldIds + "]";
+		return "Indexing [eventTypeIndexFile=" + eventTypeIndexFile + ", eventIndicies=" + eventIndicies + ", eventFieldIds=" + eventFieldIndicies + "]";
 	}
 
 	// ----- Helper classes -----

@@ -129,7 +129,7 @@ public class EventStore {
 
 		@Override
 		public IndexType getIndexing(String fieldName) {
-			return fieldName.equals("First") ? IndexType.SIMPLE : IndexType.NONE; // TODO: Fix this
+			return indexing.getIndexing(eventTypeId, fieldName);
 		}
 	}
 
