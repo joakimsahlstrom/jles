@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventFieldConstraint;
@@ -24,6 +25,7 @@ import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.PersistingEventDefinitions;
 import se.jsa.jles.internal.fields.StorableLongField;
 import se.jsa.jles.internal.file.FlippingEntryFile;
+import se.jsa.jles.internal.file.ThreadSafeEntryFile;
 import se.jsa.jles.internal.util.Objects;
 
 /**
@@ -35,6 +37,7 @@ public class EventStoreConfigurer {
 	private final Set<Class<?>> indexedEventTypes = new HashSet<Class<?>>();
 	private final Set<EventFieldIndexConfiguration> indexedEventFields = new HashSet<EventFieldIndexConfiguration>();
 	private boolean useFileBasedEventDefinitions;
+	private boolean multiThreadedEnvironment;
 
 	private final List<String> files = new ArrayList<String>();
 
@@ -58,13 +61,23 @@ public class EventStoreConfigurer {
 		return this;
 	}
 
+	public EventStoreConfigurer multiThreadedEnvironment() {
+		this.multiThreadedEnvironment = true;
+		return this;
+	}
+
+	public EventStoreConfigurer singleThreadedEnvironment() {
+		this.multiThreadedEnvironment = false;
+		return this;
+	}
+
 	public EventStore configure() {
-		FlippingEntryFile eventTypeIndexFile = createEntryFile("events.if", fileChannelFactory);
+		EntryFile eventTypeIndexFile = createEntryFile("events.if", fileChannelFactory);
 		EventFile eventFile = new EventFile(createEntryFile("events.ef", fileChannelFactory));
 		EventDefinitions eventDefinitions = createEventDefinitions();
 		Indexing indexing = createIndexing(eventTypeIndexFile, eventDefinitions, eventFile);
 
-		EventStore result = new EventStore(eventFile, indexing, eventDefinitions);
+		EventStore result = new EventStore(eventFile, indexing, eventDefinitions, multiThreadedEnvironment);
 		return result;
 	}
 
@@ -78,7 +91,7 @@ public class EventStoreConfigurer {
 		}
 	}
 
-	private Indexing createIndexing(FlippingEntryFile eventTypeIndexFile, EventDefinitions eventDefinitions, EventFile eventFile) {
+	private Indexing createIndexing(EntryFile eventTypeIndexFile, EventDefinitions eventDefinitions, EventFile eventFile) {
 		IndexFile eventTypeIndex = new IndexFile(new StorableLongField(), eventTypeIndexFile);
 		EventIndexPreparer eventIndexPreparer = new EventIndexPreparer(eventTypeIndex, eventDefinitions, eventFile);
 		HashMap<Long, EventIndex> eventIndicies = createEventIndicies(eventDefinitions, eventIndexPreparer);
@@ -114,8 +127,11 @@ public class EventStoreConfigurer {
 		return eventIndicies;
 	}
 
-	private FlippingEntryFile createEntryFile(String fileName, FileChannelFactory fileChannelFactory) {
-		FlippingEntryFile flippingEntryFile = new FlippingEntryFile(fileName, fileChannelFactory);
+	private EntryFile createEntryFile(String fileName, FileChannelFactory fileChannelFactory) {
+		EntryFile flippingEntryFile = new FlippingEntryFile(fileName, fileChannelFactory);
+		if (multiThreadedEnvironment) {
+			flippingEntryFile = new ThreadSafeEntryFile(flippingEntryFile);
+		}
 		files.add(fileName);
 		return flippingEntryFile;
 	}

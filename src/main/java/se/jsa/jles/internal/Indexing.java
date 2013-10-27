@@ -66,6 +66,13 @@ public class Indexing {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "Indexing [eventTypeIndexFile=" + eventTypeIndexFile + ", eventIndicies=" + eventIndicies + ", eventFieldIds=" + eventFieldIds + "]";
+	}
+
+	// ----- Helper classes -----
+
 	public static class EventTypeMatcher implements IndexKeyMatcher {
 		private final Set<Long> acceptedTypes;
 		public EventTypeMatcher(Set<Long> acceptedEventTypes) {

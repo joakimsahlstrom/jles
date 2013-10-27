@@ -2,6 +2,7 @@ package se.jsa.jles.internal;
 
 import se.jsa.jles.internal.util.Objects;
 
+//TODO: move fieldName to FieldConstraint and delete this file?
 public class EventFieldConstraint {
 	private final String fieldName;
 	private final FieldConstraint<?> constraint;
