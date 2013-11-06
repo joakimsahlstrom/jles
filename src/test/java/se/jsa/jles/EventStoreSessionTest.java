@@ -18,7 +18,7 @@ import se.jsa.jles.internal.testevents.NonSerializableEvent;
 public class EventStoreSessionTest {
 
 	private final StreamBasedChannelFactory fileChannelFactory = new StreamBasedChannelFactory();
-	private final EventStoreConfigurer configurer = new EventStoreConfigurer(fileChannelFactory);
+	private final EventStoreConfigurer configurer = EventStoreConfigurer.createFileBasedConfigurer(fileChannelFactory);
 	private EventStore eventStore = configurer.configure();
 
 	@After
@@ -50,7 +50,7 @@ public class EventStoreSessionTest {
 		eventStore.write(e2);
 
 		eventStore.stop();
-		eventStore = new EventStoreConfigurer(fileChannelFactory).configure();
+		eventStore = configurer.configure();
 
 		List<Object> events = eventStore.collectEvents(NonSerializableEvent.class);
 		assertEquals(2, events.size());

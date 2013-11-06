@@ -214,6 +214,9 @@ public class Indexing {
 				this.event = Objects.requireNonNull(event);
 			}
 
+			/**
+			 * The critical section
+			 */
 			@Override
 			public Void call() throws Exception {
 				eventTypeIndexFile.writeIndex(eventId, ed.getEventTypeId());

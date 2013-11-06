@@ -4,40 +4,31 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.After;
 import org.junit.Test;
 
 import se.jsa.jles.EventStoreTest.EmptyEvent;
 import se.jsa.jles.EventStoreTest.EmptyEvent2;
 import se.jsa.jles.EventStoreTest.EmptyEvent3;
 import se.jsa.jles.EventStoreTest.TestEvent;
-import se.jsa.jles.internal.FieldConstraint;
-import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.Constraint;
+import se.jsa.jles.internal.EventId;
+import se.jsa.jles.internal.FieldConstraint;
 import se.jsa.jles.internal.TypedEventRepo;
-import se.jsa.jles.internal.file.StreamBasedChannelFactory;
 import se.jsa.jles.internal.testevents.ObjectTestEvent;
 
 public class IndexingTests {
 
-	private final EventStoreConfigurer configurer = new EventStoreConfigurer(new StreamBasedChannelFactory())
-		.addIndexing(EmptyEvent3.class);
-	private EventStore es = configurer.configure();
+	private final EventStoreConfigurer configurer = EventStoreConfigurer
+			.createMemoryOnlyConfigurer()
+			.addIndexing(EmptyEvent3.class);
 
-	@After
-	public void teardown() {
-		es.stop();
-		for (String fileName : configurer.getFiles()) {
-			delete(fileName);
-		}
-	}
+	private EventStore es = configurer.configure();
 
 	@Test
 	public void canSupplyConstraint() throws Exception {
@@ -170,23 +161,6 @@ public class IndexingTests {
 		long unindexedRead = end2 - start2;
 		long indexedRead = end3 - start3;
 		assertTrue("Indexed read should be at least a factor 10 faster under conditions given in this test case (" + indexedRead + " vs " + unindexedRead + ")", indexedRead * 10 < unindexedRead);
-	}
-
-	private boolean delete(String fileName) {
-		File file = new File(fileName);
-		int count = 0;
-		while (file.exists() && !file.delete() && count++ < 10) {
-			System.out.println("Failed to delete file: " + fileName + " retrying...");
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		if (file.exists()) {
-			System.out.println("Failed to delete file: " + fileName);
-		}
-		return true;
 	}
 
 	private static Random random = new Random(System.nanoTime());

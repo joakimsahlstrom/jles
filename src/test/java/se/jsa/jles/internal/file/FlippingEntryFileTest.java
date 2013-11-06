@@ -1,38 +1,33 @@
 package se.jsa.jles.internal.file;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
-import java.nio.ByteBuffer;
 
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Test;
+import se.jsa.jles.internal.EntryFile;
 
 
 
-public class FlippingEntryFileTest {
-	private final FlippingEntryFile fef = new FlippingEntryFile("test.ef", new StreamBasedChannelFactory());
+public class FlippingEntryFileTest extends EntryFileContract {
 
-	@After
-	public void teardown() {
-		fef.close();
-		new File("test.ef").delete();
+	StreamBasedChannelFactory fileChannelFactory = new StreamBasedChannelFactory();
+
+	@Override
+	public EntryFile createEntryFile() {
+		deleteFile();
+		return new FlippingEntryFile("testEntryFile.ef", fileChannelFactory);
 	}
 
-	@Test
-	@Ignore
-	public void canWriteElement() throws Exception {
-		fef.append(ByteBuffer.allocate(1));
-		fef.append(ByteBuffer.allocate(1));
+	@Override
+	public void closeEntryFile(EntryFile entryFile) {
+		fileChannelFactory.close();
+		entryFile.close();
+		deleteFile();
 	}
 
-	@Test
-	public void canCleanup() throws Exception {
-		fef.append(ByteBuffer.allocate(1));
-		fef.append(ByteBuffer.allocate(1));
-		fef.close();
-		assertTrue(new File("test.ef").delete());
+	private void deleteFile() {
+		File file = new File("testEntryFile.ef");
+		while (file.exists()) {
+			file.delete();
+		}
 	}
 
 }

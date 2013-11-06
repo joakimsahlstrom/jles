@@ -3,6 +3,7 @@ package se.jsa.jles.internal.file;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 import se.jsa.jles.FileChannelFactory;
 
@@ -30,6 +31,23 @@ public class StreamBasedChannelFactory implements FileChannelFactory {
 			return fileInputStream;
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	public void close() {
+		if (fileOutputStream != null) {
+			try {
+				fileOutputStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		if (fileInputStream != null) {
+			try {
+				fileInputStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
