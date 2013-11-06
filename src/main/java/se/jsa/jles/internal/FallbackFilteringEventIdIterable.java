@@ -8,10 +8,10 @@ import se.jsa.jles.internal.util.Objects;
 public class FallbackFilteringEventIdIterable implements Iterable<EventId> {
 
 	private final Iterable<EventId> baseIter;
-	private final EventFieldConstraint constraint;
+	private final FieldConstraint constraint;
 	private final TypedEventRepo typedEventRepo;
 
-	public FallbackFilteringEventIdIterable(Iterable<EventId> baseIter, EventFieldConstraint constraint, TypedEventRepo typedEventRepo) {
+	public FallbackFilteringEventIdIterable(Iterable<EventId> baseIter, FieldConstraint constraint, TypedEventRepo typedEventRepo) {
 		this.baseIter = Objects.requireNonNull(baseIter);
 		this.constraint = Objects.requireNonNull(constraint);
 		this.typedEventRepo = Objects.requireNonNull(typedEventRepo);
@@ -24,12 +24,12 @@ public class FallbackFilteringEventIdIterable implements Iterable<EventId> {
 
 	private static class FallbackFilteringEventIdIterator implements Iterator<EventId> {
 		private final Iterator<EventId> iterator;
-		private final EventFieldConstraint constraint;
+		private final FieldConstraint constraint;
 		private final TypedEventRepo typedEventRepo;
 
 		private EventId next = null;
 
-		public FallbackFilteringEventIdIterator(Iterator<EventId> iterator, EventFieldConstraint constraint, TypedEventRepo typedEventRepo) {
+		public FallbackFilteringEventIdIterator(Iterator<EventId> iterator, FieldConstraint constraint, TypedEventRepo typedEventRepo) {
 			this.iterator = Objects.requireNonNull(iterator);
 			this.constraint = Objects.requireNonNull(constraint);
 			this.typedEventRepo = Objects.requireNonNull(typedEventRepo);

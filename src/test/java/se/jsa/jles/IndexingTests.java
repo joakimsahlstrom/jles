@@ -18,9 +18,9 @@ import se.jsa.jles.EventStoreTest.EmptyEvent;
 import se.jsa.jles.EventStoreTest.EmptyEvent2;
 import se.jsa.jles.EventStoreTest.EmptyEvent3;
 import se.jsa.jles.EventStoreTest.TestEvent;
-import se.jsa.jles.internal.EventFieldConstraint;
-import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.FieldConstraint;
+import se.jsa.jles.internal.EventId;
+import se.jsa.jles.internal.Constraint;
 import se.jsa.jles.internal.TypedEventRepo;
 import se.jsa.jles.internal.file.StreamBasedChannelFactory;
 import se.jsa.jles.internal.testevents.ObjectTestEvent;
@@ -48,7 +48,7 @@ public class IndexingTests {
 			es.readEvents(TestEvent.class, new Match() {
 				@Override
 				public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
-					return eventRepo.getIterator(EventFieldConstraint.create("Id", new FieldConstraint<Long>() {
+					return eventRepo.getIterator(FieldConstraint.create("Id", new Constraint<Long>() {
 						@Override
 						public boolean isSatisfied(Long eventFieldValue) {
 							boolean res = Long.valueOf(1).equals(eventFieldValue);
@@ -118,7 +118,7 @@ public class IndexingTests {
 		return new Match() {
 			@Override
 			public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
-				return eventRepo.getIterator(EventFieldConstraint.create("Id", new FieldConstraint<Long>() {
+				return eventRepo.getIterator(FieldConstraint.create("Id", new Constraint<Long>() {
 					@Override
 					public boolean isSatisfied(Long eventFieldValue) {
 						boolean res = Long.valueOf(1).equals(eventFieldValue);
@@ -137,7 +137,7 @@ public class IndexingTests {
 		return new Match() {
 			@Override
 			public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
-				return eventRepo.getIterator(EventFieldConstraint.create("First", new FieldConstraint<Boolean>() {
+				return eventRepo.getIterator(FieldConstraint.create("First", new Constraint<Boolean>() {
 					@Override
 					public boolean isSatisfied(Boolean eventFieldValue) {
 						return eventFieldValue == null;

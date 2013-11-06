@@ -40,7 +40,7 @@ public class IndexingTest {
 	private final Set<Long> eventTypeIds = eventDefinitions.getEventTypeIds(TestEvent.class);
 	private final Long eventTypeId = eventTypeIds.iterator().next();
 
-	private class EqualsLongConstraint extends FieldConstraint<Long> {
+	private class EqualsLongConstraint extends Constraint<Long> {
 		private final Long value;
 
 		public EqualsLongConstraint(Long value) {
@@ -66,7 +66,7 @@ public class IndexingTest {
 			indexing.onNewEvent(0, eventDefinitions.getEventSerializer(te), te);
 		}
 
-		assertContainsEvents(eventFieldIndex.getIterable(EventFieldConstraint.create("Id", new EqualsLongConstraint(0L))), 0L, 2L);
+		assertContainsEvents(eventFieldIndex.getIterable(FieldConstraint.create("Id", new EqualsLongConstraint(0L))), 0L, 2L);
 	}
 
 	@Test
@@ -81,7 +81,7 @@ public class IndexingTest {
 		// recreate event field index
 		eventFieldIndex = new SimpleEventFieldIndex(eventTypeId, eventDefinitions.getEventField(eventTypeId, "Id"), fieldIndexFile);
 
-		assertContainsEvents(eventFieldIndex.getIterable(EventFieldConstraint.create("Id", new EqualsLongConstraint(0L))), 0L, 2L);
+		assertContainsEvents(eventFieldIndex.getIterable(FieldConstraint.create("Id", new EqualsLongConstraint(0L))), 0L, 2L);
 	}
 
 	private void assertContainsEvents(Iterable<EventId> iterable, long... ids) {

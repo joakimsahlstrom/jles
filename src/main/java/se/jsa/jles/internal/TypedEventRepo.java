@@ -2,7 +2,7 @@ package se.jsa.jles.internal;
 
 public interface TypedEventRepo {
 
-	public Iterable<EventId> getIterator(EventFieldConstraint constraint);
+	public Iterable<EventId> getIterator(FieldConstraint constraint);
 
 	public Object readEvent(EventId eventIndex);
 

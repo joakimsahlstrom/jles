@@ -40,7 +40,7 @@ public interface EventFieldIndex {
 	public Long getEventTypeId();
 	public boolean indexes(long eventTypeId);
 
-	public Iterable<EventId> getIterable(EventFieldConstraint constraint);
+	public Iterable<EventId> getIterable(FieldConstraint constraint);
 	public void onNewEvent(long eventId, Object event);
 
 	public void close();

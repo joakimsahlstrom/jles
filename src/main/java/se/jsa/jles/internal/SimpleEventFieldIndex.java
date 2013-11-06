@@ -29,7 +29,7 @@ public class SimpleEventFieldIndex implements EventFieldIndex {
 	}
 
 	@Override
-	public Iterable<EventId> getIterable(final EventFieldConstraint constraint) {
+	public Iterable<EventId> getIterable(final FieldConstraint constraint) {
 		return entriesFile.readIndicies(new IndexKeyMatcher() {
 			@Override
 			public boolean accepts(Object t) {

@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import se.jsa.jles.EventStore;
 import se.jsa.jles.internal.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.IndexFile.IndexKeyMatcher;
 import se.jsa.jles.internal.util.Objects;
@@ -24,6 +25,12 @@ public class Indexing {
 	private final Map<EventFieldId, EventFieldIndex> eventFieldIndicies;
 	private final IndexUpdater indexUpdater;
 
+	/**
+	 * @param eventTypeIndexFile The {@link IndexFile} containing the main mapping data between event file indexes and the event types
+	 * @param eventIndicies A Map with the {@link EventIndex}es that should exist for corresponding event type (ids)
+	 * @param eventFieldIds A Map with the {@link EventFieldIndex}es that should exist for corresponding event fields
+	 * @param multiThreadedEnvironment <code>true</code> if this {@link Indexing} is living in a multithreaded environment (and thus must be thread safe)
+	 */
 	public Indexing(IndexFile eventTypeIndexFile, Map<Long, EventIndex> eventIndicies, Map<EventFieldId, EventFieldIndex> eventFieldIds, boolean multiThreadedEnvironment) {
 		this.eventTypeIndexFile = eventTypeIndexFile;
 		this.eventIndicies = Objects.requireNonNull(eventIndicies);
@@ -35,7 +42,15 @@ public class Indexing {
 		return multiThreadedEnvironment ? new ThreadsafeIndexUpdater(eventTypeIndexFile, eventIndicies, eventFieldIds) : new SimpleIndexUpdater(eventTypeIndexFile, eventIndicies, eventFieldIds);
 	}
 
-	public Iterable<EventId> readIndicies(Long eventTypeId, EventFieldConstraint constraint, TypedEventRepo typedEventRepo) {
+	/**
+	 * Read all indexes that for the given event type that match the given constraint from the given typed event repo
+	 * This method will attempt to find the best possible way of retrieving index data given the indexes that exists in this {@link Indexing}
+	 * @param eventTypeId {@link Long} event type id
+	 * @param constraint {@link FieldConstraint}
+	 * @param typedEventRepo {@link TypedEventRepo} where event data can be read from
+	 * @return
+	 */
+	public Iterable<EventId> readIndicies(Long eventTypeId, FieldConstraint constraint, TypedEventRepo typedEventRepo) {
 		if (!constraint.hasConstraint()) {
 			return getIndexEntryIterable(eventTypeId);
 		}
@@ -55,10 +70,21 @@ public class Indexing {
 		return eventTypeIndexFile.readIndicies(new EventTypeMatcher(eventTypeId));
 	}
 
+	/**
+	 * A new event has entered the surrounding {@link EventStore}, let this {@link Indexing} react appropriately
+	 * @param eventId <code>long</code>
+	 * @param ed The {@link EventSerializer} that is used for creating serialized data for given event type
+	 * @param event The event that has entered the {@link EventStore}
+	 */
 	public void onNewEvent(long eventId, EventSerializer ed, Object event) {
 		indexUpdater.onNewEvent(eventId, ed, event);
 	}
 
+	/**
+	 * @param eventTypeId {@link Long} event type id
+	 * @param fieldName String
+	 * @return The {@link IndexType} used for indexing the given field for the given event type
+	 */
 	public IndexType getIndexing(Long eventTypeId, String fieldName) {
 		if (eventFieldIndicies.containsKey(new EventFieldId(eventTypeId, fieldName))) {
 			return IndexType.SIMPLE; // Advanced indexing not yet supported
@@ -66,6 +92,9 @@ public class Indexing {
 		return IndexType.NONE;
 	}
 
+	/**
+	 * Stops this {@link Indexing} and closes all associated files. This indexing is no longer usable after this method has been called.
+	 */
 	public void stop() {
 		eventTypeIndexFile.close();
 		for (EventIndex ei : eventIndicies.values()) {
@@ -76,6 +105,9 @@ public class Indexing {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String toString() {
 		return "Indexing [eventTypeIndexFile=" + eventTypeIndexFile + ", eventIndicies=" + eventIndicies + ", eventFieldIds=" + eventFieldIndicies + "]";

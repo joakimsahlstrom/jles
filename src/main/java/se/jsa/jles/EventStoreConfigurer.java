@@ -10,7 +10,7 @@ import java.util.Set;
 import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventDeserializer;
-import se.jsa.jles.internal.EventFieldConstraint;
+import se.jsa.jles.internal.FieldConstraint;
 import se.jsa.jles.internal.EventFieldIndex;
 import se.jsa.jles.internal.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.EventFile;
@@ -168,7 +168,7 @@ public class EventStoreConfigurer {
 		}
 
 		public void prepare(EventFieldIndex eventFieldIndex) {
-			Iterator<EventId> existingIndicies = eventFieldIndex.getIterable(EventFieldConstraint.noConstraint()).iterator();
+			Iterator<EventId> existingIndicies = eventFieldIndex.getIterable(FieldConstraint.noConstraint()).iterator();
 			Iterator<EventId> sourceIndicies = eventTypeIndex.readIndicies(new Indexing.EventTypeMatcher(eventFieldIndex.getEventTypeId())).iterator();
 			while (existingIndicies.hasNext()) {
 				if (!sourceIndicies.hasNext()) {

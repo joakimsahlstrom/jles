@@ -15,8 +15,8 @@ import se.jsa.jles.internal.util.Objects;
 public class ConventionbasedEventResolver implements EventResolver {
 
 	private final Set<Class<?>> knownTypes = new HashSet<Class<?>>();
-	private final Map<Class<?>, Method> eventToGetSerializableEventMethodMap = new HashMap<Class<?>, Method>();
 	private final Map<Class<?>, Set<Class<?>>> eventToSerializableEventMap = new HashMap<Class<?>, Set<Class<?>>>();
+	private final Map<Class<?>, Method> eventToGetSerializableEventMethodMap = new HashMap<Class<?>, Method>();
 	private final Map<Class<?>, Method> serializableEventToAsEventMethodMap = new HashMap<Class<?>, Method>();
 
 	@Override
