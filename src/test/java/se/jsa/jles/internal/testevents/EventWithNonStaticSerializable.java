@@ -5,7 +5,6 @@ import java.util.Date;
 import se.jsa.jles.internal.util.Objects;
 
 public class EventWithNonStaticSerializable {
-
 	private final Name name;
 	private final Date date;
 

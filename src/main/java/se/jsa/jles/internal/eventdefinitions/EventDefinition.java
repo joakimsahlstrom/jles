@@ -88,6 +88,28 @@ class EventDefinition implements EventSerializer, EventDeserializer {
 		return getEventType().cast(instance);
 	}
 
+	@Override
+	public Object deserializeEventField(ByteBuffer buffer, EventField eventField) {
+		verifyEventTypeId(buffer.getLong());
+		buffer.position(12);
+
+		try {
+			NullFieldMap nullFieldMap = NullFieldMap.buildFromBuffer(fields, buffer);
+			for (EventField pf : fields) {
+				if (!nullFieldMap.isFieldNull(pf)) {
+					if (pf.equals(eventField)) {
+						return pf.readFromBuffer(buffer);
+					} else {
+						pf.readFromBuffer(buffer);
+					}
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Could not deserialize type: " + eventType + ". Found constructors: " + Arrays.asList(eventType.getConstructors()), e);
+		}
+		return null; // field not found above => is null
+	}
+
 	public EventField getField(String fieldName) {
 		for (EventField ef : fields) {
 			if (ef.getPropertyName().equals(fieldName)) {

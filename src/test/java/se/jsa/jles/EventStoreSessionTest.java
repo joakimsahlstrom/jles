@@ -52,7 +52,7 @@ public class EventStoreSessionTest {
 		eventStore.stop();
 		eventStore = configurer.configure();
 
-		List<Object> events = eventStore.collectEvents(NonSerializableEvent.class);
+		List<Object> events = eventStore.collectEvents(EventQuery.builder().query(NonSerializableEvent.class).build());
 		assertEquals(2, events.size());
 		assertTrue(events.get(0) instanceof NonSerializableEvent);
 		assertTrue(events.get(1) instanceof NonSerializableEvent);
@@ -63,7 +63,7 @@ public class EventStoreSessionTest {
 		assertEquals("2", 	nse2.getName().toString());
 		assertEquals(2, 	nse2.getDate().getTime());
 
-		assertEquals(3, eventStore.collectEvents().size());
+		assertEquals(3, eventStore.collectEvents(EventQuery.builder().query(NonSerializableEvent.class).query(EmptyEvent.class).build()).size());
 	}
 
 }

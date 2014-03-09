@@ -20,6 +20,7 @@ import org.junit.runners.Parameterized.Parameters;
 import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventFile;
 import se.jsa.jles.internal.PerformanceTest;
+import se.jsa.jles.internal.PerformanceTest.IntegerStringEvent;
 import se.jsa.jles.internal.file.CachingEntryFile;
 import se.jsa.jles.internal.file.FlippingEntryFile;
 import se.jsa.jles.internal.file.StreamBasedChannelFactory;
@@ -212,7 +213,7 @@ public class EventStoreTest {
 
 	@Test
 	public void emptyListWhenNoPresentEvents() throws Exception {
-		assertTrue(eventStore.collectEvents(TestEvent.class).isEmpty());
+		assertTrue(eventStore.collectEvents(EventQuery.query(TestEvent.class)).isEmpty());
 	}
 
 	@Test
@@ -232,11 +233,11 @@ public class EventStoreTest {
 			eventStore.write(e);
 		}
 
-		List<?> readEvents = eventStore.collectEvents(TestEvent.class);
+		List<?> readEvents = eventStore.collectEvents(EventQuery.query(TestEvent.class));
 		assertEquals(expectedTestEvents, readEvents);
-		readEvents = eventStore.collectEvents(EmptyEvent.class);
+		readEvents = eventStore.collectEvents(EventQuery.query(EmptyEvent.class));
 		assertEquals(expectedEmptyEvents, readEvents);
-		readEvents = eventStore.collectEvents();
+		readEvents = eventStore.collectEvents(EventQuery.query(EmptyEvent.class, TestEvent.class));
 		assertEquals(events, readEvents);
 	}
 
@@ -266,7 +267,7 @@ public class EventStoreTest {
 			eventStore.write(e);
 		}
 
-		List<?> readEvents = eventStore.collectEvents(TestEvent.class, EmptyEvent.class);
+		List<?> readEvents = eventStore.collectEvents(EventQuery.query(TestEvent.class, EmptyEvent.class));
 		assertEquals(expectedEvents, readEvents);
 	}
 
@@ -274,7 +275,7 @@ public class EventStoreTest {
 	public void serializableEventObjectsCanBeResolvedFromNonSerializableEvent() throws Exception {
 		NonSerializableEvent nonSerializableEvent = new NonSerializableEvent(Name.valueOf("apa"), new Date());
 		eventStore.write(nonSerializableEvent);
-		List<Object> events = eventStore.collectEvents(NonSerializableEvent.class);
+		List<Object> events = eventStore.collectEvents(EventQuery.query(NonSerializableEvent.class));
 
 		Object event = events.get(0);
 		assertTrue("Event type was: " + event.getClass(), event instanceof NonSerializableEvent);
@@ -289,7 +290,7 @@ public class EventStoreTest {
 		eventStore.write(new EmptyEvent());
 		eventStore.write(e2);
 
-		List<Object> events = eventStore.collectEvents(NonSerializableEvent.class);
+		List<Object> events = eventStore.collectEvents(EventQuery.query(NonSerializableEvent.class));
 		assertEquals(2, events.size());
 		assertTrue(events.get(0) instanceof NonSerializableEvent);
 		assertTrue(events.get(1) instanceof NonSerializableEvent);
@@ -317,7 +318,7 @@ public class EventStoreTest {
 				"\nEvents/s = " + (int)((double)COUNT / (end-start) * 1000000000.0));
 
 		start = System.nanoTime();
-		eventStore.collectEvents();
+		eventStore.collectEvents(EventQuery.query(IntegerStringEvent.class));
 		end = System.nanoTime();
 
 		System.out.println("Read " + COUNT + " IntegerStringEvent:s in " + TimeUnit.NANOSECONDS.toMillis(end - start) + " ms. " +
@@ -335,39 +336,39 @@ public class EventStoreTest {
 		for (Object e : events.subList(0, 500)) {
 			eventStore.write(e);
 		}
-		eventStore.collectEvents();
+		eventStore.collectEvents(EventQuery.query(IntegerStringEvent.class));
 		for (Object e : events.subList(500, 1000)) {
 			eventStore.write(e);
 		}
-		eventStore.collectEvents();
+		eventStore.collectEvents(EventQuery.query(IntegerStringEvent.class));
 		for (Object e : events.subList(1000, 10000)) {
 			eventStore.write(e);
 		}
-		eventStore.collectEvents();
-		eventStore.collectEvents();
+		eventStore.collectEvents(EventQuery.query(IntegerStringEvent.class));
+		eventStore.collectEvents(EventQuery.query(IntegerStringEvent.class));
 		for (Object e : events.subList(10000, 12000)) {
 			eventStore.write(e);
 		}
-		eventStore.collectEvents();
+		eventStore.collectEvents(EventQuery.query(IntegerStringEvent.class));
 		for (Object e : events.subList(12000, 13000)) {
 			eventStore.write(e);
 		}
-		eventStore.collectEvents();
+		eventStore.collectEvents(EventQuery.query(IntegerStringEvent.class));
 		for (Object e : events.subList(13000, 14000)) {
 			eventStore.write(e);
 		}
-		eventStore.collectEvents();
+		eventStore.collectEvents(EventQuery.query(IntegerStringEvent.class));
 		for (Object e : events.subList(14000, 15000)) {
 			eventStore.write(e);
 		}
 		for (Object e : events.subList(15000, 25000)) {
 			eventStore.write(e);
 		}
-		eventStore.collectEvents();
+		eventStore.collectEvents(EventQuery.query(IntegerStringEvent.class));
 		for (Object e : events.subList(25000, 30000)) {
 			eventStore.write(e);
 		}
-		eventStore.collectEvents();
+		eventStore.collectEvents(EventQuery.query(IntegerStringEvent.class));
 
 		long end = System.nanoTime();
 

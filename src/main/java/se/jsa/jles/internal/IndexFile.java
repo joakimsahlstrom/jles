@@ -84,22 +84,20 @@ public class IndexFile {
 		}
 		@Override
 		public Iterator<EventId> iterator() {
-			return new IndexIterator(matcher, entryFile.size());
+			return new IndexIterator(matcher);
 		}
 	}
 
 	private class IndexIterator implements Iterator<EventId> {
 		private final IndexKeyMatcher matcher;
-		private final long fileSize;
 
 		private long position = 0;
 		private long eventIdByType = 0;
 		private EventId nextEntry = null;
 		private boolean nextEntryReady = false;
 
-		public IndexIterator(IndexKeyMatcher matcher, long fileSize) {
+		public IndexIterator(IndexKeyMatcher matcher) {
 			this.matcher = matcher;
-			this.fileSize = fileSize;
 		}
 
 		@Override
@@ -119,7 +117,7 @@ public class IndexFile {
 			if (nextEntryReady) {
 				return true;
 			}
-			if (position >= fileSize) {
+			if (position >= entryFile.size()) {
 				return false;
 			}
 
@@ -132,6 +130,7 @@ public class IndexFile {
 			long eventIndex;
 			Object indexKey;
 			EventId result;
+			long fileSize = entryFile.size();
 			do {
 				entry = entryFile.readEntry(position);
 				eventIndex = entry.getLong();

@@ -2,6 +2,8 @@ package se.jsa.jles.internal;
 
 import java.nio.ByteBuffer;
 
+import se.jsa.jles.internal.fields.EventField;
+
 /**
  * EventFile
  *
@@ -35,6 +37,13 @@ public class EventFile {
 		ByteBuffer input = entryFile.readEntry(position);
 
 		Object result = ed.deserializeEvent(input);
+		return result;
+	}
+
+	public Object readEventField(long position, EventDeserializer ed, EventField eventField) {
+		ByteBuffer input = entryFile.readEntry(position);
+
+		Object result = ed.deserializeEventField(input, eventField);
 		return result;
 	}
 

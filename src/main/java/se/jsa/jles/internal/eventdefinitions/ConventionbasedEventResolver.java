@@ -10,6 +10,7 @@ import java.util.Set;
 
 import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventSerializer;
+import se.jsa.jles.internal.fields.EventField;
 import se.jsa.jles.internal.util.Objects;
 
 public class ConventionbasedEventResolver implements EventResolver {
@@ -79,6 +80,11 @@ public class ConventionbasedEventResolver implements EventResolver {
 			Object deserializedEvent = deserializer.deserializeEvent(input);
 			onNewEventType(deserializedEvent.getClass());
 			return getDeserializedEvent(deserializedEvent);
+		}
+
+		@Override
+		public Object deserializeEventField(ByteBuffer input, EventField eventField) {
+			return deserializer.deserializeEventField(input, eventField);
 		}
 	}
 
@@ -157,11 +163,18 @@ public class ConventionbasedEventResolver implements EventResolver {
 			if (!eventType.equals(asSerializableMethod.getReturnType().getMethod("asEvent").getReturnType())) {
 				throw new RuntimeException("Bad convention conformance for eventType: " + eventType);
 			}
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException("Bad convention conformance for eventType: " + eventType, e);
+		} catch (SecurityException e) {
+			throw new RuntimeException("Bad convention conformance for eventType: " + eventType, e);
+		}
+
+		try {
 			asSerializableMethod.getReturnType().getConstructor(); // Verify that the serializable event has the correct constructor signature
 		} catch (NoSuchMethodException e) {
-			throw new RuntimeException("Bad convention conformance for eventType: " + eventType);
+			throw new RuntimeException("Serializable event class missing no argument constructor: " + asSerializableMethod.getReturnType().getSimpleName(), e);
 		} catch (SecurityException e) {
-			throw new RuntimeException("Bad convention conformance for eventType: " + eventType);
+			throw new RuntimeException("Serializable event class non-public no argument constructor: " + asSerializableMethod.getReturnType().getSimpleName(), e);
 		}
 	}
 

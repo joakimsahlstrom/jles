@@ -3,12 +3,14 @@ package se.jsa.jles;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import se.jsa.jles.NewEventNotificationListeners.NewEventNotificationListener;
 import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventDeserializer;
@@ -25,6 +27,7 @@ import se.jsa.jles.internal.LoadingIterable;
 import se.jsa.jles.internal.TypedEventRepo;
 import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
+import se.jsa.jles.internal.fields.EventField;
 import se.jsa.jles.internal.fields.StorableLongField;
 import se.jsa.jles.internal.util.Objects;
 
@@ -39,6 +42,7 @@ public class EventStore {
 	final Indexing indexing;
 	final EventDefinitions eventDefinitions;
 	final EventWriter eventWriter;
+	final NewEventNotificationListeners eventListeners = new NewEventNotificationListeners();
 
 	/**
 	 * Create a simplest possible {@link EventStore} using the given {@link EventFile} for event storage and {@link EntryFile} for event type indexing.
@@ -69,6 +73,10 @@ public class EventStore {
 		return new SimpleEventWriter(eventFile, indexing);
 	}
 
+	public void registerEventListener(NewEventNotificationListener listener) {
+		this.eventListeners.registerListener(listener);
+	}
+
 	/**
 	 * Stores a new event in this {@link EventStore}
 	 * @param event The event
@@ -76,23 +84,14 @@ public class EventStore {
 	public void write(Object event) {
 		EventSerializer ed = eventDefinitions.getEventSerializer(event);
 		eventWriter.onNewEvent(event, ed);
+		eventListeners.onNewEvent();
 	}
 
-	/**
-	 * Get all events of the given event types
-	 * @param eventTypes varargs {@link Class}
-	 * @return {@link List} of all events in the same order they were put into this {@link EventStore}
-	 */
-	public List<Object> collectEvents(Class<?>... eventTypes) {
-		return collect(readEvents(eventTypes));
+	public List<Object> collectEvents(EventQuery query) {
+		return collect(readEvents(query));
 	}
 
-	/**
-	 * Utility method for collecting all objects of an {@link Iterable} into a {@link List}
-	 * @param iterable {@link Iterable} of {@link Object}
-	 * @return {@link List} of {@link Object}
-	 */
-	public static List<Object> collect(Iterable<Object> iterable) {
+	private static List<Object> collect(Iterable<Object> iterable) {
 		List<Object> result = new ArrayList<Object>();
 		for (Object event : iterable) {
 			result.add(event);
@@ -100,36 +99,23 @@ public class EventStore {
 		return result;
 	}
 
-	/**
-	 * Creates an {@link Iterable} for iterating over all event of the given types
-	 * @param eventTypes varargs {@link Class}
-	 * @return {@link Iterable} of {@link Object} of all matching events in the same order they were put into this {@link EventStore}
-	 */
-	public Iterable<Object> readEvents(Class<?>... eventTypes) {
+	public Iterable<Object> readEvents(EventQuery query) {
 		LoadingIterable loadingIterable = new LoadingIterable();
-		for (Long eventTypeId : eventDefinitions.getEventTypeIds(eventTypes)) {
-			InternalTypedEventRepo typedEventRepo = new InternalTypedEventRepo(eventTypeId);
-			Iterable<EventId> iterable = typedEventRepo.getIterator(FieldConstraint.noConstraint());
-			loadingIterable.register(iterable, typedEventRepo);
+		for (Map.Entry<Class<?>, Match> selection : query.queries()) {
+			for (Long eventTypeId : eventDefinitions.getEventTypeIds(selection.getKey())) {
+				InternalTypedEventRepo typedEventRepo = new InternalTypedEventRepo(eventTypeId);
+				if (selection.getValue() != null) {
+					Iterable<EventId> iterable = selection.getValue().buildFilteringIterator(typedEventRepo);
+					loadingIterable.register(iterable, typedEventRepo);
+				} else {
+					Iterable<EventId> iterable = typedEventRepo.getIterator(FieldConstraint.noConstraint());
+					loadingIterable.register(iterable, typedEventRepo);
+				}
+			}
 		}
 		return loadingIterable;
 	}
 
-	/**
-	 * Read all events of the given type matching the given {@link Match} criteria
-	 * @param eventType {@link Class}
-	 * @param match {@link Match}
-	 * @return An {@link Iterable} of {@link Object} of all matching events in the same order they were put into this {@link EventStore}
-	 */
-	public Iterable<Object> readEvents(Class<?> eventType, Match match) {
-		LoadingIterable loadingIterable = new LoadingIterable();
-		for (Long eventTypeId : eventDefinitions.getEventTypeIds(eventType)) {
-			InternalTypedEventRepo typedEventRepo = new InternalTypedEventRepo(eventTypeId);
-			Iterable<EventId> iterable = match.buildFilteringIterator(typedEventRepo);
-			loadingIterable.register(iterable, typedEventRepo);
-		}
-		return loadingIterable;
-	}
 
 	/**
 	 * Stops this {@link EventStore} instance and releases all associated files.
@@ -165,7 +151,8 @@ public class EventStore {
 
 		@Override
 		public Object readEventField(EventId eventIndex, String fieldName) {
-			return eventDefinitions.getEventField(eventTypeId, fieldName).getValue(readEvent(eventIndex)); // non indexed
+			final EventField eventField = eventDefinitions.getEventField(eventTypeId, fieldName);
+			return eventFile.readEventField(eventIndex.getEventId(), eventDeserializer, eventField);
 		}
 
 		@Override
