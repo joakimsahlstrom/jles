@@ -484,8 +484,8 @@ public class EventFileTest {
 				new SingleLongEvent(10000023232L),
 				new SingleFloatEvent(1.21f),
 				new SingleDoubleEvent(1.21d),
-				new SingleCharEvent('�'),
-				new MultipleFieldsEvent((byte)3, (short)290, 32767, 100000003L, 1.1f, 1.1212d, true, 'G', "str���ng"));
+				new SingleCharEvent('ö'),
+				new MultipleFieldsEvent((byte)3, (short)290, 32767, 100000003L, 1.1f, 1.1212d, true, 'G', "sträng"));
 
 		EventDefinitions ed = new MemoryBasedEventDefinitions();
 		for (Object event : events) {

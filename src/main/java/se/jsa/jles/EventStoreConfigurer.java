@@ -34,6 +34,8 @@ import se.jsa.jles.internal.util.Objects;
  * @author joakim Joakim Sahlström
  */
 public class EventStoreConfigurer {
+	private static EntryFileNameGenerator entryFileNameGenerator = new EntryFileNameGenerator();
+	
 	private final FileChannelFactory fileChannelFactory;
 	private final InMemoryFileRepository inMemoryFileRepository;
 	private final Set<Class<?>> indexedEventTypes = new HashSet<Class<?>>();
@@ -43,9 +45,9 @@ public class EventStoreConfigurer {
 
 	private final List<String> files = new ArrayList<String>();
 
-	private EventStoreConfigurer() {
+	private EventStoreConfigurer(InMemoryFileRepository inMemoryFileRepository) {
 		this.fileChannelFactory = null;
-		this.inMemoryFileRepository = new InMemoryFileRepository();
+		this.inMemoryFileRepository = inMemoryFileRepository;
 		this.useFileBasedEventDefinitions = true;
 	}
 
@@ -56,7 +58,11 @@ public class EventStoreConfigurer {
 	}
 
 	public static EventStoreConfigurer createMemoryOnlyConfigurer() {
-		return new EventStoreConfigurer();
+		return new EventStoreConfigurer(new InMemoryFileRepository());
+	}
+	
+	public static EventStoreConfigurer createMemoryOnlyConfigurer(InMemoryFileRepository inMemeotyFileRepository) {
+		return new EventStoreConfigurer(inMemeotyFileRepository);
 	}
 
 	public static EventStoreConfigurer createFileBasedConfigurer(FileChannelFactory fileChannelFactory) {
@@ -89,8 +95,8 @@ public class EventStoreConfigurer {
 	}
 
 	public EventStore configure() {
-		EntryFile eventTypeIndexFile = createEntryFile("events.if");
-		EventFile eventFile = new EventFile(createEntryFile("events.ef"));
+		EntryFile eventTypeIndexFile = createEntryFile(entryFileNameGenerator.getEventTypeIndexFileName());
+		EventFile eventFile = new EventFile(createEntryFile(entryFileNameGenerator.getEventFileName()));
 		EventDefinitions eventDefinitions = createEventDefinitions();
 		Indexing indexing = createIndexing(eventTypeIndexFile, eventDefinitions, eventFile);
 
@@ -100,7 +106,9 @@ public class EventStoreConfigurer {
 
 	private EventDefinitions createEventDefinitions() {
 		if (useFileBasedEventDefinitions) {
-			MappingEventDefinitions eventDefinitions = new MappingEventDefinitions(new PersistingEventDefinitions(new EventDefinitionFile(createEntryFile("events.def"))));
+			MappingEventDefinitions eventDefinitions = new MappingEventDefinitions(
+					new PersistingEventDefinitions(
+							new EventDefinitionFile(createEntryFile(entryFileNameGenerator.getEventDefintionsFileName()))));
 			eventDefinitions.init();
 			return eventDefinitions;
 		} else {
@@ -124,7 +132,7 @@ public class EventStoreConfigurer {
 				EventFieldIndex eventFieldIndex = new SimpleEventFieldIndex(
 						eventTypeId,
 						eventDefinitions.getEventField(eventTypeId, eventFieldIndexConfiguration.getFieldName()),
-						createEntryFile("events_" + eventTypeId + "_" + eventFieldIndexConfiguration.getFieldName() + ".if"));
+						createEntryFile(entryFileNameGenerator.getEventFieldIndexFileName(eventTypeId, eventFieldIndexConfiguration.getFieldName())));
 				eventIndexPreparer.prepare(eventFieldIndex);
 				eventFieldIndicies.put(eventFieldIndexConfiguration.createEventFieldId(eventTypeId), eventFieldIndex);
 			}
@@ -136,7 +144,7 @@ public class EventStoreConfigurer {
 		HashMap<Long, EventIndex> eventIndicies = new HashMap<Long, EventIndex>();
 		for (Class<?> indexedEventType : indexedEventTypes) {
 			for (Long eventTypeId : eventDefinitions.getEventTypeIds(indexedEventType)) {
-				EventIndex eventIndex = new EventIndex(createEntryFile("events_" + eventTypeId + ".if"), eventTypeId);
+				EventIndex eventIndex = new EventIndex(createEntryFile(entryFileNameGenerator.getEventIndexFileName(eventTypeId)), eventTypeId);
 				eventIndexPreparer.prepare(eventIndex);
 				eventIndicies.put(eventTypeId, eventIndex);
 			}

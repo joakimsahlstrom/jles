@@ -2,7 +2,6 @@ package se.jsa.jles.internal;
 
 import se.jsa.jles.internal.util.Objects;
 
-//TODO: move fieldName to FieldConstraint and delete this file?
 public class FieldConstraint {
 	private final String fieldName;
 	private final Constraint<?> constraint;
@@ -37,6 +36,6 @@ public class FieldConstraint {
 	}
 
 	public boolean accepts(Object eventFieldValue) {
-		return constraint.isSatisfiedBy(eventFieldValue);
+		return constraint == null || constraint.isSatisfiedBy(eventFieldValue);
 	}
 }

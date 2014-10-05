@@ -36,9 +36,10 @@ public class FlippingEntryFile implements EntryFile {
 	@Override
 	public long append(ByteBuffer data) {
 		try {
-			long result = entryReader.append(data, getOutputChannel());
+			FileChannel outputChannel = getOutputChannel();
+			long result = entryReader.append(data, outputChannel);
 			if (safeWrite) {
-				closeOutputStream();
+				outputChannel.force(true);
 			}
 			return result;
 		} catch (IOException e) {
