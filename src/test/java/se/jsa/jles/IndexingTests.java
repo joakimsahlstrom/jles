@@ -35,7 +35,7 @@ public class IndexingTests {
 		es.write(new TestEvent("a", 0, true));
 		es.write(new TestEvent("a", 1, true));
 		es.write(new TestEvent("a", 2, true));
-		List<Object> events = es.collectEvents(EventQuery.builder().query(TestEvent.class, new Match() {
+		List<Object> events = es.collectEvents(EventQuery.builder().query(TestEvent.class, new Matcher() {
 				@Override
 				public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
 					return eventRepo.getIterator(FieldConstraint.create("Id", new Constraint<Long>() {
@@ -103,8 +103,8 @@ public class IndexingTests {
 		assertFalse(events.hasNext());
 	}
 
-	private Match createIdMatch() {
-		return new Match() {
+	private Matcher createIdMatch() {
+		return new Matcher() {
 			@Override
 			public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
 				return eventRepo.getIterator(FieldConstraint.create("Id", new Constraint<Long>() {
@@ -122,8 +122,8 @@ public class IndexingTests {
 		};
 	}
 
-	private Match createNullMatch() {
-		return new Match() {
+	private Matcher createNullMatch() {
+		return new Matcher() {
 			@Override
 			public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
 				return eventRepo.getIterator(FieldConstraint.create("First", new Constraint<Boolean>() {

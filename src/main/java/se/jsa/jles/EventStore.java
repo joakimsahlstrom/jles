@@ -38,11 +38,11 @@ import se.jsa.jles.internal.util.Objects;
  *
  */
 public class EventStore {
-	final EventFile eventFile; // Wrap this in "Events"?
-	final Indexing indexing;
-	final EventDefinitions eventDefinitions;
-	final EventWriter eventWriter;
-	final NewEventNotificationListeners eventListeners = new NewEventNotificationListeners();
+	private final EventFile eventFile; // Wrap this in "Events"?
+	private final Indexing indexing;
+	private final EventDefinitions eventDefinitions;
+	private final EventWriter eventWriter;
+	private final NewEventNotificationListeners eventListeners = new NewEventNotificationListeners();
 
 	/**
 	 * Create a simplest possible {@link EventStore} using the given {@link EventFile} for event storage and {@link EntryFile} for event type indexing.
@@ -63,9 +63,9 @@ public class EventStore {
 	 * @param eventDefinitions {@link EventDefinitions} The event definitions subsystem
 	 */
 	EventStore(EventFile eventFile, Indexing indexing, EventDefinitions eventDefinitions) {
-		this.eventFile = eventFile;
-		this.indexing = indexing;
-		this.eventDefinitions = eventDefinitions;
+		this.eventFile = Objects.requireNonNull(eventFile);
+		this.indexing = Objects.requireNonNull(indexing);
+		this.eventDefinitions = Objects.requireNonNull(eventDefinitions);
 		this.eventWriter = createEventWriter(eventFile, indexing);
 	}
 
@@ -101,7 +101,7 @@ public class EventStore {
 
 	public Iterable<Object> readEvents(EventQuery query) {
 		LoadingIterable loadingIterable = new LoadingIterable();
-		for (Map.Entry<Class<?>, Match> selection : query.queries()) {
+		for (Map.Entry<Class<?>, Matcher> selection : query.queries()) {
 			for (Long eventTypeId : eventDefinitions.getEventTypeIds(selection.getKey())) {
 				InternalTypedEventRepo typedEventRepo = new InternalTypedEventRepo(eventTypeId);
 				if (selection.getValue() != null) {

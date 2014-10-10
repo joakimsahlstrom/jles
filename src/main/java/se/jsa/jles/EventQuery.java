@@ -8,13 +8,13 @@ import java.util.Map;
 import se.jsa.jles.internal.util.Objects;
 
 public class EventQuery {
-	private final Map<Class<?>, Match> queries;
+	private final Map<Class<?>, Matcher> queries;
 
-	EventQuery(Map<Class<?>, Match> queries) {
-		this.queries = Collections.unmodifiableMap(new HashMap<Class<?>, Match>(queries));
+	EventQuery(Map<Class<?>, Matcher> queries) {
+		this.queries = Collections.unmodifiableMap(new HashMap<Class<?>, Matcher>(queries));
 	}
 
-	public Collection<Map.Entry<Class<?>, Match>> queries() {
+	public Collection<Map.Entry<Class<?>, Matcher>> queries() {
 		return queries.entrySet();
 	}
 
@@ -30,27 +30,27 @@ public class EventQuery {
 		return builder.build();
 	}
 
-	public static EventQuery query(Class<?> eventType, Match match) {
+	public static EventQuery query(Class<?> eventType, Matcher match) {
 		return new Builder().query(eventType, match).build();
 	}
 
 	public static class Builder {
-		private final Map<Class<?>, Match> queries;
+		private final Map<Class<?>, Matcher> queries;
 		public Builder() {
 			this.queries = Collections.emptyMap();
 		}
-		private Builder(Map<Class<?>, Match> queries, Class<?> eventType, Match match) {
-			HashMap<Class<?>, Match> result = new HashMap<Class<?>, Match>(queries);
+		private Builder(Map<Class<?>, Matcher> queries, Class<?> eventType, Matcher match) {
+			HashMap<Class<?>, Matcher> result = new HashMap<Class<?>, Matcher>(queries);
 			result.put(eventType, match);
 			this.queries = Collections.unmodifiableMap(result);
 		}
 		public Builder query(Class<?> eventType) {
-			return append(eventType, Match.MATCH_ALL);
+			return append(eventType, Matcher.MATCH_ALL);
 		}
-		public Builder query(Class<?> eventType, Match match) {
+		public Builder query(Class<?> eventType, Matcher match) {
 			return append(eventType, Objects.requireNonNull(match));
 		}
-		private Builder append(Class<?> eventType, Match match) {
+		private Builder append(Class<?> eventType, Matcher match) {
 			return new Builder(queries, eventType, match);
 		}
 		public EventQuery build() {
