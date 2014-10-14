@@ -1,4 +1,10 @@
-jles [jealous]
+jles
 ==============
+Joakims Lightweight Event Storage
 
-A lightweight event repository in java
+
+
+todo:
+- EventQuery2 -> EventQuery
+- Allow events to contain arrays of primitives?
+- Make LoadingIterable immutable
