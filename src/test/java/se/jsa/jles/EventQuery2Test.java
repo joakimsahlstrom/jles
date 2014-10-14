@@ -6,8 +6,8 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import se.jsa.jles.testevents.MyEvent;
-import se.jsa.jles.testevents.MyEvent2;
+import se.jsa.jles.internal.testevents.MyEvent;
+import se.jsa.jles.internal.testevents.MyEvent2;
 
 public class EventQuery2Test {
 

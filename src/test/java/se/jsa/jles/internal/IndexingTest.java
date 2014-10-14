@@ -40,14 +40,14 @@ public class IndexingTest {
 	private final Set<Long> eventTypeIds = eventDefinitions.getEventTypeIds(TestEvent.class);
 	private final Long eventTypeId = eventTypeIds.iterator().next();
 
-	private class EqualsLongConstraint extends Constraint<Long> {
+	private class EqualsLongConstraint extends Constraint {
 		private final Long value;
 
 		public EqualsLongConstraint(Long value) {
 			this.value = Objects.requireNonNull(value);
 		}
 		@Override
-		protected boolean isSatisfied(Long eventFieldValue) {
+		protected boolean isSatisfied(Object eventFieldValue) {
 			return this.value.equals(eventFieldValue);
 		}
 

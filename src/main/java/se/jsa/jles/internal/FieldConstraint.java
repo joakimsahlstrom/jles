@@ -4,14 +4,14 @@ import se.jsa.jles.internal.util.Objects;
 
 public class FieldConstraint {
 	private final String fieldName;
-	private final Constraint<?> constraint;
+	private final Constraint constraint;
 
 	FieldConstraint() {
 		this.fieldName = null;
 		this.constraint = null;
 	}
 
-	protected FieldConstraint(String fieldName, Constraint<?> constraint) {
+	protected FieldConstraint(String fieldName, Constraint constraint) {
 		this.fieldName = Objects.requireNonNull(fieldName);
 		this.constraint = Objects.requireNonNull(constraint);
 	}
@@ -20,7 +20,7 @@ public class FieldConstraint {
 		return new FieldConstraint();
 	}
 
-	public static FieldConstraint create(String fieldName, Constraint<?> constraint) {
+	public static FieldConstraint create(String fieldName, Constraint constraint) {
 		return new FieldConstraint(fieldName, constraint);
 	}
 

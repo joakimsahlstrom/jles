@@ -128,14 +128,14 @@ public final class EventQuery2 {
 
 		@Override
 		public FieldConstraint createFieldContraint() {
-			return FieldConstraint.create(fieldName, new Constraint<Object>() {
+			return FieldConstraint.create(fieldName, new Constraint() {
 				@Override
 				protected boolean isSatisfied(Object eventFieldValue) {
 					return equality == null ? eventFieldValue == null : eventFieldValue.equals(equality);
 				}
 
 				@Override
-				protected Class getFieldType() {
+				protected Class<?> getFieldType() {
 					return equality.getClass();
 				}
 			});

@@ -38,9 +38,9 @@ public class IndexingTests {
 		List<Object> events = es.collectEvents(EventQuery.builder().query(TestEvent.class, new Matcher() {
 				@Override
 				public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
-					return eventRepo.getIterator(FieldConstraint.create("Id", new Constraint<Long>() {
+					return eventRepo.getIterator(FieldConstraint.create("Id", new Constraint() {
 						@Override
-						public boolean isSatisfied(Long eventFieldValue) {
+						public boolean isSatisfied(Object eventFieldValue) {
 							boolean res = Long.valueOf(1).equals(eventFieldValue);
 							return res;
 						}
@@ -107,9 +107,9 @@ public class IndexingTests {
 		return new Matcher() {
 			@Override
 			public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
-				return eventRepo.getIterator(FieldConstraint.create("Id", new Constraint<Long>() {
+				return eventRepo.getIterator(FieldConstraint.create("Id", new Constraint() {
 					@Override
-					public boolean isSatisfied(Long eventFieldValue) {
+					public boolean isSatisfied(Object eventFieldValue) {
 						boolean res = Long.valueOf(1).equals(eventFieldValue);
 						return res;
 					}
@@ -126,9 +126,9 @@ public class IndexingTests {
 		return new Matcher() {
 			@Override
 			public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
-				return eventRepo.getIterator(FieldConstraint.create("First", new Constraint<Boolean>() {
+				return eventRepo.getIterator(FieldConstraint.create("First", new Constraint() {
 					@Override
-					public boolean isSatisfied(Boolean eventFieldValue) {
+					public boolean isSatisfied(Object eventFieldValue) {
 						return eventFieldValue == null;
 					}
 					@Override
