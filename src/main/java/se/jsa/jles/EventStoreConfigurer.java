@@ -61,8 +61,8 @@ public class EventStoreConfigurer {
 		return new EventStoreConfigurer(new InMemoryFileRepository());
 	}
 	
-	public static EventStoreConfigurer createMemoryOnlyConfigurer(InMemoryFileRepository inMemeotyFileRepository) {
-		return new EventStoreConfigurer(inMemeotyFileRepository);
+	public static EventStoreConfigurer createMemoryOnlyConfigurer(InMemoryFileRepository inMemoryFileRepository) {
+		return new EventStoreConfigurer(inMemoryFileRepository);
 	}
 
 	public static EventStoreConfigurer createFileBasedConfigurer(FileChannelFactory fileChannelFactory) {
