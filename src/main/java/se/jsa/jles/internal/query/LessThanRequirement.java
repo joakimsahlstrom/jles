@@ -6,7 +6,7 @@ import java.util.Objects;
 import se.jsa.jles.internal.Constraint;
 import se.jsa.jles.internal.FieldConstraint;
 
-public class LessThanRequirement extends Requirement {
+class LessThanRequirement extends Requirement {
 
 	private final String fieldName;
 	private final Number number;

@@ -14,7 +14,7 @@ class NotRequirement extends Requirement {
 	@Override
 	public FieldConstraint createFieldContraint() {
 		FieldConstraint fieldContraint = requirement.createFieldContraint();
-		return FieldConstraint.create(requirement.createFieldContraint().getFieldName(), new NotConstraint(fieldContraint.getConstraint()));
+		return FieldConstraint.create(fieldContraint.getFieldName(), new NotConstraint(fieldContraint.getConstraint()));
 	}
 	
 	private static class NotConstraint extends Constraint {
