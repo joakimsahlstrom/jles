@@ -52,7 +52,7 @@ public class IndexingTest {
 		}
 
 		@Override
-		protected Class<Long> getFieldType() {
+		public Class<Long> getFieldType() {
 			return Long.class;
 		}
 	}

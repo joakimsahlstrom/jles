@@ -25,7 +25,7 @@ public class FieldConstraint {
 	}
 
 	public boolean hasConstraint() {
-		return fieldName != null;
+		return constraint != null;
 	}
 
 	public String getFieldName() {
@@ -38,4 +38,9 @@ public class FieldConstraint {
 	public boolean accepts(Object eventFieldValue) {
 		return constraint == null || constraint.isSatisfiedBy(eventFieldValue);
 	}
+
+	public Constraint getConstraint() {
+		return constraint;
+	}
+
 }

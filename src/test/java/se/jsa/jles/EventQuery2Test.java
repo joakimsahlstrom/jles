@@ -48,6 +48,7 @@ public class EventQuery2Test {
 		Iterator<Object> iterator = eventStore.readEvents(EventQuery2.select(MyEvent.class).join(MyEvent2.class)).iterator();
 		assertEquals(expectedEvent1, iterator.next());
 		assertEquals(expectedEvent2, iterator.next());
+		assertFalse(iterator.hasNext());
 	}
 	
 	@Test
@@ -56,10 +57,12 @@ public class EventQuery2Test {
 		MyEvent otherEvent1 = new MyEvent(2);
 		MyEvent2 otherEvent2 = new MyEvent2(3);
 		MyEvent2 expectedEvent2 = new MyEvent2(4);
+		MyEvent2 expectedEvent3 = new MyEvent2(4);
 		eventStore.write(expectedEvent1);
 		eventStore.write(otherEvent1);
 		eventStore.write(otherEvent2);
 		eventStore.write(expectedEvent2);
+		eventStore.write(expectedEvent3);
 		Iterator<Object> iterator = eventStore.readEvents(
 				EventQuery2
 					.select(MyEvent.class).where("Num").is(1)
@@ -67,21 +70,41 @@ public class EventQuery2Test {
 					).iterator();
 		assertEquals(expectedEvent1, iterator.next());
 		assertEquals(expectedEvent2, iterator.next());
-	}
-	
-	@Test
-	public void canQueryByFieldInequality() throws Exception {
-		
+		assertEquals(expectedEvent3, iterator.next());
+		assertFalse(iterator.hasNext());
 	}
 	
 	@Test
 	public void canQueryByNumericFieldGreaterThan() throws Exception {
-		
+		MyEvent otherEvent1 = new MyEvent(1);
+		MyEvent expectedEvent1 = new MyEvent(2);
+		MyEvent expectedEvent2 = new MyEvent(3);
+		eventStore.write(expectedEvent1);
+		eventStore.write(otherEvent1);
+		eventStore.write(expectedEvent2);
+		Iterator<Object> iterator = eventStore.readEvents(
+				EventQuery2
+					.select(MyEvent.class).where("Num").isGreaterThan(1)
+					).iterator();
+		assertEquals(expectedEvent1, iterator.next());
+		assertEquals(expectedEvent2, iterator.next());
+		assertFalse(iterator.hasNext());
 	}
 	
 	@Test
 	public void canQueryByNumericFieldLessThan() throws Exception {
-		
+		MyEvent expectedEvent1 = new MyEvent(1);
+		MyEvent otherEvent1 = new MyEvent(2);
+		MyEvent otherEvent2 = new MyEvent(3);
+		eventStore.write(expectedEvent1);
+		eventStore.write(otherEvent1);
+		eventStore.write(otherEvent2);
+		Iterator<Object> iterator = eventStore.readEvents(
+				EventQuery2
+					.select(MyEvent.class).where("Num").isLessThan(2)
+					).iterator();
+		assertEquals(expectedEvent1, iterator.next());
+		assertFalse(iterator.hasNext());
 	}
 	
 }

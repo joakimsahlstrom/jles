@@ -2,7 +2,7 @@ package se.jsa.jles.internal;
 
 public abstract class Constraint {
 	protected abstract boolean isSatisfied(Object eventFieldValue);
-	protected abstract Class<?> getFieldType();
+	public abstract Class<?> getFieldType();
 
 	public final boolean isSatisfiedBy(Object eventFieldValue) {
 		try {
