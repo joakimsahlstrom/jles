@@ -84,7 +84,7 @@ public class EventStore {
 		eventListeners.onNewEvent();
 	}
 
-	public Iterable<Object> readEvents(EventQuery2 query) {
+	public Iterable<Object> readEvents(EventQuery query) {
 		LoadingIterable loadingIterable = new LoadingIterable();
 		do {
 			for (Long eventTypeId : eventDefinitions.getEventTypeIds(query.getEventType())) {

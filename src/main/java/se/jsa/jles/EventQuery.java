@@ -6,15 +6,15 @@ import se.jsa.jles.internal.query.RequirementFactory;
 import se.jsa.jles.internal.util.Objects;
 import se.jsa.jles.internal.util.ReflectionUtil;
 
-public final class EventQuery2 {
+public final class EventQuery {
 
 	private static final RequirementFactory REQUIREMENT_FACTORY = new RequirementFactory();
 	
 	private Class<?> eventType;
 	private Requirement requirement;
-	private EventQuery2 next;
+	private EventQuery next;
 
-	private EventQuery2(Class<?> eventType, Requirement requirement, EventQuery2 next) {
+	private EventQuery(Class<?> eventType, Requirement requirement, EventQuery next) {
 		this.eventType = Objects.requireNonNull(eventType);
 		this.requirement = Objects.requireNonNull(requirement);
 		this.next = next; // may be null
@@ -22,20 +22,20 @@ public final class EventQuery2 {
 
 	// query building
 	
-	public static EventQuery2 select(Class<?> eventType) {
-		return new EventQuery2(eventType, Requirement.NONE, null);
+	public static EventQuery select(Class<?> eventType) {
+		return new EventQuery(eventType, Requirement.NONE, null);
 	}
 
 	public EventQueryWhere where(String fieldName) {
 		return new EventQueryWhere(this, fieldName);
 	}
 	
-	public EventQuery2 join(Class<?> eventType) {
-		return new EventQuery2(eventType, Requirement.NONE, this);
+	public EventQuery join(Class<?> eventType) {
+		return new EventQuery(eventType, Requirement.NONE, this);
 	}
 	
-	private EventQuery2 withRequirement(Requirement requirement) {
-		return new EventQuery2(eventType, requirement, this.next);
+	private EventQuery withRequirement(Requirement requirement) {
+		return new EventQuery(eventType, requirement, this.next);
 	}
 	
 	// inspection
@@ -44,7 +44,7 @@ public final class EventQuery2 {
 		return eventType;
 	}
 	
-	EventQuery2 next() {
+	EventQuery next() {
 		return next;
 	}
 
@@ -53,10 +53,10 @@ public final class EventQuery2 {
 	}
 	
 	public static class EventQueryWhere {
-		private EventQuery2 sourceQuery;
+		private EventQuery sourceQuery;
 		private String fieldName;
 
-		public EventQueryWhere(EventQuery2 sourceQuery, String fieldName) {
+		public EventQueryWhere(EventQuery sourceQuery, String fieldName) {
 			validateFieldName(sourceQuery.getEventType(), fieldName);
 			this.sourceQuery = Objects.requireNonNull(sourceQuery);
 			this.fieldName = Objects.requireNonNull(fieldName);
@@ -70,19 +70,19 @@ public final class EventQuery2 {
 			}
 		}
 
-		public EventQuery2 is(Object equality) {
+		public EventQuery is(Object equality) {
 			return sourceQuery.withRequirement(REQUIREMENT_FACTORY.createEqualsRequirement(sourceQuery.getEventType(), fieldName, equality));
 		}
 
-		public EventQuery2 isGreaterThan(Number number) {
+		public EventQuery isGreaterThan(Number number) {
 			return sourceQuery.withRequirement(REQUIREMENT_FACTORY.createGreaterThanRequirement(sourceQuery.getEventType(), fieldName, number));
 		}
 
-		public EventQuery2 isLessThan(Number number) {
+		public EventQuery isLessThan(Number number) {
 			return sourceQuery.withRequirement(REQUIREMENT_FACTORY.createLessThanRequirement(sourceQuery.getEventType(), fieldName, number));
 		}
 
-		public EventQuery2 in(Object... equalities) {
+		public EventQuery in(Object... equalities) {
 			return sourceQuery.withRequirement(REQUIREMENT_FACTORY.createInRequirement(sourceQuery.getEventType(), fieldName, equalities));
 		}
 	}

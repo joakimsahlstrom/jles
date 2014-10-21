@@ -31,7 +31,7 @@ public class IndexingTests {
 		es.write(new TestEvent("a", 0, true));
 		es.write(new TestEvent("a", 1, true));
 		es.write(new TestEvent("a", 2, true));
-		List<Object> events = TestUtil.collect(es.readEvents(EventQuery2.select(TestEvent.class).where("Id").is(1)));
+		List<Object> events = TestUtil.collect(es.readEvents(EventQuery.select(TestEvent.class).where("Id").is(1)));
 		/*, new Matcher() {
 				@Override
 				public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
@@ -61,7 +61,7 @@ public class IndexingTests {
 		es = configurer
 				.addIndexing(TestEvent.class)
 				.configure();
-		Iterator<Object> events = es.readEvents(EventQuery2.select(TestEvent.class)).iterator();
+		Iterator<Object> events = es.readEvents(EventQuery.select(TestEvent.class)).iterator();
 		assertEquals(0L, ((TestEvent)events.next()).getId());
 		assertEquals(1L, ((TestEvent)events.next()).getId());
 		assertEquals(2L, ((TestEvent)events.next()).getId());
@@ -78,7 +78,7 @@ public class IndexingTests {
 		es = configurer
 				.addIndexing(TestEvent.class, "Id")
 				.configure();
-		Iterator<Object> events = es.readEvents(EventQuery2.select(TestEvent.class).where("Id").is(1)).iterator();
+		Iterator<Object> events = es.readEvents(EventQuery.select(TestEvent.class).where("Id").is(1)).iterator();
 		assertEquals(1L, ((TestEvent)events.next()).getId());
 		assertFalse(events.hasNext());
 	}
@@ -94,7 +94,7 @@ public class IndexingTests {
 		es.write(new ObjectTestEvent("a", 1L, true));
 		es.write(new ObjectTestEvent("a", 2L, null));
 
-		Iterator<Object> events = es.readEvents(EventQuery2.select(ObjectTestEvent.class).where("First").is(null)).iterator();
+		Iterator<Object> events = es.readEvents(EventQuery.select(ObjectTestEvent.class).where("First").is(null)).iterator();
 		assertEquals(Long.valueOf(0L), ((ObjectTestEvent)events.next()).getId());
 		assertEquals(Long.valueOf(2L), ((ObjectTestEvent)events.next()).getId());
 		assertFalse(events.hasNext());
@@ -109,11 +109,11 @@ public class IndexingTests {
 		}
 
 		long start2 = System.nanoTime();
-		TestUtil.collect(es.readEvents(EventQuery2.select(EmptyEvent2.class)));
+		TestUtil.collect(es.readEvents(EventQuery.select(EmptyEvent2.class)));
 		long end2 = System.nanoTime();
 
 		long start3 = System.nanoTime();
-		TestUtil.collect(es.readEvents(EventQuery2.select(EmptyEvent3.class)));
+		TestUtil.collect(es.readEvents(EventQuery.select(EmptyEvent3.class)));
 		long end3 = System.nanoTime();
 
 		long unindexedRead = end2 - start2;

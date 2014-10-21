@@ -9,7 +9,7 @@ import org.junit.Test;
 import se.jsa.jles.internal.testevents.MyEvent;
 import se.jsa.jles.internal.testevents.MyEvent2;
 
-public class EventQuery2Test {
+public class EventQueryTest {
 
 	EventStore eventStore = EventStoreConfigurer.createMemoryOnlyConfigurer().configure();
 	
@@ -17,7 +17,7 @@ public class EventQuery2Test {
 	public void canQueryForAllEventsOfOneType() throws Exception {
 		MyEvent expectedEvent = new MyEvent(1);
 		eventStore.write(expectedEvent);
-		assertEquals(expectedEvent, eventStore.readEvents(EventQuery2.select(MyEvent.class)).iterator().next());
+		assertEquals(expectedEvent, eventStore.readEvents(EventQuery.select(MyEvent.class)).iterator().next());
 	}
 	
 	@Test
@@ -26,17 +26,17 @@ public class EventQuery2Test {
 		MyEvent expectedEvent = new MyEvent(2);
 		eventStore.write(otherEvent);
 		eventStore.write(expectedEvent);
-		assertEquals(expectedEvent, eventStore.readEvents(EventQuery2.select(MyEvent.class).where("Num").is(2)).iterator().next());
+		assertEquals(expectedEvent, eventStore.readEvents(EventQuery.select(MyEvent.class).where("Num").is(2)).iterator().next());
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void doesNotAllowQueryForNonExistingField() throws Exception {
-		EventQuery2.select(MyEvent.class).where("Num2");
+		EventQuery.select(MyEvent.class).where("Num2");
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void doesNotAllowQueryWithDifferentTypeForEquality() throws Exception {
-		EventQuery2.select(MyEvent.class).where("Num").is(2L);
+		EventQuery.select(MyEvent.class).where("Num").is(2L);
 	}
 	
 	@Test
@@ -45,7 +45,7 @@ public class EventQuery2Test {
 		MyEvent2 expectedEvent2 = new MyEvent2(2);
 		eventStore.write(expectedEvent1);
 		eventStore.write(expectedEvent2);
-		Iterator<Object> iterator = eventStore.readEvents(EventQuery2.select(MyEvent.class).join(MyEvent2.class)).iterator();
+		Iterator<Object> iterator = eventStore.readEvents(EventQuery.select(MyEvent.class).join(MyEvent2.class)).iterator();
 		assertEquals(expectedEvent1, iterator.next());
 		assertEquals(expectedEvent2, iterator.next());
 		assertFalse(iterator.hasNext());
@@ -64,7 +64,7 @@ public class EventQuery2Test {
 		eventStore.write(expectedEvent2);
 		eventStore.write(expectedEvent3);
 		Iterator<Object> iterator = eventStore.readEvents(
-				EventQuery2
+				EventQuery
 					.select(MyEvent.class).where("Num").is(1)
 					.join(MyEvent2.class).where("Num").is(4L)
 					).iterator();
@@ -83,7 +83,7 @@ public class EventQuery2Test {
 		eventStore.write(otherEvent1);
 		eventStore.write(expectedEvent2);
 		Iterator<Object> iterator = eventStore.readEvents(
-				EventQuery2
+				EventQuery
 					.select(MyEvent.class).where("Num").isGreaterThan(1)
 					).iterator();
 		assertEquals(expectedEvent1, iterator.next());
@@ -100,7 +100,7 @@ public class EventQuery2Test {
 		eventStore.write(otherEvent1);
 		eventStore.write(otherEvent2);
 		Iterator<Object> iterator = eventStore.readEvents(
-				EventQuery2
+				EventQuery
 					.select(MyEvent.class).where("Num").isLessThan(2)
 					).iterator();
 		assertEquals(expectedEvent1, iterator.next());
