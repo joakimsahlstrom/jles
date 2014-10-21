@@ -81,6 +81,10 @@ public final class EventQuery2 {
 		public EventQuery2 isLessThan(Number number) {
 			return sourceQuery.withRequirement(REQUIREMENT_FACTORY.createLessThanRequirement(sourceQuery.getEventType(), fieldName, number));
 		}
+
+		public EventQuery2 in(Object... equalities) {
+			return sourceQuery.withRequirement(REQUIREMENT_FACTORY.createInRequirement(sourceQuery.getEventType(), fieldName, equalities));
+		}
 	}
 	
 }

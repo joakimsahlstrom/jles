@@ -1,11 +1,11 @@
 package se.jsa.jles;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import java.io.File;
 import java.util.Date;
-import java.util.List;
+import java.util.Iterator;
 
 import org.junit.After;
 import org.junit.Test;
@@ -52,18 +52,22 @@ public class EventStoreSessionTest {
 		eventStore.stop();
 		eventStore = configurer.configure();
 
-		List<Object> events = eventStore.collectEvents(EventQuery.builder().query(NonSerializableEvent.class).build());
-		assertEquals(2, events.size());
-		assertTrue(events.get(0) instanceof NonSerializableEvent);
-		assertTrue(events.get(1) instanceof NonSerializableEvent);
-		NonSerializableEvent nse1 = (NonSerializableEvent) events.get(0);
-		NonSerializableEvent nse2 = (NonSerializableEvent) events.get(1);
+		Iterator<Object> events = eventStore.readEvents(EventQuery2.select(NonSerializableEvent.class)).iterator();
+		NonSerializableEvent nse1 = (NonSerializableEvent) events.next();
+		NonSerializableEvent nse2 = (NonSerializableEvent) events.next();
+		assertFalse(events.hasNext());
 		assertEquals("1", 	nse1.getName().toString());
 		assertEquals(0, 	nse1.getDate().getTime());
 		assertEquals("2", 	nse2.getName().toString());
 		assertEquals(2, 	nse2.getDate().getTime());
 
-		assertEquals(3, eventStore.collectEvents(EventQuery.builder().query(NonSerializableEvent.class).query(EmptyEvent.class).build()).size());
+		assertEquals(3, size(eventStore.readEvents(EventQuery2.select(NonSerializableEvent.class).join(EmptyEvent.class)).iterator()));
+	}
+
+	private int size(Iterator<Object> readEvents) {
+		int count = 0;
+		while (readEvents.hasNext()) { readEvents.next(); count++; }
+		return count;
 	}
 
 }

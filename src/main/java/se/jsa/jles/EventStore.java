@@ -1,9 +1,6 @@
 package se.jsa.jles;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -87,18 +84,6 @@ public class EventStore {
 		eventListeners.onNewEvent();
 	}
 
-	public List<Object> collectEvents(EventQuery query) {
-		return collect(readEvents(query));
-	}
-
-	private static List<Object> collect(Iterable<Object> iterable) {
-		List<Object> result = new ArrayList<Object>();
-		for (Object event : iterable) {
-			result.add(event);
-		}
-		return result;
-	}
-	
 	public Iterable<Object> readEvents(EventQuery2 query) {
 		LoadingIterable loadingIterable = new LoadingIterable();
 		do {
@@ -111,24 +96,6 @@ public class EventStore {
 		} while (query != null);
 		return loadingIterable;
 	}
-
-	public Iterable<Object> readEvents(EventQuery query) {
-		LoadingIterable loadingIterable = new LoadingIterable();
-		for (Map.Entry<Class<?>, Matcher> selection : query.queries()) {
-			for (Long eventTypeId : eventDefinitions.getEventTypeIds(selection.getKey())) {
-				InternalTypedEventRepo typedEventRepo = new InternalTypedEventRepo(eventTypeId);
-				if (selection.getValue() != null) {
-					Iterable<EventId> iterable = selection.getValue().buildFilteringIterator(typedEventRepo);
-					loadingIterable.register(iterable, typedEventRepo);
-				} else {
-					Iterable<EventId> iterable = typedEventRepo.getIterator(FieldConstraint.noConstraint());
-					loadingIterable.register(iterable, typedEventRepo);
-				}
-			}
-		}
-		return loadingIterable;
-	}
-
 
 	/**
 	 * Stops this {@link EventStore} instance and releases all associated files.

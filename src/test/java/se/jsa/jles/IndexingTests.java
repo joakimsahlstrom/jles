@@ -16,10 +16,6 @@ import se.jsa.jles.EventStoreTest.EmptyEvent;
 import se.jsa.jles.EventStoreTest.EmptyEvent2;
 import se.jsa.jles.EventStoreTest.EmptyEvent3;
 import se.jsa.jles.EventStoreTest.TestEvent;
-import se.jsa.jles.internal.Constraint;
-import se.jsa.jles.internal.EventId;
-import se.jsa.jles.internal.FieldConstraint;
-import se.jsa.jles.internal.TypedEventRepo;
 import se.jsa.jles.internal.testevents.ObjectTestEvent;
 
 public class IndexingTests {
@@ -35,7 +31,8 @@ public class IndexingTests {
 		es.write(new TestEvent("a", 0, true));
 		es.write(new TestEvent("a", 1, true));
 		es.write(new TestEvent("a", 2, true));
-		List<Object> events = es.collectEvents(EventQuery.builder().query(TestEvent.class, new Matcher() {
+		List<Object> events = TestUtil.collect(es.readEvents(EventQuery2.select(TestEvent.class).where("Id").is(1)));
+		/*, new Matcher() {
 				@Override
 				public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
 					return eventRepo.getIterator(FieldConstraint.create("Id", new Constraint() {
@@ -50,7 +47,7 @@ public class IndexingTests {
 						}
 					}));
 				}
-			}).build());
+			}).build());*/
 		assertEquals(Arrays.asList(new TestEvent("a", 1, true)), events);
 	}
 
@@ -64,7 +61,7 @@ public class IndexingTests {
 		es = configurer
 				.addIndexing(TestEvent.class)
 				.configure();
-		Iterator<Object> events = es.readEvents(EventQuery.query(TestEvent.class)).iterator();
+		Iterator<Object> events = es.readEvents(EventQuery2.select(TestEvent.class)).iterator();
 		assertEquals(0L, ((TestEvent)events.next()).getId());
 		assertEquals(1L, ((TestEvent)events.next()).getId());
 		assertEquals(2L, ((TestEvent)events.next()).getId());
@@ -81,7 +78,7 @@ public class IndexingTests {
 		es = configurer
 				.addIndexing(TestEvent.class, "Id")
 				.configure();
-		Iterator<Object> events = es.readEvents(EventQuery.query(TestEvent.class, createIdMatch())).iterator();
+		Iterator<Object> events = es.readEvents(EventQuery2.select(TestEvent.class).where("Id").is(1)).iterator();
 		assertEquals(1L, ((TestEvent)events.next()).getId());
 		assertFalse(events.hasNext());
 	}
@@ -97,47 +94,10 @@ public class IndexingTests {
 		es.write(new ObjectTestEvent("a", 1L, true));
 		es.write(new ObjectTestEvent("a", 2L, null));
 
-		Iterator<Object> events = es.readEvents(EventQuery.query(ObjectTestEvent.class, createNullMatch())).iterator();
+		Iterator<Object> events = es.readEvents(EventQuery2.select(ObjectTestEvent.class).where("First").is(null)).iterator();
 		assertEquals(Long.valueOf(0L), ((ObjectTestEvent)events.next()).getId());
 		assertEquals(Long.valueOf(2L), ((ObjectTestEvent)events.next()).getId());
 		assertFalse(events.hasNext());
-	}
-
-	private Matcher createIdMatch() {
-		return new Matcher() {
-			@Override
-			public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
-				return eventRepo.getIterator(FieldConstraint.create("Id", new Constraint() {
-					@Override
-					public boolean isSatisfied(Object eventFieldValue) {
-						boolean res = Long.valueOf(1).equals(eventFieldValue);
-						return res;
-					}
-					@Override
-					public Class<Long> getFieldType() {
-						return Long.class;
-					}
-				}));
-			}
-		};
-	}
-
-	private Matcher createNullMatch() {
-		return new Matcher() {
-			@Override
-			public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
-				return eventRepo.getIterator(FieldConstraint.create("First", new Constraint() {
-					@Override
-					public boolean isSatisfied(Object eventFieldValue) {
-						return eventFieldValue == null;
-					}
-					@Override
-					public Class<Boolean> getFieldType() {
-						return Boolean.class;
-					}
-				}));
-			}
-		};
 	}
 
 	@Test
@@ -149,11 +109,11 @@ public class IndexingTests {
 		}
 
 		long start2 = System.nanoTime();
-		es.collectEvents(EventQuery.query(EmptyEvent2.class));
+		TestUtil.collect(es.readEvents(EventQuery2.select(EmptyEvent2.class)));
 		long end2 = System.nanoTime();
 
 		long start3 = System.nanoTime();
-		es.collectEvents(EventQuery.query(EmptyEvent3.class));
+		TestUtil.collect(es.readEvents(EventQuery2.select(EmptyEvent3.class)));
 		long end3 = System.nanoTime();
 
 		long unindexedRead = end2 - start2;

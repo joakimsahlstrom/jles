@@ -18,5 +18,9 @@ public class RequirementFactory {
 	public Requirement createLessThanRequirement(Class<?> eventType, String fieldName, Number number) {
 		return new LessThanRequirement(eventType, fieldName, number);
 	}
+
+	public Requirement createInRequirement(Class<?> eventType, String fieldName, Object[] equalities) {
+		return new InRequirement(eventType, fieldName, equalities);
+	}
 	
 }
