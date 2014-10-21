@@ -7,6 +7,12 @@ import java.util.Map;
 
 import se.jsa.jles.internal.util.Objects;
 
+/**
+ * 
+ * @author joasah
+ * @deprecated Use EventQuery2 instead
+ */
+@Deprecated
 public class EventQuery {
 	private final Map<Class<?>, Matcher> queries;
 
