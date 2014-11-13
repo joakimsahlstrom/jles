@@ -2,6 +2,7 @@ package se.jsa.jles.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -10,8 +11,22 @@ import se.jsa.jles.internal.util.Objects;
 
 
 public class LoadingIterable implements Iterable<Object> {
-	private final List<EventIndexHolder> holders = new ArrayList<EventIndexHolder>();
+	private final List<EventIndexHolder> holders;
+	
+	private LoadingIterable(List<EventIndexHolder> holders) {
+		this.holders = Collections.unmodifiableList(Objects.requireNonNull(holders));
+	}
+	
+	public static LoadingIterable empty() {
+		return new LoadingIterable(new ArrayList<EventIndexHolder>());
+	}
 
+	public LoadingIterable with(Iterable<EventId> iterable, TypedEventRepo eventRepo) {
+		ArrayList<EventIndexHolder> result = new ArrayList<EventIndexHolder>(holders);
+		result.add(new EventIndexHolder(iterable, eventRepo));
+		return new LoadingIterable(result);
+	}
+	
 	@Override
 	public Iterator<Object> iterator() {
 		return new LoadingIterator(createFeeders(holders));
@@ -23,10 +38,6 @@ public class LoadingIterable implements Iterable<Object> {
 			result.add(holder.toFeeder());
 		}
 		return result;
-	}
-
-	public void register(Iterable<EventId> iterable, TypedEventRepo eventRepo) {
-		holders.add(new EventIndexHolder(iterable, eventRepo));
 	}
 
 	private class EventIndexHolder {

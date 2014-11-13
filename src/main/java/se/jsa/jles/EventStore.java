@@ -85,12 +85,12 @@ public class EventStore {
 	}
 
 	public Iterable<Object> readEvents(EventQuery query) {
-		LoadingIterable loadingIterable = new LoadingIterable();
+		LoadingIterable loadingIterable = LoadingIterable.empty();
 		do {
 			for (Long eventTypeId : eventDefinitions.getEventTypeIds(query.getEventType())) {
 				InternalTypedEventRepo typedEventRepo = new InternalTypedEventRepo(eventTypeId);
 				Iterable<EventId> iterable = typedEventRepo.getIterator(query.createFieldConstraint());
-				loadingIterable.register(iterable, typedEventRepo);
+				loadingIterable = loadingIterable.with(iterable, typedEventRepo);
 			}
 			query = query.next();
 		} while (query != null);
