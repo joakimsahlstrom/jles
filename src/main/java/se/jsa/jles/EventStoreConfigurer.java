@@ -35,13 +35,14 @@ import se.jsa.jles.internal.util.Objects;
  */
 public class EventStoreConfigurer {
 	private static EntryFileNameGenerator entryFileNameGenerator = new EntryFileNameGenerator();
-	
+
 	private final FileChannelFactory fileChannelFactory;
 	private final InMemoryFileRepository inMemoryFileRepository;
 	private final Set<Class<?>> indexedEventTypes = new HashSet<Class<?>>();
 	private final Set<EventFieldIndexConfiguration> indexedEventFields = new HashSet<EventFieldIndexConfiguration>();
 	private boolean useFileBasedEventDefinitions;
 	private boolean multiThreadedEnvironment;
+	private boolean safeWrites = false;
 
 	private final List<String> files = new ArrayList<String>();
 
@@ -60,7 +61,7 @@ public class EventStoreConfigurer {
 	public static EventStoreConfigurer createMemoryOnlyConfigurer() {
 		return new EventStoreConfigurer(new InMemoryFileRepository());
 	}
-	
+
 	public static EventStoreConfigurer createMemoryOnlyConfigurer(InMemoryFileRepository inMemoryFileRepository) {
 		return new EventStoreConfigurer(inMemoryFileRepository);
 	}
@@ -91,6 +92,11 @@ public class EventStoreConfigurer {
 
 	public EventStoreConfigurer testableEventDefinitions() {
 		this.useFileBasedEventDefinitions = false;
+		return this;
+	}
+
+	public EventStoreConfigurer safeWrites(boolean safeWrites) {
+		this.safeWrites = safeWrites;
 		return this;
 	}
 
@@ -157,7 +163,7 @@ public class EventStoreConfigurer {
 			return inMemoryFileRepository.getEntryFile(fileName);
 		}
 
-		EntryFile flippingEntryFile = new FlippingEntryFile(fileName, fileChannelFactory);
+		EntryFile flippingEntryFile = new FlippingEntryFile(fileName, fileChannelFactory, safeWrites);
 		if (multiThreadedEnvironment) {
 			flippingEntryFile = new ThreadSafeEntryFile(flippingEntryFile);
 		}
