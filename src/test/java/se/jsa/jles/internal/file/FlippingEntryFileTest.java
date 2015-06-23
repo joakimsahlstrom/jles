@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import se.jsa.jles.EventStoreConfigurer.WriteStrategy;
 import se.jsa.jles.FileChannelFactory;
 import se.jsa.jles.internal.EntryFile;
 
@@ -18,14 +19,14 @@ public class FlippingEntryFileTest extends EntryFileContract {
 	private interface EntryFileFactory {
 		public EntryFile create(String fileName, FileChannelFactory fileChannelFactory);
 	}
-	
+
 	@Parameters
 	public static Collection<Object[]> entryFiles() {
 		return Arrays.asList(new Object[] {
 				new EntryFileFactory() {
 					@Override
 					public EntryFile create(String fileName, FileChannelFactory fileChannelFactory) {
-						return new FlippingEntryFile(fileName, fileChannelFactory, false);
+						return new FlippingEntryFile(fileName, fileChannelFactory, WriteStrategy.FAST);
 					}
 					@Override
 					public String toString() { return "FlippingEntryFile, no safe writes"; }
@@ -35,21 +36,31 @@ public class FlippingEntryFileTest extends EntryFileContract {
 				new EntryFileFactory() {
 					@Override
 					public EntryFile create(String fileName, FileChannelFactory fileChannelFactory) {
-						return new FlippingEntryFile(fileName, fileChannelFactory, true);
+						return new FlippingEntryFile(fileName, fileChannelFactory, WriteStrategy.SAFE);
 					}
 					@Override
 					public String toString() { return "FlippingEntryFile, safe writes"; }
 				}
+			},
+			new Object[] {
+				new EntryFileFactory() {
+					@Override
+					public EntryFile create(String fileName, FileChannelFactory fileChannelFactory) {
+						return new FlippingEntryFile(fileName, fileChannelFactory, WriteStrategy.SUPERSAFE);
+					}
+					@Override
+					public String toString() { return "FlippingEntryFile, supersafe writes"; }
+				}
 			});
 	}
-	
-	private StreamBasedChannelFactory fileChannelFactory = new StreamBasedChannelFactory();
-	private EntryFileFactory entryFileFactory;
-	
+
+	private final StreamBasedChannelFactory fileChannelFactory = new StreamBasedChannelFactory();
+	private final EntryFileFactory entryFileFactory;
+
 	public FlippingEntryFileTest(EntryFileFactory entryFileFactory) {
 		this.entryFileFactory = entryFileFactory;
 	}
-	
+
 	@Override
 	public EntryFile createEntryFile() {
 		deleteFile();

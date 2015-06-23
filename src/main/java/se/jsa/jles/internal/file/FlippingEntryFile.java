@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+import se.jsa.jles.EventStoreConfigurer.WriteStrategy;
 import se.jsa.jles.FileChannelFactory;
 import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.util.Objects;
@@ -21,16 +22,16 @@ public class FlippingEntryFile implements EntryFile {
 	private FileChannel outputChannel = null;
 	private Long size = null;
 	private FileChannelFactory fileChannelFactory;
-	private final boolean safeWrite;
+	private final WriteStrategy writeStrategy;
 
 	public FlippingEntryFile(String fileName, FileChannelFactory fileChannelFactory) {
-		this(fileName, fileChannelFactory, false);
+		this(fileName, fileChannelFactory, WriteStrategy.FAST);
 	}
 
-	public FlippingEntryFile(String fileName, FileChannelFactory fileChannelFactory, boolean safeWrite) {
+	public FlippingEntryFile(String fileName, FileChannelFactory fileChannelFactory, WriteStrategy writeStrategy) {
 		this.fileName = Objects.requireNonNull(fileName);
 		this.fileChannelFactory = Objects.requireNonNull(fileChannelFactory);
-		this.safeWrite = safeWrite;
+		this.writeStrategy = writeStrategy;
 	}
 
 	@Override
@@ -38,8 +39,13 @@ public class FlippingEntryFile implements EntryFile {
 		try {
 			FileChannel outputChannel = getOutputChannel();
 			long result = entryReader.append(data, outputChannel);
-			if (safeWrite) {
+			switch (writeStrategy) {
+			case SAFE:
 				outputChannel.force(true);
+				break;
+			case SUPERSAFE:
+				closeOutputStream();
+				break;
 			}
 			return result;
 		} catch (IOException e) {
@@ -124,8 +130,11 @@ public class FlippingEntryFile implements EntryFile {
 	@Override
 	public String toString() {
 		return "FlippingEntryFile [fileName=" + fileName + ", entryReader="
-				+ entryReader + ", size=" + size + ", fileChannelFactory="
-				+ fileChannelFactory + ", safeWrite=" + safeWrite + "]";
+				+ entryReader + ", inputStream=" + inputStream
+				+ ", inputChannel=" + inputChannel + ", outputStream="
+				+ outputStream + ", outputChannel=" + outputChannel + ", size="
+				+ size + ", fileChannelFactory=" + fileChannelFactory
+				+ ", writeStrategy=" + writeStrategy + "]";
 	}
 
 }

@@ -34,6 +34,13 @@ import se.jsa.jles.internal.util.Objects;
  * @author joakim Joakim Sahlström
  */
 public class EventStoreConfigurer {
+
+	public enum WriteStrategy {
+		FAST,
+		SAFE,
+		SUPERSAFE
+	}
+
 	private static EntryFileNameGenerator entryFileNameGenerator = new EntryFileNameGenerator();
 
 	private final FileChannelFactory fileChannelFactory;
@@ -42,7 +49,7 @@ public class EventStoreConfigurer {
 	private final Set<EventFieldIndexConfiguration> indexedEventFields = new HashSet<EventFieldIndexConfiguration>();
 	private boolean useFileBasedEventDefinitions;
 	private boolean multiThreadedEnvironment;
-	private boolean safeWrites = false;
+	private WriteStrategy writeStrategy = WriteStrategy.FAST;
 
 	private final List<String> files = new ArrayList<String>();
 
@@ -95,8 +102,8 @@ public class EventStoreConfigurer {
 		return this;
 	}
 
-	public EventStoreConfigurer safeWrites(boolean safeWrites) {
-		this.safeWrites = safeWrites;
+	public EventStoreConfigurer writeStrategy(WriteStrategy writeStrategy) {
+		this.writeStrategy = writeStrategy;
 		return this;
 	}
 
@@ -163,7 +170,7 @@ public class EventStoreConfigurer {
 			return inMemoryFileRepository.getEntryFile(fileName);
 		}
 
-		EntryFile flippingEntryFile = new FlippingEntryFile(fileName, fileChannelFactory, safeWrites);
+		EntryFile flippingEntryFile = new FlippingEntryFile(fileName, fileChannelFactory, writeStrategy);
 		if (multiThreadedEnvironment) {
 			flippingEntryFile = new ThreadSafeEntryFile(flippingEntryFile);
 		}
