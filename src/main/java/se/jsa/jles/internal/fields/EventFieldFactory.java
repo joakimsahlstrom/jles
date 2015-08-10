@@ -3,6 +3,7 @@ package se.jsa.jles.internal.fields;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -54,6 +55,7 @@ public class EventFieldFactory {
 		for (NameTypePair ntp : getMethods) {
 			result.add(ntp.createEventField(eventType));
 		}
+		Collections.sort(result);
 		return result;
 	}
 

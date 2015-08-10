@@ -1,9 +1,8 @@
 package se.jsa.jles.internal.query;
 
-import java.util.Objects;
-
 import se.jsa.jles.internal.Constraint;
 import se.jsa.jles.internal.FieldConstraint;
+import se.jsa.jles.internal.util.Objects;
 
 class EqualsRequirement extends Requirement {
 	private final String fieldName;
@@ -14,19 +13,19 @@ class EqualsRequirement extends Requirement {
 		this.fieldName = Objects.requireNonNull(fieldName);
 		this.equality = Objects.requireNonNull(equality);
 	}
-	
+
 	@Override
 	public FieldConstraint createFieldContraint() {
 		return FieldConstraint.create(fieldName, new EqualsConstraint(equality));
 	}
-	
+
 	private static class EqualsConstraint extends Constraint {
-		private Object equality;
+		private final Object equality;
 
 		public EqualsConstraint(Object equality) {
 			this.equality = equality;
 		}
-		
+
 		@Override
 		protected boolean isSatisfied(Object eventFieldValue) {
 			return equality == null ? eventFieldValue == null : eventFieldValue.equals(equality);

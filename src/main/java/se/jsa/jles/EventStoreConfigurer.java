@@ -119,9 +119,9 @@ public class EventStoreConfigurer {
 
 	private EventDefinitions createEventDefinitions() {
 		if (useFileBasedEventDefinitions) {
-			MappingEventDefinitions eventDefinitions = new MappingEventDefinitions(
-					new PersistingEventDefinitions(
-							new EventDefinitionFile(createEntryFile(entryFileNameGenerator.getEventDefintionsFileName()))));
+			PersistingEventDefinitions persistedEventDefinitions = new PersistingEventDefinitions(
+					new EventDefinitionFile(createEntryFile(entryFileNameGenerator.getEventDefintionsFileName())));
+			MappingEventDefinitions eventDefinitions = new MappingEventDefinitions(persistedEventDefinitions);
 			eventDefinitions.init();
 			return eventDefinitions;
 		} else {

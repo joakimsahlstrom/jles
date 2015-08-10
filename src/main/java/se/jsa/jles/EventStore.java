@@ -1,5 +1,6 @@
 package se.jsa.jles;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -24,9 +25,9 @@ import se.jsa.jles.internal.LoadingIterable;
 import se.jsa.jles.internal.TypedEventRepo;
 import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
-import se.jsa.jles.internal.fields.EventField;
 import se.jsa.jles.internal.fields.StorableLongField;
 import se.jsa.jles.internal.util.Objects;
+import se.jsa.jles.internal.util.ReflectionUtil;
 
 
 /**
@@ -131,8 +132,15 @@ public class EventStore {
 
 		@Override
 		public Object readEventField(EventId eventIndex, String fieldName) {
-			final EventField eventField = eventDefinitions.getEventField(eventTypeId, fieldName);
-			return eventFile.readEventField(eventIndex.getEventId(), eventDeserializer, eventField);
+//			EventField eventField = eventDefinitions.getEventField(eventTypeId, fieldName);
+			Object event = eventFile.readEvent(eventIndex.getEventId(), eventDeserializer);
+			Method getMethod = ReflectionUtil.getPropertyRetrieveMethod(event.getClass(), fieldName);
+			try {
+				return getMethod.invoke(event);
+			} catch (Exception e) {
+				throw new RuntimeException("Unknown event field!");
+			}
+			//return eventFile.readEventField(eventIndex.getEventId(), eventDeserializer, eventField);
 		}
 
 		@Override

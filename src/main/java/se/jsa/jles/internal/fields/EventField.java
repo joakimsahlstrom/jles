@@ -3,7 +3,7 @@ package se.jsa.jles.internal.fields;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
-public abstract class EventField extends StorableField {
+public abstract class EventField extends StorableField implements Comparable<EventField> {
 	private final Method getMethod;
 	private final Method setMethod;
 	private final String propertyName;
@@ -72,6 +72,12 @@ public abstract class EventField extends StorableField {
 	public boolean isNull(Object event) {
 		return getValue(event) == null;
 	}
+
+	@Override
+	public int compareTo(EventField o) {
+		return propertyName.compareTo(o.propertyName);
+	}
+
 
 	@Override
 	public int hashCode() {
