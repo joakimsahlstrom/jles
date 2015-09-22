@@ -134,8 +134,17 @@ public class IndexFile {
 			do {
 				entry = entryFile.readEntry(position);
 				eventIndex = entry.getLong();
-				entry.getInt(); // size
-				indexKey = readIndexKey(entry);
+				int size = entry.getInt();
+				try {
+					indexKey = readIndexKey(entry);
+				} catch (Exception e) {
+					throw new RuntimeException("Could not read index key. entryFile=" + entryFile
+							+ ", position=" + position
+							+ ", eventIndex=" + eventIndex
+							+ ", size=" + size
+							+ ", entry=" + entry,
+							e);
+				}
 				result = new EventId(eventIndex, eventIdByType++);
 			} while (!matcher.accepts(indexKey) && (position += entry.limit()) < fileSize);
 

@@ -48,7 +48,7 @@ public class EventStoreConfigurer {
 	private final Set<Class<?>> indexedEventTypes = new HashSet<Class<?>>();
 	private final Set<EventFieldIndexConfiguration> indexedEventFields = new HashSet<EventFieldIndexConfiguration>();
 	private boolean useFileBasedEventDefinitions;
-	private boolean multiThreadedEnvironment;
+	private boolean multiThreadedEnvironment = true;
 	private WriteStrategy writeStrategy = WriteStrategy.FAST;
 
 	private final List<String> files = new ArrayList<String>();

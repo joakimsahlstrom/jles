@@ -103,4 +103,15 @@ public class IndexFileTest {
 		indexFile.close();
 	}
 
+	@Test
+	public void hasNext() throws Exception {
+		IndexFile indexFile = new IndexFile(new StorableLongField(), new SynchronousEntryFile("test.if"));
+
+		Iterator<EventId> iterator = indexFile.readIndicies(EventIndex.ALWAYS_MATCHER).iterator();
+		assertFalse(iterator.hasNext());
+		assertFalse(iterator.hasNext());
+
+		indexFile.close();
+	}
+
 }
