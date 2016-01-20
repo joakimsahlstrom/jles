@@ -1,6 +1,22 @@
+/*
+ * Copyright 2016 Joakim Sahlström
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package se.jsa.jles;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.util.Iterator;
 
@@ -12,14 +28,14 @@ import se.jsa.jles.internal.testevents.MyEvent2;
 public class EventQueryTest {
 
 	EventStore eventStore = EventStoreConfigurer.createMemoryOnlyConfigurer().configure();
-	
+
 	@Test
 	public void canQueryForAllEventsOfOneType() throws Exception {
 		MyEvent expectedEvent = new MyEvent(1);
 		eventStore.write(expectedEvent);
 		assertEquals(expectedEvent, eventStore.readEvents(EventQuery.select(MyEvent.class)).iterator().next());
 	}
-	
+
 	@Test
 	public void canQueryByFieldEqualityForOneEventType() throws Exception {
 		MyEvent otherEvent = new MyEvent(1);
@@ -28,17 +44,17 @@ public class EventQueryTest {
 		eventStore.write(expectedEvent);
 		assertEquals(expectedEvent, eventStore.readEvents(EventQuery.select(MyEvent.class).where("Num").is(2)).iterator().next());
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void doesNotAllowQueryForNonExistingField() throws Exception {
 		EventQuery.select(MyEvent.class).where("Num2");
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void doesNotAllowQueryWithDifferentTypeForEquality() throws Exception {
 		EventQuery.select(MyEvent.class).where("Num").is(2L);
 	}
-	
+
 	@Test
 	public void canQueryForAllEventsOfMultipleTypes() throws Exception {
 		MyEvent expectedEvent1 = new MyEvent(1);
@@ -50,7 +66,7 @@ public class EventQueryTest {
 		assertEquals(expectedEvent2, iterator.next());
 		assertFalse(iterator.hasNext());
 	}
-	
+
 	@Test
 	public void canQueryByFieldEqualityForMultipleEventTypes() throws Exception {
 		MyEvent expectedEvent1 = new MyEvent(1);
@@ -73,7 +89,7 @@ public class EventQueryTest {
 		assertEquals(expectedEvent3, iterator.next());
 		assertFalse(iterator.hasNext());
 	}
-	
+
 	@Test
 	public void canQueryByNumericFieldGreaterThan() throws Exception {
 		MyEvent otherEvent1 = new MyEvent(1);
@@ -90,7 +106,7 @@ public class EventQueryTest {
 		assertEquals(expectedEvent2, iterator.next());
 		assertFalse(iterator.hasNext());
 	}
-	
+
 	@Test
 	public void canQueryByNumericFieldLessThan() throws Exception {
 		MyEvent expectedEvent1 = new MyEvent(1);
@@ -106,5 +122,5 @@ public class EventQueryTest {
 		assertEquals(expectedEvent1, iterator.next());
 		assertFalse(iterator.hasNext());
 	}
-	
+
 }

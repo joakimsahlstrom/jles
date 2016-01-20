@@ -1,3 +1,21 @@
+/*
+ * Copyright 2016 Joakim Sahlimport static org.junit.Assert.assertEquals;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.After;
+import org.junit.Test;
+
+import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
+import se.jsa.jles.internal.file.FlippingEntryFile;
+import se.jsa.jles.internal.file.StreamBasedChannelFactory;
+import se.jsa.jles.internal.testevents.ObjectTestEvent;
+ONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package se.jsa.jles.internal;
 
 import static org.junit.Assert.assertEquals;

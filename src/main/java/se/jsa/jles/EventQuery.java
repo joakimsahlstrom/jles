@@ -1,3 +1,18 @@
+/*
+ * Copyright 2016 Joakim Sahlström
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package se.jsa.jles;
 
 import se.jsa.jles.internal.FieldConstraint;
@@ -9,10 +24,10 @@ import se.jsa.jles.internal.util.ReflectionUtil;
 public final class EventQuery {
 
 	private static final RequirementFactory REQUIREMENT_FACTORY = new RequirementFactory();
-	
-	private Class<?> eventType;
-	private Requirement requirement;
-	private EventQuery next;
+
+	private final Class<?> eventType;
+	private final Requirement requirement;
+	private final EventQuery next;
 
 	private EventQuery(Class<?> eventType, Requirement requirement, EventQuery next) {
 		this.eventType = Objects.requireNonNull(eventType);
@@ -21,7 +36,7 @@ public final class EventQuery {
 	}
 
 	// query building
-	
+
 	public static EventQuery select(Class<?> eventType) {
 		return new EventQuery(eventType, Requirement.NONE, null);
 	}
@@ -29,21 +44,21 @@ public final class EventQuery {
 	public EventQueryWhere where(String fieldName) {
 		return new EventQueryWhere(this, fieldName);
 	}
-	
+
 	public EventQuery join(Class<?> eventType) {
 		return new EventQuery(eventType, Requirement.NONE, this);
 	}
-	
+
 	private EventQuery withRequirement(Requirement requirement) {
 		return new EventQuery(eventType, requirement, this.next);
 	}
-	
+
 	// inspection
-	
+
 	Class<?> getEventType() {
 		return eventType;
 	}
-	
+
 	EventQuery next() {
 		return next;
 	}
@@ -51,10 +66,10 @@ public final class EventQuery {
 	FieldConstraint createFieldConstraint() {
 		return requirement.createFieldContraint();
 	}
-	
+
 	public static class EventQueryWhere {
-		private EventQuery sourceQuery;
-		private String fieldName;
+		private final EventQuery sourceQuery;
+		private final String fieldName;
 
 		public EventQueryWhere(EventQuery sourceQuery, String fieldName) {
 			validateFieldName(sourceQuery.getEventType(), fieldName);
@@ -86,5 +101,5 @@ public final class EventQuery {
 			return sourceQuery.withRequirement(REQUIREMENT_FACTORY.createInRequirement(sourceQuery.getEventType(), fieldName, equalities));
 		}
 	}
-	
+
 }

@@ -13,17 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.jsa.jles.internal.fields;
+package se.jsa.jles.internal.file;
 
-import java.nio.ByteBuffer;
+import se.jsa.jles.internal.EntryFile;
 
-public abstract class StorableField {
+public class InMemoryEntryFileTest extends EntryFileContract {
 
-	public abstract Class<?> getFieldType();
-	public abstract int getSize(Object event);
-	public abstract void writeToBuffer(Object obj, ByteBuffer buffer);
-	public abstract Object readFromBuffer(ByteBuffer buffer);
-	public abstract boolean isNullable();
-	public abstract boolean isNull(Object event);
+	@Override
+	public EntryFile createEntryFile() {
+		return new InMemoryEntryFile();
+	}
+
+	@Override
+	public void closeEntryFile(EntryFile entryFile) {
+		// do nothing
+	}
 
 }
