@@ -135,6 +135,50 @@ public class EventStoreTest {
 			return "TestEvent [name=" + name + ", id=" + id + ", first="
 					+ first + "]";
 		}
+
+		public SerializableV1 asSerializable() {
+			return new SerializableV1(this);
+		}
+
+		public static class SerializableV1 {
+			private String nam;
+			private long id;
+			private boolean first;
+
+			public SerializableV1(TestEvent testEvent) {
+				nam = testEvent.getName();
+				id = testEvent.getId();
+				first = testEvent.getFirst();
+			}
+			public SerializableV1() {
+			}
+
+			@FieldMapping("Name")
+			public String getNam() {
+				return nam;
+			}
+			public void setNam(String nam) {
+				this.nam = nam;
+			}
+
+			public long getId() {
+				return id;
+			}
+			public void setId(long id) {
+				this.id = id;
+			}
+
+			public boolean getFirst() {
+				return first;
+			}
+			public void setFirst(boolean first) {
+				this.first = first;
+			}
+
+			public TestEvent asEvent() {
+				return new TestEvent(nam, id, first);
+			}
+		}
 	}
 
 	private interface EntryFileFactory {

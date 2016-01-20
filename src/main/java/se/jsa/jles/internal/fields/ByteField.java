@@ -1,16 +1,11 @@
 package se.jsa.jles.internal.fields;
 
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
 public class ByteField extends EventField {
 
 	public ByteField(Class<?> eventType, String propertyName) {
 		super(eventType, propertyName);
-	}
-
-	public ByteField(Method getMethod, Method setMethod) {
-		super(getMethod, setMethod);
 	}
 
 	@Override

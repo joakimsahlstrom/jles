@@ -1,13 +1,8 @@
 package se.jsa.jles.internal.fields;
 
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
 public class FloatField extends EventField {
-
-	public FloatField(Method getMethod, Method setMethod) {
-		super(getMethod, setMethod);
-	}
 
 	public FloatField(Class<?> eventType, String propertyName) {
 		super(eventType, propertyName);

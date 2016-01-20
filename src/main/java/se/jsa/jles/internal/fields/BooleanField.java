@@ -1,13 +1,8 @@
 package se.jsa.jles.internal.fields;
 
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
 public class BooleanField extends EventField {
-
-	public BooleanField(Method getMethod, Method setMethod) {
-		super(getMethod, setMethod);
-	}
 
 	public BooleanField(Class<?> eventType, String propertyName) {
 		super(eventType, propertyName);

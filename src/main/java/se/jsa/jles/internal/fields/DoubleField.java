@@ -1,13 +1,8 @@
 package se.jsa.jles.internal.fields;
 
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
 public class DoubleField extends EventField {
-
-	public DoubleField(Method getMethod, Method setMethod) {
-		super(getMethod, setMethod);
-	}
 
 	public DoubleField(Class<?> eventType, String propertyName) {
 		super(eventType, propertyName);

@@ -16,6 +16,7 @@ import se.jsa.jles.internal.EventFile;
 import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.EventIndex;
 import se.jsa.jles.internal.FieldConstraint;
+import se.jsa.jles.internal.InMemoryEventFieldIndex;
 import se.jsa.jles.internal.IndexFile;
 import se.jsa.jles.internal.Indexing;
 import se.jsa.jles.internal.SimpleEventFieldIndex;
@@ -23,6 +24,7 @@ import se.jsa.jles.internal.eventdefinitions.EventDefinitionFile;
 import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.PersistingEventDefinitions;
+import se.jsa.jles.internal.fields.EventField;
 import se.jsa.jles.internal.fields.StorableLongField;
 import se.jsa.jles.internal.file.FlippingEntryFile;
 import se.jsa.jles.internal.file.InMemoryFileRepository;
@@ -83,7 +85,12 @@ public class EventStoreConfigurer {
 	}
 
 	public EventStoreConfigurer addIndexing(Class<?> eventType, String fieldName) {
-		this.indexedEventFields.add(new EventFieldIndexConfiguration(eventType, fieldName));
+		this.indexedEventFields.add(new EventFieldIndexConfiguration(eventType, fieldName, false));
+		return this;
+	}
+
+	public EventStoreConfigurer addInMemoryIndexing(Class<?> eventType, String fieldName) {
+		this.indexedEventFields.add(new EventFieldIndexConfiguration(eventType, fieldName, true));
 		return this;
 	}
 
@@ -142,15 +149,34 @@ public class EventStoreConfigurer {
 		HashMap<EventFieldIndex.EventFieldId, EventFieldIndex> eventFieldIndicies = new HashMap<EventFieldIndex.EventFieldId, EventFieldIndex>();
 		for (EventFieldIndexConfiguration eventFieldIndexConfiguration : indexedEventFields) {
 			for (Long eventTypeId : eventDefinitions.getEventTypeIds(eventFieldIndexConfiguration.getEventType())) {
-				EventFieldIndex eventFieldIndex = new SimpleEventFieldIndex(
-						eventTypeId,
-						eventDefinitions.getEventField(eventTypeId, eventFieldIndexConfiguration.getFieldName()),
-						createEntryFile(entryFileNameGenerator.getEventFieldIndexFileName(eventTypeId, eventFieldIndexConfiguration.getFieldName())));
-				eventIndexPreparer.prepare(eventFieldIndex);
+				EventFieldIndex eventFieldIndex = createEventFieldIndex(eventDefinitions, eventIndexPreparer, eventFieldIndexConfiguration, eventTypeId);
 				eventFieldIndicies.put(eventFieldIndexConfiguration.createEventFieldId(eventTypeId), eventFieldIndex);
 			}
 		}
 		return eventFieldIndicies;
+	}
+
+	private EventFieldIndex createEventFieldIndex(
+			EventDefinitions eventDefinitions,
+			EventIndexPreparer eventIndexPreparer,
+			EventFieldIndexConfiguration eventFieldIndexConfiguration,
+			Long eventTypeId) {
+		EventField eventField = eventDefinitions.getEventField(eventTypeId, eventFieldIndexConfiguration.getFieldName());
+		if (eventFieldIndexConfiguration.inMemory()) {
+			return new InMemoryEventFieldIndex(
+					new EventFieldId(eventTypeId, eventField.getPropertyName()),
+					eventField,
+					eventIndexPreparer.getEventTypeIndex(),
+					eventDefinitions,
+					eventIndexPreparer.getEventFile());
+		} else {
+			EventFieldIndex eventFieldIndex = new SimpleEventFieldIndex(
+					eventTypeId,
+					eventField,
+					createEntryFile(entryFileNameGenerator.getEventFieldIndexFileName(eventTypeId, eventFieldIndexConfiguration.getFieldName())));
+			eventIndexPreparer.prepare(eventFieldIndex);
+			return eventFieldIndex;
+		}
 	}
 
 	private HashMap<Long, EventIndex> createEventIndicies(EventDefinitions eventDefinitions, EventIndexPreparer eventIndexPreparer) {
@@ -193,6 +219,14 @@ public class EventStoreConfigurer {
 			this.eventDefinitions = Objects.requireNonNull(eventDefinitions);
 		}
 
+		public EventFile getEventFile() {
+			return eventFile;
+		}
+
+		public IndexFile getEventTypeIndex() {
+			return eventTypeIndex;
+		}
+
 		public void prepare(EventIndex index) {
 			Iterator<EventId> existingIndicies = index.readIndicies().iterator();
 			Iterator<EventId> sourceIndicies = eventTypeIndex.readIndicies(new Indexing.EventTypeMatcher(index.getEventTypeId())).iterator();
@@ -205,7 +239,7 @@ public class EventStoreConfigurer {
 				}
 			}
 			while (sourceIndicies.hasNext()) {
-				index.writeIndex(sourceIndicies.next().getEventId());
+				index.writeIndex(sourceIndicies.next().toLong());
 			}
 		}
 
@@ -223,7 +257,7 @@ public class EventStoreConfigurer {
 			EventDeserializer eventDeserializer = eventDefinitions.getEventDeserializer(eventFieldIndex.getEventTypeId());
 			while (sourceIndicies.hasNext()) {
 				EventId eventId = sourceIndicies.next();
-				eventFieldIndex.onNewEvent(eventId.getEventId(), eventFile.readEvent(eventId.getEventId(), eventDeserializer));
+				eventFieldIndex.onNewEvent(eventId.toLong(), eventFile.readEvent(eventId.toLong(), eventDeserializer));
 			}
 		}
 	}
@@ -231,13 +265,19 @@ public class EventStoreConfigurer {
 	private class EventFieldIndexConfiguration {
 		private final Class<?> eventType;
 		private final String fieldName;
+		private final boolean inMemory;
 
-		public EventFieldIndexConfiguration(Class<?> eventType, String fieldName) {
+		public EventFieldIndexConfiguration(Class<?> eventType, String fieldName, boolean inMemory) {
 			this.eventType = Objects.requireNonNull(eventType);
 			this.fieldName = Objects.requireNonNull(fieldName);
+			this.inMemory = inMemory;
 		}
 
-		public EventFieldId createEventFieldId(Long eventTypeId) {
+		public boolean inMemory() {
+			return inMemory;
+		}
+
+		public EventFieldId createEventFieldId(long eventTypeId) {
 			return new EventFieldId(eventTypeId, fieldName);
 		}
 

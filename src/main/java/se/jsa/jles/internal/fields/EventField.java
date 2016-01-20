@@ -3,25 +3,28 @@ package se.jsa.jles.internal.fields;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
+import se.jsa.jles.FieldMapping;
+import se.jsa.jles.FieldValueMapper;
+
 public abstract class EventField extends StorableField implements Comparable<EventField> {
 	private final Method getMethod;
 	private final Method setMethod;
 	private final String propertyName;
+	private final String fieldName;
+	private final FieldValueMapper fieldValueMapper;
 
 	EventField(Class<?> eventType, String propertyName) {
 		this.propertyName = propertyName;
 		try {
 			getMethod = eventType.getMethod("get" + propertyName);
 			setMethod = eventType.getMethod("set" + propertyName, getFieldType());
+
+			FieldMapping fieldMapping = getMethod.getAnnotation(FieldMapping.class);
+			this.fieldName = fieldMapping != null ? fieldMapping.value() : null;
+			this.fieldValueMapper = fieldMapping != null ? fieldMapping.mapper().newInstance() : new FieldValueMapper.IdentityMapper();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	EventField(Method getMethod, Method setMethod) {
-		this.getMethod = getMethod;
-		this.setMethod = setMethod;
-		this.propertyName = getMethod.getName().substring(3);
 	}
 
 	public Object getValue(Object event) {
@@ -38,6 +41,14 @@ public abstract class EventField extends StorableField implements Comparable<Eve
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public Object mapFieldValue(Object fieldValue) {
+		return fieldValueMapper.map(fieldValue);
+	}
+
+	public boolean matchesFieldName(String fieldName) {
+		return this.fieldName != null ? this.fieldName.equals(fieldName) : propertyName.equals(fieldName);
 	}
 
 	public void readFromBuffer(Object event, ByteBuffer buffer) {

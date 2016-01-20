@@ -9,11 +9,6 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import se.jsa.jles.internal.fields.EventField;
-import se.jsa.jles.internal.fields.EventFieldFactory;
-import se.jsa.jles.internal.fields.IntegerField;
-import se.jsa.jles.internal.fields.StringField;
-
 public class EventFieldFactoryTest {
 
 	public static class EmptyEvent {
@@ -113,7 +108,7 @@ public class EventFieldFactoryTest {
 	public void canBuildEventFieldsFromSingleIntegerEventType() throws Exception {
 		List<EventField> eventFields = new EventFieldFactory().fromEventType(SingleIntegerEvent.class);
 		assertEquals(
-				asSet(new IntegerField(SingleIntegerEvent.class.getMethod("getVal"), SingleIntegerEvent.class.getMethod("setVal", Integer.TYPE))),
+				asSet(new IntegerField(SingleIntegerEvent.class, "Val")),
 				asSet(eventFields));
 	}
 
@@ -121,7 +116,7 @@ public class EventFieldFactoryTest {
 	public void canBuildEventFieldsFromSingleStringEventType() throws Exception {
 		List<EventField> eventFields = new EventFieldFactory().fromEventType(SingleStringEvent.class);
 		assertEquals(
-				asSet(new IntegerField(SingleStringEvent.class.getMethod("getVal"), SingleStringEvent.class.getMethod("setVal", String.class))),
+				asSet(new IntegerField(SingleStringEvent.class, "Val")),
 				asSet(eventFields));
 	}
 
@@ -129,8 +124,7 @@ public class EventFieldFactoryTest {
 	public void canBuildEventFieldsFromIntegerStringEventType() throws Exception {
 		List<EventField> eventFields = new EventFieldFactory().fromEventType(IntegerStringEvent.class);
 		assertEquals(
-				asSet(new IntegerField(IntegerStringEvent.class.getMethod("getI"), IntegerStringEvent.class.getMethod("setI", Integer.TYPE)),
-					  new StringField(IntegerStringEvent.class.getMethod("getS"), IntegerStringEvent.class.getMethod("setS", String.class))),
+				asSet(new IntegerField(IntegerStringEvent.class, "I"), new StringField(IntegerStringEvent.class, "S")),
 				asSet(eventFields));
 	}
 

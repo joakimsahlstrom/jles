@@ -1,16 +1,11 @@
 package se.jsa.jles.internal.fields;
 
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
 public class CharField extends EventField {
 
 	public CharField(Class<?> eventType, String propertyName) {
 		super(eventType, propertyName);
-	}
-
-	public CharField(Method getMethod, Method setMethod) {
-		super(getMethod, setMethod);
 	}
 
 	@Override

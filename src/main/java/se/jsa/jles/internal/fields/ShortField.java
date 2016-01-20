@@ -1,16 +1,11 @@
 package se.jsa.jles.internal.fields;
 
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
 public class ShortField extends EventField {
 
 	ShortField(Class<?> eventType, String propertyName) {
 		super(eventType, propertyName);
-	}
-
-	ShortField(Method getMethod, Method setMethod) {
-		super(getMethod, setMethod);
 	}
 
 	@Override

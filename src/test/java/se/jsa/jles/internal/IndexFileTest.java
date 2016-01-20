@@ -53,8 +53,8 @@ public class IndexFileTest {
 		EventId ie1 = iterator.next();
 		EventId ie2 = iterator.next();
 		assertFalse(iterator.hasNext());
-		assertEquals(0L, ie1.getEventId());
-		assertEquals(3L, ie2.getEventId());
+		assertEquals(0L, ie1.toLong());
+		assertEquals(3L, ie2.toLong());
 
 		indexFile.close();
 	}
@@ -73,9 +73,9 @@ public class IndexFileTest {
 		EventId ie2 = iterator.next();
 		EventId ie3 = iterator.next();
 		assertFalse(iterator.hasNext());
-		assertEquals(0L, ie1.getEventId());
-		assertEquals(3L, ie2.getEventId());
-		assertEquals(27L, ie3.getEventId());
+		assertEquals(0L, ie1.toLong());
+		assertEquals(3L, ie2.toLong());
+		assertEquals(27L, ie3.toLong());
 
 		indexFile.close();
 	}
@@ -95,10 +95,10 @@ public class IndexFileTest {
 		EventId ie3 = iterator.next();
 		EventId ie4 = iterator.next();
 		assertFalse(iterator.hasNext());
-		assertEquals(0, ie1.getEventId());
-		assertEquals(1, ie2.getEventId());
-		assertEquals(2, ie3.getEventId());
-		assertEquals(3, ie4.getEventId());
+		assertEquals(0, ie1.toLong());
+		assertEquals(1, ie2.toLong());
+		assertEquals(2, ie3.toLong());
+		assertEquals(3, ie4.toLong());
 
 		indexFile.close();
 	}

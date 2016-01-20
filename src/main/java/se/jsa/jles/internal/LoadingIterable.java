@@ -86,7 +86,7 @@ public class LoadingIterable implements Iterable<Object> {
 			if (currentFeeder == null) {
 				return true;
 			}
-			return current.getEventId() < currentFeeder.current.getEventId();
+			return current.toLong() < currentFeeder.current.toLong();
 		}
 	}
 

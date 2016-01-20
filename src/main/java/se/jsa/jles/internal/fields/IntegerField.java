@@ -1,13 +1,8 @@
 package se.jsa.jles.internal.fields;
 
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
 public class IntegerField extends EventField {
-
-	public IntegerField(Method getMethod, Method setMethod) {
-		super(getMethod, setMethod);
-	}
 
 	public IntegerField(Class<?> eventType, String propertyName) {
 		super(eventType, propertyName);

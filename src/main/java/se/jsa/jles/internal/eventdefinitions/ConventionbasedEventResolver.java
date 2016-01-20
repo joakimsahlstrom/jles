@@ -84,7 +84,8 @@ public class ConventionbasedEventResolver implements EventResolver {
 
 		@Override
 		public Object deserializeEventField(ByteBuffer input, EventField eventField) {
-			return deserializer.deserializeEventField(input, eventField);
+			Object deserializeEventField = deserializer.deserializeEventField(input, eventField);
+			return eventField.mapFieldValue(deserializeEventField);
 		}
 	}
 

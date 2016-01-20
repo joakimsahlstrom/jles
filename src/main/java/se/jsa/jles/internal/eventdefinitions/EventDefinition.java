@@ -112,11 +112,11 @@ class EventDefinition implements EventSerializer, EventDeserializer {
 
 	public EventField getField(String fieldName) {
 		for (EventField ef : fields) {
-			if (ef.getPropertyName().equals(fieldName)) {
+			if (ef.matchesFieldName(fieldName)) {
 				return ef;
 			}
 		}
-		throw new IllegalArgumentException("Field with name " + fieldName + " does not exist for event type " + eventType.getSimpleName());
+		throw new IllegalArgumentException("Field with name " + fieldName + " does not exist for event type " + eventType.getSimpleName() + ". Available fields: " + fields);
 	}
 
 	List<EventField> getFields() {

@@ -4,13 +4,13 @@ package se.jsa.jles.internal;
 public interface EventFieldIndex {
 
 	class EventFieldId {
-		private final Long eventTypeId;
+		private final long eventTypeId;
 		private final String fieldName;
-		public EventFieldId(Long eventTypeId, String fieldName) {
+		public EventFieldId(long eventTypeId, String fieldName) {
 			this.eventTypeId = eventTypeId;
 			this.fieldName = fieldName;
 		}
-		public Long getEventTypeId() {
+		public long getEventTypeId() {
 			return eventTypeId;
 		}
 		public String getFieldName() {
@@ -18,7 +18,7 @@ public interface EventFieldIndex {
 		}
 		@Override
 		public int hashCode() {
-			return eventTypeId.hashCode() * 31 + fieldName.hashCode();
+			return (int) eventTypeId * 31 + fieldName.hashCode();
 		}
 		@Override
 		public boolean equals(Object obj) {
@@ -32,12 +32,12 @@ public interface EventFieldIndex {
 				return false;
 			}
 			EventFieldId other = (EventFieldId) obj;
-			return eventTypeId.equals(other.eventTypeId) && fieldName.equals(other.fieldName);
+			return eventTypeId == other.eventTypeId && fieldName.equals(other.fieldName);
 		}
 	}
 
+	public long getEventTypeId();
 	public EventFieldId getFieldId();
-	public Long getEventTypeId();
 	public boolean indexes(long eventTypeId);
 
 	public Iterable<EventId> getIterable(FieldConstraint constraint);

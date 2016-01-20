@@ -1,13 +1,8 @@
 package se.jsa.jles.internal.fields;
 
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
 public class StringField extends EventField {
-
-	public StringField(Method getMethod, Method setMethod) {
-		super(getMethod, setMethod);
-	}
 
 	public StringField(Class<?> eventType, String value) {
 		super(eventType, value);

@@ -29,16 +29,16 @@ public class EventStoreConfigurerTest {
 		initialEventStore.stop();
 		// Initial event causes indexing
 		assertEquals(1, count(eventIndex.readIndicies().iterator()));
-		
-		
+
+
 		EventStore nonIndexingEventStore = EventStoreConfigurer.createMemoryOnlyConfigurer(inMemoryFileRepository)
 				.configure();
 		nonIndexingEventStore.write(new TestEvent("2", 2, false));
 		nonIndexingEventStore.stop();
 		// No more indexing happens since new event store does not use index for given event type
 		assertEquals(1, count(eventIndex.readIndicies().iterator()));
-		
-		
+
+
 		EventStore indexingEventStore = EventStoreConfigurer.createMemoryOnlyConfigurer(inMemoryFileRepository)
 				.addIndexing(TestEvent.class)
 				.configure();
@@ -51,8 +51,8 @@ public class EventStoreConfigurerTest {
 	public void fillsEventFieldIndecesIfEventsMissing() throws Exception {
 		InMemoryFileRepository inMemoryFileRepository = new InMemoryFileRepository();
 		EventFieldIndex eventFieldIndex = new SimpleEventFieldIndex(
-				0L, 
-				new EventFieldFactory().createEventField(Long.class, "Id", TestEvent.class), 
+				0L,
+				new EventFieldFactory().createEventField(Long.class, "Id", TestEvent.class),
 				inMemoryFileRepository.getEntryFile(new EntryFileNameGenerator().getEventFieldIndexFileName(0L, "Id")));
 
 		EventStore initialEventStore = EventStoreConfigurer.createMemoryOnlyConfigurer(inMemoryFileRepository)
@@ -62,16 +62,16 @@ public class EventStoreConfigurerTest {
 		initialEventStore.stop();
 		// Initial event causes indexing
 		assertEquals(1, count(eventFieldIndex.getIterable(FieldConstraint.noConstraint()).iterator()));
-		
-		
+
+
 		EventStore nonIndexingEventStore = EventStoreConfigurer.createMemoryOnlyConfigurer(inMemoryFileRepository)
 				.configure();
 		nonIndexingEventStore.write(new TestEvent("2", 2, false));
 		nonIndexingEventStore.stop();
 		// No more indexing happens since new event store does not use index for given event type
 		assertEquals(1, count(eventFieldIndex.getIterable(FieldConstraint.noConstraint()).iterator()));
-		
-		
+
+
 		EventStore indexingEventStore = EventStoreConfigurer.createMemoryOnlyConfigurer(inMemoryFileRepository)
 				.addIndexing(TestEvent.class, "Id")
 				.configure();
@@ -79,7 +79,7 @@ public class EventStoreConfigurerTest {
 		assertEquals(2, count(eventFieldIndex.getIterable(FieldConstraint.noConstraint()).iterator()));
 		indexingEventStore.stop();
 	}
-	
+
 	private int count(Iterator<?> it) {
 		int count = 0;
 		while (it.hasNext()) {
@@ -88,5 +88,5 @@ public class EventStoreConfigurerTest {
 		}
 		return count;
 	}
-	
+
 }

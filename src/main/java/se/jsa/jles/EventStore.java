@@ -127,13 +127,13 @@ public class EventStore {
 
 		@Override
 		public Object readEvent(EventId eventIndex) {
-			return eventFile.readEvent(eventIndex.getEventId(), eventDeserializer);
+			return eventFile.readEvent(eventIndex.toLong(), eventDeserializer);
 		}
 
 		@Override
 		public Object readEventField(EventId eventIndex, String fieldName) {
 //			EventField eventField = eventDefinitions.getEventField(eventTypeId, fieldName);
-			Object event = eventFile.readEvent(eventIndex.getEventId(), eventDeserializer);
+			Object event = eventFile.readEvent(eventIndex.toLong(), eventDeserializer);
 			Method getMethod = ReflectionUtil.getPropertyRetrieveMethod(event.getClass(), fieldName);
 			try {
 				return getMethod.invoke(event);

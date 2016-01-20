@@ -1,13 +1,8 @@
 package se.jsa.jles.internal.fields;
 
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
 public class LongField extends EventField {
-
-	public LongField(Method getMethod, Method setMethod) {
-		super(getMethod, setMethod);
-	}
 
 	public LongField(Class<?> eventType, String propertyName) {
 		super(eventType, propertyName);

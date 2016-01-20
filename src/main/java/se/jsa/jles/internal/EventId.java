@@ -10,7 +10,7 @@ public class EventId {
 		this.eventIdByType = eventIdByType;
 	}
 
-	public long getEventId() {
+	public long toLong() {
 		return eventId;
 	}
 

@@ -28,14 +28,14 @@ public class Indexing {
 	/**
 	 * @param eventTypeIndexFile The {@link IndexFile} containing the main mapping data between event file indexes and the event types
 	 * @param eventIndicies A Map with the {@link EventIndex}es that should exist for corresponding event type (ids)
-	 * @param eventFieldIds A Map with the {@link EventFieldIndex}es that should exist for corresponding event fields
+	 * @param eventFieldIndicies A Map with the {@link EventFieldIndex}es that should exist for corresponding event fields
 	 * @param multiThreadedEnvironment <code>true</code> if this {@link Indexing} is living in a multithreaded environment (and thus must be thread safe)
 	 */
-	public Indexing(IndexFile eventTypeIndexFile, Map<Long, EventIndex> eventIndicies, Map<EventFieldId, EventFieldIndex> eventFieldIds, boolean multiThreadedEnvironment) {
+	public Indexing(IndexFile eventTypeIndexFile, Map<Long, EventIndex> eventIndicies, Map<EventFieldId, EventFieldIndex> eventFieldIndicies, boolean multiThreadedEnvironment) {
 		this.eventTypeIndexFile = eventTypeIndexFile;
 		this.eventIndicies = Objects.requireNonNull(eventIndicies);
-		this.eventFieldIndicies = Objects.requireNonNull(eventFieldIds);
-		this.indexUpdater = createIndexUpdater(eventTypeIndexFile, eventIndicies, eventFieldIds, multiThreadedEnvironment);
+		this.eventFieldIndicies = Objects.requireNonNull(eventFieldIndicies);
+		this.indexUpdater = createIndexUpdater(eventTypeIndexFile, eventIndicies, eventFieldIndicies, multiThreadedEnvironment);
 	}
 
 	private static IndexUpdater createIndexUpdater(IndexFile eventTypeIndexFile, Map<Long, EventIndex> eventIndicies, Map<EventFieldId, EventFieldIndex> eventFieldIds, boolean multiThreadedEnvironment) {
@@ -120,7 +120,7 @@ public class Indexing {
 		public EventTypeMatcher(Set<Long> acceptedEventTypes) {
 			this.acceptedTypes = acceptedEventTypes;
 		}
-		public EventTypeMatcher(Long eventTypeId) {
+		public EventTypeMatcher(long eventTypeId) {
 			this(Collections.singleton(eventTypeId));
 		}
 		@Override
@@ -172,13 +172,13 @@ public class Indexing {
 	private static class ThreadsafeIndexUpdater implements IndexUpdater {
 		final IndexFile eventTypeIndexFile;
 		final Map<Long, EventIndex> eventIndicies;
-		final Map<EventFieldId, EventFieldIndex> eventFieldIds;
+		final Map<EventFieldId, EventFieldIndex> eventFieldIndicies;
 		private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-		public ThreadsafeIndexUpdater(IndexFile eventTypeIndexFile, Map<Long, EventIndex> eventIndicies, Map<EventFieldId, EventFieldIndex> eventFieldIds) {
+		public ThreadsafeIndexUpdater(IndexFile eventTypeIndexFile, Map<Long, EventIndex> eventIndicies, Map<EventFieldId, EventFieldIndex> eventFieldIndicies) {
 			this.eventTypeIndexFile = Objects.requireNonNull(eventTypeIndexFile);
 			this.eventIndicies = Objects.requireNonNull(eventIndicies);
-			this.eventFieldIds = Objects.requireNonNull(eventFieldIds);
+			this.eventFieldIndicies = Objects.requireNonNull(eventFieldIndicies);
 		}
 
 		@Override
@@ -223,7 +223,7 @@ public class Indexing {
 				if (eventIndicies.containsKey(ed.getEventTypeId())) {
 					eventIndicies.get(ed.getEventTypeId()).writeIndex(eventId);
 				}
-				for (EventFieldIndex efi : eventFieldIds.values()) {
+				for (EventFieldIndex efi : eventFieldIndicies.values()) {
 					if (efi.indexes(ed.getEventTypeId())) {
 						efi.onNewEvent(eventId, event);
 					}
