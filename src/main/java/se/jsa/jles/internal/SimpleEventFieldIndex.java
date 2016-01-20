@@ -1,5 +1,7 @@
 package se.jsa.jles.internal;
 
+import java.util.Iterator;
+
 import se.jsa.jles.internal.IndexFile.IndexKeyMatcher;
 import se.jsa.jles.internal.fields.EventField;
 
@@ -48,8 +50,32 @@ public class SimpleEventFieldIndex implements EventFieldIndex {
 	}
 
 	@Override
+	public void prepare(EventIndexPreparation preparation) {
+		Iterator<EventId> existingIndicies = getIterable(FieldConstraint.noConstraint()).iterator();
+		Iterator<EventId> sourceIndicies = preparation.getEventTypeIndex().readIndicies(new Indexing.EventTypeMatcher(getEventTypeId())).iterator();
+		while (existingIndicies.hasNext()) {
+			if (!sourceIndicies.hasNext()) {
+				throw new RuntimeException("Index for eventType " + getEventTypeId() + " contains more indexes than the source event type index");
+			}
+			if (!existingIndicies.next().equals(sourceIndicies.next())) {
+				throw new RuntimeException("Indexing between event index and source event type index did not match for eventType " + getEventTypeId());
+			}
+		}
+		EventDeserializer eventDeserializer = preparation.getEventDefinitions().getEventDeserializer(getEventTypeId());
+		while (sourceIndicies.hasNext()) {
+			EventId eventId = sourceIndicies.next();
+			onNewEvent(eventId.toLong(), preparation.getEventFile().readEvent(eventId.toLong(), eventDeserializer));
+		}
+	}
+
+	@Override
 	public void close() {
 		entriesFile.close();
+	}
+
+	@Override
+	public String toString() {
+		return "SimpleEventFieldIndex [eventFieldId=" + eventFieldId + "]";
 	}
 
 }

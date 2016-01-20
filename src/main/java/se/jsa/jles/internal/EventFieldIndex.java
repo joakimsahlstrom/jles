@@ -43,6 +43,7 @@ public interface EventFieldIndex {
 	public Iterable<EventId> getIterable(FieldConstraint constraint);
 	public void onNewEvent(long eventId, Object event);
 
+	public void prepare(EventIndexPreparation preparation);
 	public void close();
 
 }

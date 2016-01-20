@@ -1,6 +1,6 @@
-package se.jsa.jles;
+package se.jsa.jles.configuration;
 
-class EntryFileNameGenerator {
+public class EntryFileNameGenerator {
 
 	public String getEventTypeIndexFileName() {
 		return "events.if";
@@ -21,5 +21,5 @@ class EntryFileNameGenerator {
 	public String getEventIndexFileName(Long eventTypeId) {
 		return "events_" + eventTypeId + ".if";
 	}
-	
+
 }

@@ -6,6 +6,7 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
+import se.jsa.jles.configuration.EntryFileNameGenerator;
 import se.jsa.jles.internal.EventFieldIndex;
 import se.jsa.jles.internal.EventIndex;
 import se.jsa.jles.internal.FieldConstraint;

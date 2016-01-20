@@ -106,7 +106,7 @@ public class InMemoryEventFieldIndex implements EventFieldIndex {
 
 	@Override
 	public Iterable<EventId> getIterable(FieldConstraint fieldConstraint) {
-		sync();
+		sync(); // todo: remove?
 		return new EventFieldEntryIterable(entries, fieldConstraint);
 	}
 
@@ -116,16 +116,31 @@ public class InMemoryEventFieldIndex implements EventFieldIndex {
 	}
 
 	@Override
+	public void prepare(EventIndexPreparation preparation) {
+		preparation.schedule(new Runnable() {
+			@Override
+			public void run() {
+				sync();
+			}
+		});
+	}
+
+	@Override
 	public void close() {
 		// in-memory, do nothing
 	}
 
-	private synchronized void sync() {
+	synchronized void sync() {
 		while (eventIndicies.hasNext()) {
 			EventId eventId = eventIndicies.next();
 			Object fieldValue = eventFile.readEventField(eventId.toLong(), eventDeserializer, eventField);
 			entries.add(new EventFieldEntry(eventId, fieldValue));
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "InMemoryEventFieldIndex [eventField=" + eventField + "]";
 	}
 
 }
