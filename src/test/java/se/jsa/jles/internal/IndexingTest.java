@@ -62,8 +62,9 @@ public class IndexingTest {
 		SimpleEventFieldIndex eventFieldIndex = new SimpleEventFieldIndex(eventTypeId, eventDefinitions.getEventField(eventTypeId, "Id"), fieldIndexFile);
 		Indexing indexing = createIndexing(eventFieldIndex);
 
+		int eventId = 0;
 		for (TestEvent te : Arrays.asList(new TestEvent("a", 0, true), new TestEvent("b", 1, true), new TestEvent("a", 0, true))) {
-			indexing.onNewEvent(0, eventDefinitions.getEventSerializer(te), te);
+			indexing.onNewEvent(eventId++, eventDefinitions.getEventSerializer(te), te);
 		}
 
 		assertContainsEvents(eventFieldIndex.getIterable(FieldConstraint.create("Id", new EqualsLongConstraint(0L))), 0L, 2L);
@@ -74,8 +75,9 @@ public class IndexingTest {
 		SimpleEventFieldIndex eventFieldIndex = new SimpleEventFieldIndex(eventTypeId, eventDefinitions.getEventField(eventTypeId, "Id"), fieldIndexFile);
 		Indexing indexing = createIndexing(eventFieldIndex);
 
+		int eventId = 0;
 		for (TestEvent te : Arrays.asList(new TestEvent("a", 0, true), new TestEvent("b", 1, true), new TestEvent("a", 0, true))) {
-			indexing.onNewEvent(0, eventDefinitions.getEventSerializer(te), te);
+			indexing.onNewEvent(eventId++, eventDefinitions.getEventSerializer(te), te);
 		}
 
 		// recreate event field index
@@ -88,7 +90,7 @@ public class IndexingTest {
 		Iterator<EventId> indicies = iterable.iterator();
 		int paramNum = 0;
 		for (long id : ids) {
-			assertEquals("Error or param " + paramNum++, id, indicies.next().getEventIdByType());
+			assertEquals("Error or param " + paramNum++, id, indicies.next().toLong());
 		}
 	}
 

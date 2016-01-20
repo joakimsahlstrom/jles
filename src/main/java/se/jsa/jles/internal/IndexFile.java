@@ -92,7 +92,6 @@ public class IndexFile {
 		private final IndexKeyMatcher matcher;
 
 		private long position = 0;
-		private long eventIdByType = 0;
 		private EventId nextEntry = null;
 		private boolean nextEntryReady = false;
 
@@ -145,7 +144,7 @@ public class IndexFile {
 							+ ", entry=" + entry,
 							e);
 				}
-				result = new EventId(eventIndex, eventIdByType++);
+				result = new EventId(eventIndex);
 			} while (!matcher.accepts(indexKey) && (position += entry.limit()) < fileSize);
 
 			if (position < fileSize) {

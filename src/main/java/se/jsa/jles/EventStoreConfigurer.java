@@ -211,8 +211,12 @@ public class EventStoreConfigurer {
 				if (!sourceIndicies.hasNext()) {
 					throw new RuntimeException("Index for eventType " + index.getEventTypeId() + " contains more indexes than the source event type index");
 				}
-				if (!existingIndicies.next().equals(sourceIndicies.next())) {
-					throw new RuntimeException("Indexing between event index and source event type index did not match for eventType " + index.getEventTypeId());
+				EventId expected = sourceIndicies.next();
+				EventId actual = existingIndicies.next();
+				if (!expected.equals(actual)) {
+					throw new RuntimeException("Indexing between event index and source event type index did not match for eventTypeId=" + index.getEventTypeId()
+							+ ". Expected=" + expected
+							+ " Actual=" + actual);
 				}
 			}
 			while (sourceIndicies.hasNext()) {
