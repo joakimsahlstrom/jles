@@ -6,6 +6,6 @@ public interface EventSerializer {
 
 	ByteBuffer serializeEvent(Object event);
 
-	long getEventTypeId();
+	EventTypeId getEventTypeId();
 
 }

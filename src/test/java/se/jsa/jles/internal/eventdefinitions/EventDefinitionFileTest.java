@@ -9,6 +9,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import se.jsa.jles.internal.EventFileTest;
+import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.fields.EventFieldFactory;
 import se.jsa.jles.internal.file.SynchronousEntryFile;
 
@@ -45,7 +46,7 @@ public class EventDefinitionFileTest {
 	}
 
 	private EventDefinition createEventDefinition(Class<?> eventType) {
-		return new EventDefinition((long)eventType.hashCode(), eventType, eventFieldFactory.fromEventType(eventType));
+		return new EventDefinition(new EventTypeId(eventType.hashCode()), eventType, eventFieldFactory.fromEventType(eventType));
 	}
 
 }

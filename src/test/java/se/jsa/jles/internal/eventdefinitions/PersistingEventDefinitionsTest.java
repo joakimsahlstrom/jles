@@ -6,6 +6,7 @@ import java.util.Collections;
 import org.junit.After;
 import org.junit.Test;
 
+import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.fields.EventField;
 import se.jsa.jles.internal.fields.EventFieldFactory;
 import se.jsa.jles.internal.file.SynchronousEntryFile;
@@ -28,14 +29,14 @@ public class PersistingEventDefinitionsTest {
 
 	@Test(expected = RuntimeException.class)
 	public void doesNotAcceptNonConformingEventDefinitions() throws Exception {
-		eventDefinitionsFile.write(new EventDefinition(1L, NonSerializableEvent.SerializableEventV2.class, Collections.<EventField>emptyList()));
+		eventDefinitionsFile.write(new EventDefinition(new EventTypeId(1L), NonSerializableEvent.SerializableEventV2.class, Collections.<EventField>emptyList()));
 
 		new MappingEventDefinitions(new PersistingEventDefinitions(eventDefinitionsFile)).init();
 	}
 
 	@Test
 	public void acceptsCorrectEventDefinitions() throws Exception {
-		eventDefinitionsFile.write(new EventDefinition(1L, NonSerializableEvent.SerializableEventV2.class, new EventFieldFactory().fromEventType(NonSerializableEvent.SerializableEventV2.class)));
+		eventDefinitionsFile.write(new EventDefinition(new EventTypeId(1L), NonSerializableEvent.SerializableEventV2.class, new EventFieldFactory().fromEventType(NonSerializableEvent.SerializableEventV2.class)));
 
 		new MappingEventDefinitions(new PersistingEventDefinitions(eventDefinitionsFile));
 	}

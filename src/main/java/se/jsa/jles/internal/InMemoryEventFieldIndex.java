@@ -90,7 +90,7 @@ public class InMemoryEventFieldIndex implements EventFieldIndex {
 	}
 
 	@Override
-	public long getEventTypeId() {
+	public EventTypeId getEventTypeId() {
 		return eventFieldId.getEventTypeId();
 	}
 
@@ -100,8 +100,8 @@ public class InMemoryEventFieldIndex implements EventFieldIndex {
 	}
 
 	@Override
-	public boolean indexes(long eventTypeId) {
-		return getEventTypeId() == eventTypeId;
+	public boolean indexes(EventTypeId eventTypeId) {
+		return getEventTypeId().equals(eventTypeId);
 	}
 
 	@Override

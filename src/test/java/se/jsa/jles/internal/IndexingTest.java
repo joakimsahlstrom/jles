@@ -37,8 +37,8 @@ public class IndexingTest {
 	private final SynchronousEntryFile eventTypeIndexFile = new SynchronousEntryFile("test.if");
 	private final SynchronousEntryFile fieldIndexFile = new SynchronousEntryFile("field.if");
 	private final MemoryBasedEventDefinitions eventDefinitions = new MemoryBasedEventDefinitions();
-	private final Set<Long> eventTypeIds = eventDefinitions.getEventTypeIds(TestEvent.class);
-	private final Long eventTypeId = eventTypeIds.iterator().next();
+	private final Set<EventTypeId> eventTypeIds = eventDefinitions.getEventTypeIds(TestEvent.class);
+	private final EventTypeId eventTypeId = eventTypeIds.iterator().next();
 
 	private class EqualsLongConstraint extends Constraint {
 		private final Long value;
@@ -96,7 +96,7 @@ public class IndexingTest {
 
 	private Indexing createIndexing(SimpleEventFieldIndex eventFieldIndex) {
 		return new Indexing(new IndexFile(new StorableLongField(), eventTypeIndexFile),
-				Collections.<Long, EventIndex>emptyMap(),
+				Collections.<EventTypeId, EventIndex>emptyMap(),
 				Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>singletonMap(eventFieldIndex.getFieldId(), eventFieldIndex),
 				false);
 	}

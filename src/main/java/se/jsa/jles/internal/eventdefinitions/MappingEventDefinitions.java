@@ -5,6 +5,7 @@ import java.util.Set;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventSerializer;
+import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.fields.EventField;
 import se.jsa.jles.internal.util.Objects;
 
@@ -68,7 +69,7 @@ public class MappingEventDefinitions implements EventDefinitions {
 	 * @return {@link Set} of {@link Long} of matched event type ids
 	 */
 	@Override
-	public Set<Long> getEventTypeIds(Class<?>... eventTypes) {
+	public Set<EventTypeId> getEventTypeIds(Class<?>... eventTypes) {
 		return definitions.getEventTypeIds(eventResolver.getSerializableEventTypes(eventTypes));
 	}
 
@@ -88,7 +89,7 @@ public class MappingEventDefinitions implements EventDefinitions {
 	 * @return {@link EventDeserializer}
 	 */
 	@Override
-	public EventDeserializer getEventDeserializer(Long eventTypeId) {
+	public EventDeserializer getEventDeserializer(EventTypeId eventTypeId) {
 		return eventResolver.wrapDeserializer(definitions.getEventDeserializer(eventTypeId));
 	}
 
@@ -99,7 +100,7 @@ public class MappingEventDefinitions implements EventDefinitions {
 	 * @return {@link EventField}
 	 */
 	@Override
-	public EventField getEventField(Long eventTypeId, String fieldName) {
+	public EventField getEventField(EventTypeId eventTypeId, String fieldName) {
 		return definitions.getEventField(eventTypeId, fieldName);
 	}
 

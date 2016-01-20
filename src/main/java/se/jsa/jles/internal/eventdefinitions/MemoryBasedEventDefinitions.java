@@ -12,6 +12,7 @@ import java.util.Set;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventSerializer;
+import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.fields.EventField;
 import se.jsa.jles.internal.fields.EventFieldFactory;
 
@@ -27,11 +28,11 @@ public class MemoryBasedEventDefinitions implements EventDefinitions {
 
 	private final EventFieldFactory eventFieldFactory = new EventFieldFactory();
 	private final Map<Class<?>, EventDefinition> eventDefinitionsByType;
-	private final Map<Long, EventDefinition> eventDefinitionsById;
+	private final Map<EventTypeId, EventDefinition> eventDefinitionsById;
 	private final List<EventDefinitionsListener> listeners = new ArrayList<EventDefinitionsListener>();
 
 	public MemoryBasedEventDefinitions() {
-		this(new HashMap<Class<?>, EventDefinition>(), new HashMap<Long, EventDefinition>());
+		this(new HashMap<Class<?>, EventDefinition>(), new HashMap<EventTypeId, EventDefinition>());
 	}
 
 	/*package*/ MemoryBasedEventDefinitions(Collection<EventDefinition> definitions) {
@@ -68,7 +69,7 @@ public class MemoryBasedEventDefinitions implements EventDefinitions {
 		}
 	}
 
-	private MemoryBasedEventDefinitions(Map<Class<?>, EventDefinition> eventDefinitions, Map<Long, EventDefinition> eventDefinitionsById) {
+	private MemoryBasedEventDefinitions(Map<Class<?>, EventDefinition> eventDefinitions, Map<EventTypeId, EventDefinition> eventDefinitionsById) {
 		this.eventDefinitionsByType = eventDefinitions;
 		this.eventDefinitionsById = eventDefinitionsById;
 	}
@@ -85,7 +86,7 @@ public class MemoryBasedEventDefinitions implements EventDefinitions {
 	}
 
 	@Override
-	public EventDeserializer getEventDeserializer(Long eventTypeId) {
+	public EventDeserializer getEventDeserializer(EventTypeId eventTypeId) {
 		if (!eventDefinitionsById.containsKey(eventTypeId)) {
 			throw new RuntimeException("Unknown event type id: " + eventTypeId);
 		}
@@ -93,12 +94,12 @@ public class MemoryBasedEventDefinitions implements EventDefinitions {
 	}
 
 	@Override
-	public Set<Long> getEventTypeIds(Class<?>... eventTypes) {
+	public Set<EventTypeId> getEventTypeIds(Class<?>... eventTypes) {
 		if (eventTypes.length == 0) {
 			return eventDefinitionsById.keySet();
 		}
 
-		HashSet<Long> result = new HashSet<Long>();
+		HashSet<EventTypeId> result = new HashSet<EventTypeId>();
 		 for (Class<?> eventType : eventTypes) {
 			 registerEventType(eventType);
 			 result.add(eventDefinitionsByType.get(eventType).getEventTypeId());
@@ -107,7 +108,7 @@ public class MemoryBasedEventDefinitions implements EventDefinitions {
 	}
 
 	@Override
-	public EventField getEventField(Long eventTypeId, String fieldName) {
+	public EventField getEventField(EventTypeId eventTypeId, String fieldName) {
 		return eventDefinitionsById.get(eventTypeId).getField(fieldName);
 	}
 
@@ -118,7 +119,7 @@ public class MemoryBasedEventDefinitions implements EventDefinitions {
 	private void registerEventType(Class<?> eventType) {
 		if (!eventDefinitionsByType.containsKey(eventType)) {
 			EventDefinition eventDefinition = new EventDefinition(
-					(long) eventDefinitionsByType.size(),
+					new EventTypeId(eventDefinitionsByType.size()),
 					eventType,
 					eventFieldFactory.fromEventType(eventType));
 			registerEventDefinition(eventDefinition);

@@ -9,24 +9,25 @@ import java.util.List;
 
 import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventSerializer;
+import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.fields.EventField;
 import se.jsa.jles.internal.fields.FieldSerializer;
 import se.jsa.jles.internal.util.NullFieldMap;
 import se.jsa.jles.internal.util.Objects;
 
 class EventDefinition implements EventSerializer, EventDeserializer {
-	private final Long id;
+	private final EventTypeId id;
 	private final Class<?> eventType;
 	private final List<EventField> fields;
 
-	EventDefinition(Long id, Class<?> eventType, List<EventField> fields) {
+	EventDefinition(EventTypeId id, Class<?> eventType, List<EventField> fields) {
 		this.id = Objects.requireNonNull(id);
 		this.eventType = Objects.requireNonNull(eventType);
 		this.fields = Collections.unmodifiableList(new ArrayList<EventField>(fields));
 	}
 
 	@Override
-	public long getEventTypeId() {
+	public EventTypeId getEventTypeId() {
 		return id;
 	}
 
@@ -41,7 +42,7 @@ class EventDefinition implements EventSerializer, EventDeserializer {
 		}
 
 		ByteBuffer output = ByteBuffer.allocate(8 + 4 + eventDefinitionLength);
-		output.putLong(getEventTypeId()); 								// eventTypeId
+		output.putLong(getEventTypeId().toLong()); 						// eventTypeId
 		output.putInt(eventDefinitionLength);							// eventDefinitionSize
 		fieldSerializer.putString(output, getEventType().getName());    // eventDefinition
 		output.putInt(getFields().size());
@@ -124,7 +125,7 @@ class EventDefinition implements EventSerializer, EventDeserializer {
 	}
 
 	private void verifyEventTypeId(Long id) {
-		if (!this.id.equals(id)) {
+		if (this.id.toLong() != id.longValue()) {
 			throw new IllegalArgumentException("Invalid event type. Expected " + this.id + " got " + id);
 		}
 	}

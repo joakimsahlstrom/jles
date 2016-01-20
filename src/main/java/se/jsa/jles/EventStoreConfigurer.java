@@ -20,6 +20,7 @@ import se.jsa.jles.internal.EventFile;
 import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.EventIndex;
 import se.jsa.jles.internal.EventIndexPreparation;
+import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.IndexFile;
 import se.jsa.jles.internal.Indexing;
 import se.jsa.jles.internal.eventdefinitions.EventDefinitionFile;
@@ -137,16 +138,16 @@ public class EventStoreConfigurer {
 	private Indexing createIndexing(EntryFile eventTypeIndexFile, EventDefinitions eventDefinitions, EventFile eventFile) {
 		IndexFile eventTypeIndex = new IndexFile(new StorableLongField(), eventTypeIndexFile);
 		EventIndexPreparationImpl eventIndexPreparer = new EventIndexPreparationImpl(eventTypeIndex, eventDefinitions, eventFile);
-		HashMap<Long, EventIndex> eventIndicies = createEventIndicies(eventDefinitions, eventIndexPreparer);
+		HashMap<EventTypeId, EventIndex> eventIndicies = createEventIndicies(eventDefinitions, eventIndexPreparer);
 		HashMap<EventFieldIndex.EventFieldId, EventFieldIndex> eventFieldIndicies = createEventFieldIndicies(eventDefinitions, eventIndexPreparer);
 
 		return new Indexing(eventTypeIndex, eventIndicies, eventFieldIndicies, multiThreadedEnvironment.get());
 	}
 
-	private HashMap<Long, EventIndex> createEventIndicies(EventDefinitions eventDefinitions, EventIndexPreparationImpl preparation) {
-		HashMap<Long, EventIndex> eventIndicies = new HashMap<Long, EventIndex>();
+	private HashMap<EventTypeId, EventIndex> createEventIndicies(EventDefinitions eventDefinitions, EventIndexPreparationImpl preparation) {
+		HashMap<EventTypeId, EventIndex> eventIndicies = new HashMap<EventTypeId, EventIndex>();
 		for (Class<?> indexedEventType : indexedEventTypes) {
-			for (Long eventTypeId : eventDefinitions.getEventTypeIds(indexedEventType)) {
+			for (EventTypeId eventTypeId : eventDefinitions.getEventTypeIds(indexedEventType)) {
 				EventIndex eventIndex = new EventIndex(entryFileFactory.createEntryFile(entryFileNameGenerator.getEventIndexFileName(eventTypeId)), eventTypeId);
 				preparation.prepare(eventIndex);
 				eventIndicies.put(eventTypeId, eventIndex);
@@ -160,7 +161,7 @@ public class EventStoreConfigurer {
 
 		HashMap<EventFieldIndex.EventFieldId, EventFieldIndex> eventFieldIndicies = new HashMap<EventFieldIndex.EventFieldId, EventFieldIndex>();
 		for (EventFieldIndexConfiguration eventFieldIndexConfiguration : indexedEventFields) {
-			for (Long eventTypeId : eventDefinitions.getEventTypeIds(eventFieldIndexConfiguration.getEventType())) {
+			for (EventTypeId eventTypeId : eventDefinitions.getEventTypeIds(eventFieldIndexConfiguration.getEventType())) {
 				EventFieldIndex eventFieldIndex = eventFieldIndexFactory.createEventFieldIndex(eventFieldIndexConfiguration, eventTypeId);
 				eventFieldIndicies.put(eventFieldIndexConfiguration.createEventFieldId(eventTypeId), eventFieldIndex);
 			}
@@ -240,7 +241,7 @@ public class EventStoreConfigurer {
 			return inMemory;
 		}
 
-		public EventFieldId createEventFieldId(long eventTypeId) {
+		public EventFieldId createEventFieldId(EventTypeId eventTypeId) {
 			return new EventFieldId(eventTypeId, fieldName);
 		}
 

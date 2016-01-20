@@ -17,6 +17,7 @@ import se.jsa.jles.internal.EventFile;
 import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.EventIndex;
 import se.jsa.jles.internal.EventSerializer;
+import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.FieldConstraint;
 import se.jsa.jles.internal.IndexFile;
 import se.jsa.jles.internal.IndexType;
@@ -50,7 +51,7 @@ public class EventStore {
 	 */
 	EventStore(EventFile eventFile, EntryFile eventTypeIndexFile) {
 		this(eventFile,
-			 new Indexing(new IndexFile(new StorableLongField(), eventTypeIndexFile), Collections.<Long, EventIndex>emptyMap(), Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>emptyMap(), false),
+			 new Indexing(new IndexFile(new StorableLongField(), eventTypeIndexFile), Collections.<EventTypeId, EventIndex>emptyMap(), Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>emptyMap(), false),
 			 new MappingEventDefinitions(new MemoryBasedEventDefinitions()));
 	}
 
@@ -88,7 +89,7 @@ public class EventStore {
 	public Iterable<Object> readEvents(EventQuery query) {
 		LoadingIterable loadingIterable = LoadingIterable.empty();
 		do {
-			for (Long eventTypeId : eventDefinitions.getEventTypeIds(query.getEventType())) {
+			for (EventTypeId eventTypeId : eventDefinitions.getEventTypeIds(query.getEventType())) {
 				InternalTypedEventRepo typedEventRepo = new InternalTypedEventRepo(eventTypeId);
 				Iterable<EventId> iterable = typedEventRepo.getIterator(query.createFieldConstraint());
 				loadingIterable = loadingIterable.with(iterable, typedEventRepo);
@@ -112,10 +113,10 @@ public class EventStore {
 	// ----- Helper classes -----
 
 	private class InternalTypedEventRepo implements TypedEventRepo {
-		private final Long eventTypeId;
+		private final EventTypeId eventTypeId;
 		private final EventDeserializer eventDeserializer;
 
-		public InternalTypedEventRepo(Long eventTypeId) {
+		public InternalTypedEventRepo(EventTypeId eventTypeId) {
 			this.eventTypeId = Objects.requireNonNull(eventTypeId);
 			this.eventDeserializer = eventDefinitions.getEventDeserializer(eventTypeId);
 		}

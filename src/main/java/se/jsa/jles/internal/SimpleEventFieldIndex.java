@@ -10,7 +10,7 @@ public class SimpleEventFieldIndex implements EventFieldIndex {
 	private final EventFieldId eventFieldId;
 	private final IndexFile entriesFile;
 
-	public SimpleEventFieldIndex(Long eventTypeId, EventField eventField, EntryFile indexEntryFile) {
+	public SimpleEventFieldIndex(EventTypeId eventTypeId, EventField eventField, EntryFile indexEntryFile) {
 		this.eventFieldId = new EventFieldId(eventTypeId, eventField.getPropertyName());
 		this.entriesFile = new IndexFile(eventField, indexEntryFile);
 	}
@@ -21,13 +21,13 @@ public class SimpleEventFieldIndex implements EventFieldIndex {
 	}
 
 	@Override
-	public long getEventTypeId() {
+	public EventTypeId getEventTypeId() {
 		return eventFieldId.getEventTypeId();
 	}
 
 	@Override
-	public boolean indexes(long eventTypeId) {
-		return eventFieldId.getEventTypeId() == eventTypeId;
+	public boolean indexes(EventTypeId eventTypeId) {
+		return eventFieldId.getEventTypeId().equals(eventTypeId);
 	}
 
 	@Override

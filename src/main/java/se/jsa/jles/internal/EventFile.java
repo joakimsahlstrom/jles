@@ -23,7 +23,7 @@ public class EventFile {
 		ByteBuffer eventData = ed.serializeEvent(event);
 
 		ByteBuffer output = ByteBuffer.allocate(8 + 4 + eventData.limit());
-		output.putLong(ed.getEventTypeId());
+		output.putLong(ed.getEventTypeId().toLong());
 		output.putInt(eventData.limit());
 		if (eventData.limit() > 0) {
 			output.put(eventData);

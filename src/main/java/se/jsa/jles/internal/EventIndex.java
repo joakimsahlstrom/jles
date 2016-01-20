@@ -15,9 +15,9 @@ import se.jsa.jles.internal.util.Objects;
  */
 public class EventIndex {
 	private final IndexFile indexFile;
-	private final Long eventTypeId;
+	private final EventTypeId eventTypeId;
 
-	public EventIndex(EntryFile entryFile, Long eventTypeId) {
+	public EventIndex(EntryFile entryFile, EventTypeId eventTypeId) {
 		this.indexFile = new IndexFile(new NullEventTypeField(eventTypeId), entryFile);
 		this.eventTypeId = Objects.requireNonNull(eventTypeId);
 	}
@@ -37,14 +37,14 @@ public class EventIndex {
 		indexFile.writeIndex(eventId, null);
 	}
 
-	public Long getEventTypeId() {
+	public EventTypeId getEventTypeId() {
 		return eventTypeId;
 	}
 
 	private static class NullEventTypeField extends StorableField {
-		private final Long eventTypeId;
+		private final EventTypeId eventTypeId;
 
-		public NullEventTypeField(Long eventTypeId) {
+		public NullEventTypeField(EventTypeId eventTypeId) {
 			this.eventTypeId = eventTypeId;
 		}
 

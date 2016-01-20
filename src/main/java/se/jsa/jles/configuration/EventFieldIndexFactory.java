@@ -5,6 +5,7 @@ import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventFieldIndex;
 import se.jsa.jles.internal.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.EventIndexPreparation;
+import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.InMemoryEventFieldIndex;
 import se.jsa.jles.internal.SimpleEventFieldIndex;
 import se.jsa.jles.internal.fields.EventField;
@@ -27,7 +28,7 @@ public class EventFieldIndexFactory {
 		this.entryFileNameGenerator = Objects.requireNonNull(entryFileNameGenerator);
 	}
 
-	public EventFieldIndex createEventFieldIndex(EventFieldIndexConfiguration eventFieldIndexConfiguration, Long eventTypeId) {
+	public EventFieldIndex createEventFieldIndex(EventFieldIndexConfiguration eventFieldIndexConfiguration, EventTypeId eventTypeId) {
 		EventFieldIndex eventFieldIndex = createEventFieldIndex(
 				eventFieldIndexConfiguration,
 				eventTypeId,
@@ -36,7 +37,7 @@ public class EventFieldIndexFactory {
 		return eventFieldIndex;
 	}
 
-	private EventFieldIndex createEventFieldIndex(EventFieldIndexConfiguration eventFieldIndexConfiguration, Long eventTypeId, EventField eventField) {
+	private EventFieldIndex createEventFieldIndex(EventFieldIndexConfiguration eventFieldIndexConfiguration, EventTypeId eventTypeId, EventField eventField) {
 		if (eventFieldIndexConfiguration.inMemory()) {
 			return new InMemoryEventFieldIndex(
 					new EventFieldId(eventTypeId, eventField.getPropertyName()),

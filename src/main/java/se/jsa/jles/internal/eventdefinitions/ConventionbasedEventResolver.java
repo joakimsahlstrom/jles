@@ -10,6 +10,7 @@ import java.util.Set;
 
 import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventSerializer;
+import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.fields.EventField;
 import se.jsa.jles.internal.util.Objects;
 
@@ -104,7 +105,7 @@ public class ConventionbasedEventResolver implements EventResolver {
 		}
 
 		@Override
-		public long getEventTypeId() {
+		public EventTypeId getEventTypeId() {
 			return serializer.getEventTypeId();
 		}
 	}

@@ -9,6 +9,7 @@ import org.junit.Test;
 import se.jsa.jles.configuration.EntryFileNameGenerator;
 import se.jsa.jles.internal.EventFieldIndex;
 import se.jsa.jles.internal.EventIndex;
+import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.FieldConstraint;
 import se.jsa.jles.internal.SimpleEventFieldIndex;
 import se.jsa.jles.internal.fields.EventFieldFactory;
@@ -21,7 +22,7 @@ public class EventStoreConfigurerTest {
 	@Test
 	public void fillsEventIndexesIfEventsMissing() throws Exception {
 		InMemoryFileRepository inMemoryFileRepository = new InMemoryFileRepository();
-		EventIndex eventIndex = new EventIndex(inMemoryFileRepository.getEntryFile(new EntryFileNameGenerator().getEventIndexFileName(0L)), 0L);
+		EventIndex eventIndex = new EventIndex(inMemoryFileRepository.getEntryFile(new EntryFileNameGenerator().getEventIndexFileName(new EventTypeId(0L))), new EventTypeId(0L));
 
 		EventStore initialEventStore = EventStoreConfigurer.createMemoryOnlyConfigurer(inMemoryFileRepository)
 			.addIndexing(TestEvent.class)
@@ -52,9 +53,9 @@ public class EventStoreConfigurerTest {
 	public void fillsEventFieldIndecesIfEventsMissing() throws Exception {
 		InMemoryFileRepository inMemoryFileRepository = new InMemoryFileRepository();
 		EventFieldIndex eventFieldIndex = new SimpleEventFieldIndex(
-				0L,
+				new EventTypeId(0L),
 				new EventFieldFactory().createEventField(Long.class, "Id", TestEvent.class),
-				inMemoryFileRepository.getEntryFile(new EntryFileNameGenerator().getEventFieldIndexFileName(0L, "Id")));
+				inMemoryFileRepository.getEntryFile(new EntryFileNameGenerator().getEventFieldIndexFileName(new EventTypeId(0L), "Id")));
 
 		EventStore initialEventStore = EventStoreConfigurer.createMemoryOnlyConfigurer(inMemoryFileRepository)
 			.addIndexing(TestEvent.class, "Id")

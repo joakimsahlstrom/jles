@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import se.jsa.jles.internal.EntryFile;
+import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.fields.EventField;
 import se.jsa.jles.internal.fields.EventFieldFactory;
 import se.jsa.jles.internal.fields.FieldSerializer;
@@ -67,7 +68,7 @@ public class EventDefinitionFile {
 			Class<?> fieldType = loadClass(fieldTypeName);
 			fields.add(eventFieldFactory.createEventField(fieldType, fieldName, eventType));
 		}
-		return new EventDefinition(eventTypeId, eventType, fields);
+		return new EventDefinition(new EventTypeId(eventTypeId), eventType, fields);
 	}
 
 	public void write(EventDefinition eventDefinition) {

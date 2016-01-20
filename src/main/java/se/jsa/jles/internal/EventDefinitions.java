@@ -11,12 +11,12 @@ public interface EventDefinitions {
 
 	Class<?>[] getRegisteredEventTypes();
 
-	Set<Long> getEventTypeIds(Class<?>... eventTypes);
+	Set<EventTypeId> getEventTypeIds(Class<?>... eventTypes);
 
 	EventSerializer getEventSerializer(Object event);
 
-	EventDeserializer getEventDeserializer(Long eventTypeId);
+	EventDeserializer getEventDeserializer(EventTypeId eventTypeId);
 
-	EventField getEventField(Long eventTypeId, String fieldName);
+	EventField getEventField(EventTypeId eventTypeId, String fieldName);
 
 }

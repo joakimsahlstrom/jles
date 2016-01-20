@@ -6,6 +6,7 @@ import java.util.Set;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventSerializer;
+import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.fields.EventField;
 import se.jsa.jles.internal.util.Objects;
 
@@ -36,7 +37,7 @@ public class PersistingEventDefinitions implements EventDefinitions, MemoryBased
 	}
 
 	@Override
-	public EventDeserializer getEventDeserializer(Long eventTypeId) {
+	public EventDeserializer getEventDeserializer(EventTypeId eventTypeId) {
 		return eventDefinitionCache.getEventDeserializer(eventTypeId);
 	}
 
@@ -46,12 +47,12 @@ public class PersistingEventDefinitions implements EventDefinitions, MemoryBased
 	}
 
 	@Override
-	public Set<Long> getEventTypeIds(Class<?>... eventTypes) {
+	public Set<EventTypeId> getEventTypeIds(Class<?>... eventTypes) {
 		return eventDefinitionCache.getEventTypeIds(eventTypes);
 	}
 
 	@Override
-	public EventField getEventField(Long eventTypeId, String fieldName) {
+	public EventField getEventField(EventTypeId eventTypeId, String fieldName) {
 		return eventDefinitionCache.getEventField(eventTypeId, fieldName);
 	}
 
