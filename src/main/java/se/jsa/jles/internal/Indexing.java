@@ -39,7 +39,9 @@ public class Indexing {
 	}
 
 	private static IndexUpdater createIndexUpdater(IndexFile eventTypeIndexFile, Map<EventTypeId, EventIndex> eventIndicies, Map<EventFieldId, EventFieldIndex> eventFieldIds, boolean multiThreadedEnvironment) {
-		return multiThreadedEnvironment ? new ThreadsafeIndexUpdater(eventTypeIndexFile, eventIndicies, eventFieldIds) : new SimpleIndexUpdater(eventTypeIndexFile, eventIndicies, eventFieldIds);
+		return multiThreadedEnvironment
+				? new ThreadsafeIndexUpdater(eventTypeIndexFile, eventIndicies, eventFieldIds)
+				: new SimpleIndexUpdater(eventTypeIndexFile, eventIndicies, eventFieldIds);
 	}
 
 	/**

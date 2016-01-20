@@ -182,7 +182,6 @@ public class EventStore {
 		}
 	}
 
-	/* Remove this once sure that it is not necessary to maintain correct state in a multithreaded environment */
 	@SuppressWarnings("unused")
 	private static class ThreadsafeEventWriter implements EventWriter {
 		final EventFile eventFile;
