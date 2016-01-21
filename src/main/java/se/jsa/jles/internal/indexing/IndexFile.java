@@ -91,25 +91,29 @@ public class IndexFile {
 	}
 
 	public Iterable<EventId> readIndicies(IndexKeyMatcher matcher) {
+		return new EventIdIterableAdapter(readIndexEntries(matcher));
+	}
+
+	public Iterable<EventIndexEntry> readIndexEntries(IndexKeyMatcher matcher) {
 		return new IndexIterable(matcher);
 	}
 
-	private class IndexIterable implements Iterable<EventId> {
+	private class IndexIterable implements Iterable<EventIndexEntry> {
 		private final IndexKeyMatcher matcher;
 		public IndexIterable(IndexKeyMatcher matcher) {
 			this.matcher = matcher;
 		}
 		@Override
-		public Iterator<EventId> iterator() {
+		public Iterator<EventIndexEntry> iterator() {
 			return new IndexIterator(matcher);
 		}
 	}
 
-	private class IndexIterator implements Iterator<EventId> {
+	private class IndexIterator implements Iterator<EventIndexEntry> {
 		private final IndexKeyMatcher matcher;
 
 		private long position = 0;
-		private EventId nextEntry = null;
+		private EventIndexEntry nextEntry = null;
 		private boolean nextEntryReady = false;
 
 		public IndexIterator(IndexKeyMatcher matcher) {
@@ -117,9 +121,9 @@ public class IndexFile {
 		}
 
 		@Override
-		public EventId next() {
+		public EventIndexEntry next() {
 			if (hasNext()) {
-				EventId result = nextEntry;
+				EventIndexEntry result = nextEntry;
 				nextEntry = null;
 				nextEntryReady = false;
 				return result;
@@ -145,7 +149,7 @@ public class IndexFile {
 			ByteBuffer entry;
 			long eventIndex;
 			Object indexKey;
-			EventId result;
+			EventIndexEntry result;
 			long fileSize = entryFile.size();
 			do {
 				entry = entryFile.readEntry(position);
@@ -161,7 +165,7 @@ public class IndexFile {
 							+ ", entry=" + entry,
 							e);
 				}
-				result = new EventId(eventIndex);
+				result = new EventIndexEntry(new EventId(eventIndex), indexKey);
 			} while (!matcher.accepts(indexKey) && (position += entry.limit()) < fileSize);
 
 			if (position < fileSize) {
@@ -190,6 +194,40 @@ public class IndexFile {
 		@Override
 		public void remove() {
 			throw new UnsupportedOperationException("Remove not supported.");
+		}
+	}
+
+	private class EventIdIterableAdapter implements Iterable<EventId> {
+		private final Iterable<EventIndexEntry> eventIndexEntry;
+		public EventIdIterableAdapter(Iterable<EventIndexEntry> eventIndexEntry) {
+			this.eventIndexEntry = eventIndexEntry;
+		}
+		@Override
+		public Iterator<EventId> iterator() {
+			return new EventIdIteratorAdapter(eventIndexEntry.iterator());
+		}
+	}
+
+	private class EventIdIteratorAdapter implements Iterator<EventId> {
+		private final Iterator<EventIndexEntry> iterator;
+
+		public EventIdIteratorAdapter(Iterator<EventIndexEntry> iterator) {
+			this.iterator = iterator;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return iterator.hasNext();
+		}
+
+		@Override
+		public EventId next() {
+			return iterator.next().getEventId();
+		}
+
+		@Override
+		public void remove() {
+			iterator.remove();
 		}
 	}
 

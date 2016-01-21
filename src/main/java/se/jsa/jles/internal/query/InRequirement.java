@@ -63,5 +63,9 @@ public class InRequirement extends Requirement {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return fieldName + " in (" + Arrays.asList(equalities) + ")";
+	}
 
 }

@@ -51,4 +51,9 @@ class EqualsRequirement extends Requirement {
 			return equality.getClass();
 		}
 	}
+
+	@Override
+	public String toString() {
+		return fieldName + "=" + equality;
+	}
 }

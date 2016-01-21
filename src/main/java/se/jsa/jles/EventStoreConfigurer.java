@@ -17,11 +17,9 @@ package se.jsa.jles;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 import se.jsa.jles.configuration.EntryFileFactory;
@@ -31,7 +29,6 @@ import se.jsa.jles.configuration.ThreadingEnvironment;
 import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventFile;
-import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.eventdefinitions.EventDefinitionFile;
 import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
@@ -43,6 +40,7 @@ import se.jsa.jles.internal.indexing.EventFieldIndex;
 import se.jsa.jles.internal.indexing.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.indexing.EventIndex;
 import se.jsa.jles.internal.indexing.EventIndexPreparation;
+import se.jsa.jles.internal.indexing.EventIndexPreparationImpl;
 import se.jsa.jles.internal.indexing.IndexFile;
 import se.jsa.jles.internal.indexing.Indexing;
 import se.jsa.jles.internal.util.Objects;
@@ -149,29 +147,29 @@ public class EventStoreConfigurer {
 
 	private Indexing createIndexing(EntryFile eventTypeIndexFile, EventDefinitions eventDefinitions, EventFile eventFile) {
 		IndexFile eventTypeIndex = new IndexFile(new StorableLongField(), eventTypeIndexFile);
-		EventIndexPreparationImpl eventIndexPreparer = new EventIndexPreparationImpl(eventTypeIndex, eventDefinitions, eventFile);
-		HashMap<EventTypeId, EventIndex> eventIndicies = createEventIndicies(eventDefinitions, eventIndexPreparer);
-		HashMap<EventFieldIndex.EventFieldId, EventFieldIndex> eventFieldIndicies = createEventFieldIndicies(eventDefinitions, eventIndexPreparer);
+		EventIndexPreparation eventIndexPreparer = new EventIndexPreparationImpl(eventTypeIndex, eventDefinitions, eventFile);
+		Map<EventTypeId, EventIndex> eventIndicies = createEventIndicies(eventDefinitions, eventIndexPreparer);
+		Map<EventFieldIndex.EventFieldId, EventFieldIndex> eventFieldIndicies = createEventFieldIndicies(eventDefinitions, eventIndexPreparer);
 
 		return new Indexing(eventTypeIndex, eventIndicies, eventFieldIndicies, threadingEnvironment.get() == ThreadingEnvironment.MULTITHREADED);
 	}
 
-	private HashMap<EventTypeId, EventIndex> createEventIndicies(EventDefinitions eventDefinitions, EventIndexPreparationImpl preparation) {
-		HashMap<EventTypeId, EventIndex> eventIndicies = new HashMap<EventTypeId, EventIndex>();
+	private Map<EventTypeId, EventIndex> createEventIndicies(EventDefinitions eventDefinitions, EventIndexPreparation preparation) {
+		Map<EventTypeId, EventIndex> eventIndicies = new HashMap<EventTypeId, EventIndex>();
 		for (Class<?> indexedEventType : indexedEventTypes) {
 			for (EventTypeId eventTypeId : eventDefinitions.getEventTypeIds(indexedEventType)) {
 				EventIndex eventIndex = new EventIndex(entryFileFactory.createEntryFile(entryFileNameGenerator.getEventIndexFileName(eventTypeId)), eventTypeId);
-				preparation.prepare(eventIndex);
 				eventIndicies.put(eventTypeId, eventIndex);
 			}
 		}
+		preparation.prepare(eventIndicies);
 		return eventIndicies;
 	}
 
-	private HashMap<EventFieldIndex.EventFieldId, EventFieldIndex> createEventFieldIndicies(EventDefinitions eventDefinitions, EventIndexPreparation preparation) {
+	private Map<EventFieldIndex.EventFieldId, EventFieldIndex> createEventFieldIndicies(EventDefinitions eventDefinitions, EventIndexPreparation preparation) {
 		EventFieldIndexFactory eventFieldIndexFactory = new EventFieldIndexFactory(eventDefinitions, preparation, entryFileNameGenerator, entryFileFactory);
 
-		HashMap<EventFieldIndex.EventFieldId, EventFieldIndex> eventFieldIndicies = new HashMap<EventFieldIndex.EventFieldId, EventFieldIndex>();
+		Map<EventFieldIndex.EventFieldId, EventFieldIndex> eventFieldIndicies = new HashMap<EventFieldIndex.EventFieldId, EventFieldIndex>();
 		for (EventFieldIndexConfiguration eventFieldIndexConfiguration : indexedEventFields) {
 			for (EventTypeId eventTypeId : eventDefinitions.getEventTypeIds(eventFieldIndexConfiguration.getEventType())) {
 				EventFieldIndex eventFieldIndex = eventFieldIndexFactory.createEventFieldIndex(eventFieldIndexConfiguration, eventTypeId);
@@ -183,59 +181,6 @@ public class EventStoreConfigurer {
 
 	public List<String> getFiles() {
 		return entryFileFactory.getFiles();
-	}
-
-	private class EventIndexPreparationImpl implements EventIndexPreparation {
-		private final IndexFile eventTypeIndex;
-		private final EventFile eventFile;
-		private final EventDefinitions eventDefinitions;
-		private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-
-		public EventIndexPreparationImpl(IndexFile eventTypeIndex, EventDefinitions eventDefinitions, EventFile eventFile) {
-			this.eventTypeIndex = Objects.requireNonNull(eventTypeIndex);
-			this.eventFile = Objects.requireNonNull(eventFile);
-			this.eventDefinitions = Objects.requireNonNull(eventDefinitions);
-		}
-
-		@Override
-		public EventFile getEventFile() {
-			return eventFile;
-		}
-
-		@Override
-		public IndexFile getEventTypeIndex() {
-			return eventTypeIndex;
-		}
-
-		@Override
-		public EventDefinitions getEventDefinitions() {
-			return eventDefinitions;
-		}
-
-		@Override
-		public void schedule(Runnable runnable) {
-			executorService.submit(runnable);
-		}
-
-		public void prepare(EventIndex index) {
-			Iterator<EventId> existingIndicies = index.readIndicies().iterator();
-			Iterator<EventId> sourceIndicies = eventTypeIndex.readIndicies(new Indexing.EventTypeMatcher(index.getEventTypeId())).iterator();
-			while (existingIndicies.hasNext()) {
-				if (!sourceIndicies.hasNext()) {
-					throw new RuntimeException("Index for eventType " + index.getEventTypeId() + " contains more indexes than the source event type index");
-				}
-				EventId expected = sourceIndicies.next();
-				EventId actual = existingIndicies.next();
-				if (!expected.equals(actual)) {
-					throw new RuntimeException("Indexing between event index and source event type index did not match for eventTypeId=" + index.getEventTypeId()
-							+ ". Expected=" + expected
-							+ " Actual=" + actual);
-				}
-			}
-			while (sourceIndicies.hasNext()) {
-				index.writeIndex(sourceIndicies.next().toLong());
-			}
-		}
 	}
 
 	public class EventFieldIndexConfiguration {

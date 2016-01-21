@@ -50,4 +50,9 @@ class NotRequirement extends Requirement {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "!" + requirement.toString();
+	}
+
 }

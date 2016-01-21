@@ -102,4 +102,9 @@ public final class EventQuery {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "EventQuery [eventType=" + eventType.getSimpleName() + ", requirement=" + requirement + ", next=" + next + "]";
+	}
+
 }

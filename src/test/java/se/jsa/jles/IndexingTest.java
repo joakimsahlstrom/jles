@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -32,9 +33,10 @@ import se.jsa.jles.EventStoreTest.EmptyEvent;
 import se.jsa.jles.EventStoreTest.EmptyEvent2;
 import se.jsa.jles.EventStoreTest.EmptyEvent3;
 import se.jsa.jles.EventStoreTest.TestEvent;
+import se.jsa.jles.internal.testevents.MyEvent;
 import se.jsa.jles.internal.testevents.ObjectTestEvent;
 
-public class IndexingTests {
+public class IndexingTest {
 
 	private final EventStoreConfigurer configurer = EventStoreConfigurer
 			.createMemoryOnlyConfigurer()
@@ -42,6 +44,11 @@ public class IndexingTests {
 			.addInMemoryIndexing(TestEvent.class, "Name");
 
 	private EventStore es = configurer.configure();
+
+	@After
+	public void after() {
+		es.stop();
+	}
 
 	@Test
 	public void canUseFieldIndex() throws Exception {
@@ -90,22 +97,30 @@ public class IndexingTests {
 	@Test
 	public void indexCanBeAddedAtLaterStartup() throws Exception {
 		es.write(new TestEvent("a", 0, true));
+		es.write(new MyEvent(1));
 		es.write(new TestEvent("a", 1, true));
+		es.write(new MyEvent(2));
 		es.write(new TestEvent("a", 2, true));
 		es.stop();
 
 		es = configurer
 				.addIndexing(TestEvent.class)
+				.addIndexing(MyEvent.class)
 				.configure();
 		Iterator<Object> events = es.readEvents(EventQuery.select(TestEvent.class)).iterator();
 		assertEquals(0L, ((TestEvent)events.next()).getId());
 		assertEquals(1L, ((TestEvent)events.next()).getId());
 		assertEquals(2L, ((TestEvent)events.next()).getId());
 		assertFalse(events.hasNext());
+
+		events = es.readEvents(EventQuery.select(MyEvent.class)).iterator();
+		assertEquals(1, ((MyEvent)events.next()).getNum());
+		assertEquals(2, ((MyEvent)events.next()).getNum());
+		assertFalse(events.hasNext());
 	}
 
 	@Test
-	@Ignore
+	@Ignore("Currently a bug here!")
 	public void fieldIndexCanBeAddedAtLaterStartup() throws Exception {
 		es.write(new TestEvent("a", 0, true));
 		es.write(new TestEvent("a", 1, true));
@@ -115,7 +130,7 @@ public class IndexingTests {
 		es = configurer
 				.addIndexing(TestEvent.class, "Id")
 				.configure();
-		Iterator<Object> events = es.readEvents(EventQuery.select(TestEvent.class).where("Id").is(Long.valueOf(1))).iterator();
+		Iterator<Object> events = es.readEvents(EventQuery.select(TestEvent.class).where("Id").is(1L)).iterator();
 		assertEquals(1L, ((TestEvent)events.next()).getId());
 		assertFalse(events.hasNext());
 	}

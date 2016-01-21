@@ -46,7 +46,7 @@ public abstract class EventField extends StorableField implements Comparable<Eve
 		try {
 			return getMethod.invoke(event);
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException("getMethod=" + getMethod + ", event=" + event, e);
 		}
 	}
 
@@ -54,7 +54,7 @@ public abstract class EventField extends StorableField implements Comparable<Eve
 		try {
 			setMethod.invoke(event, value);
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException("setMethod=" + setMethod + ", event=" + event, e);
 		}
 	}
 

@@ -56,4 +56,9 @@ class LessThanRequirement extends Requirement {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return fieldName + "<" + number;
+	}
+
 }

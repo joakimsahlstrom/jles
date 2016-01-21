@@ -27,6 +27,11 @@ public abstract class Requirement {
 		public FieldConstraint createFieldContraint() {
 			return FieldConstraint.noConstraint();
 		}
+
+		@Override
+		public String toString() {
+			return "No requirement";
+		}
 	};
 
 	public abstract FieldConstraint createFieldContraint();
@@ -43,4 +48,7 @@ public abstract class Requirement {
 			throw new IllegalArgumentException("Could not find field " + fieldName + " for type " + eventType, e);
 		}
 	}
+
+	@Override
+	public abstract String toString();
 }
