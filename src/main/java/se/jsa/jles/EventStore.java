@@ -16,8 +16,15 @@
 package se.jsa.jles;
 
 import java.util.Collections;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import se.jsa.jles.NewEventNotificationListeners.NewEventNotificationListener;
+import se.jsa.jles.configuration.ThreadingEnvironment;
 import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventDeserializer;
@@ -49,6 +56,7 @@ public class EventStore {
 	private final Indexing indexing;
 	private final EventDefinitions eventDefinitions;
 	private final NewEventNotificationListeners eventListeners = new NewEventNotificationListeners();
+	private final EventRegistrator eventRegistrator;
 
 	/**
 	 * Create a simplest possible {@link EventStore} using the given {@link EventFile} for event storage and {@link EntryFile} for event type indexing.
@@ -56,14 +64,15 @@ public class EventStore {
 	 * @param eventFile {@link EventFile}
 	 * @param eventTypeIndexFile {@link EntryFile}
 	 */
-	EventStore(EventFile eventFile, EntryFile eventTypeIndexFile) {
+	EventStore(EventFile eventFile, EntryFile eventTypeIndexFile, ThreadingEnvironment threadingEnvironment) {
 		this(eventFile,
 			 new Indexing(
 					 new IndexFile(new StorableLongField(), eventTypeIndexFile),
 					 Collections.<EventTypeId, EventIndex>emptyMap(),
 					 Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>emptyMap(),
-					 false),
-			 new MappingEventDefinitions(new MemoryBasedEventDefinitions()));
+					 threadingEnvironment == ThreadingEnvironment.MULTITHREADED),
+			 new MappingEventDefinitions(new MemoryBasedEventDefinitions()),
+			 threadingEnvironment);
 	}
 
 	/**
@@ -72,10 +81,11 @@ public class EventStore {
 	 * @param indexing {@link Indexing} the indexing subsystem
 	 * @param eventDefinitions {@link EventDefinitions} The event definitions subsystem
 	 */
-	EventStore(EventFile eventFile, Indexing indexing, EventDefinitions eventDefinitions) {
+	EventStore(EventFile eventFile, Indexing indexing, EventDefinitions eventDefinitions, ThreadingEnvironment threadingEnvironment) {
 		this.eventFile = Objects.requireNonNull(eventFile);
 		this.indexing = Objects.requireNonNull(indexing);
 		this.eventDefinitions = Objects.requireNonNull(eventDefinitions);
+		this.eventRegistrator = threadingEnvironment == ThreadingEnvironment.SINGLE_THREAD ? new UnsynchronizedEventRegistrator() : new SynchronizedEventRegistrator();
 	}
 
 	public void registerEventListener(NewEventNotificationListener listener) {
@@ -87,9 +97,7 @@ public class EventStore {
 	 * @param event The event
 	 */
 	public void write(Object event) {
-		EventSerializer ed = eventDefinitions.getEventSerializer(event);
-		long eventId = eventFile.writeEvent(event, ed);
-		indexing.onNewEvent(eventId, ed, event);
+		eventRegistrator.register(event);
 		eventListeners.onNewEvent();
 	}
 
@@ -113,6 +121,7 @@ public class EventStore {
 	 */
 	public void stop() {
 		indexing.stop();
+		eventRegistrator.stop();
 		eventFile.close();
 		eventDefinitions.close();
 	}
@@ -143,7 +152,77 @@ public class EventStore {
 			EventField eventField = eventDefinitions.getEventField(eventTypeId, fieldName);
 			return eventFile.readEventField(eventId.toLong(), eventDeserializer, eventField);
 		}
+	}
 
+	private class EventRegistration implements Callable<Void> {
+		private final Object event;
+
+		public EventRegistration(Object event) {
+			this.event = event;
+		}
+
+		@Override
+		public Void call() {
+			EventSerializer ed = eventDefinitions.getEventSerializer(event);
+			long eventId = eventFile.writeEvent(event, ed);
+			indexing.onNewEvent(eventId, ed, event);
+			return null;
+		}
+	}
+
+	private interface EventRegistrator {
+		void register(Object event);
+		void stop();
+	}
+
+	private class UnsynchronizedEventRegistrator implements EventRegistrator {
+		public UnsynchronizedEventRegistrator() {
+		}
+
+		@Override
+		public void register(Object event) {
+			new EventRegistration(event).call();
+		}
+
+		@Override
+		public void stop() {
+			// do nothing
+		}
+	}
+
+	private class SynchronizedEventRegistrator implements EventRegistrator  {
+		private final ExecutorService executor = Executors.newSingleThreadExecutor();
+
+		public SynchronizedEventRegistrator() {
+		}
+
+		@Override
+		public void register(Object event) {
+			Future<Void> future = executor.submit(new EventRegistration(event));
+			try {
+				future.get();
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			} catch (ExecutionException e) {
+				Throwable cause = e.getCause();
+				if (cause instanceof RuntimeException) {
+					throw (RuntimeException) cause;
+				} else {
+					throw new RuntimeException("Could not execute append command", cause);
+				}
+			}
+		}
+
+		@Override
+		public void stop() {
+			executor.shutdown();
+			try {
+				executor.awaitTermination(10, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new RuntimeException("Awaiting event registration shutdown failed!", e);
+			}
+		}
 	}
 
 }

@@ -30,17 +30,17 @@ public class EntryFileFactory {
 
 	private final FileChannelFactory fileChannelFactory;
 	private final InMemoryFileRepository inMemoryFileRepository;
-	private final AtomicReference<Boolean> multiThreadedEnvironment;
+	private final AtomicReference<ThreadingEnvironment> threadingEnvironment;
 
 	private final List<String> files = new ArrayList<String>();
 	private WriteStrategy writeStrategy = WriteStrategy.FAST;
 
 	public EntryFileFactory(FileChannelFactory fileChannelFactory,
 			InMemoryFileRepository inMemoryFileRepository,
-			AtomicReference<Boolean> multiThreadedEnvironment) {
+			AtomicReference<ThreadingEnvironment> threadingEnvironment) {
 		this.fileChannelFactory = fileChannelFactory;
 		this.inMemoryFileRepository = inMemoryFileRepository;
-		this.multiThreadedEnvironment = multiThreadedEnvironment;
+		this.threadingEnvironment = threadingEnvironment;
 	}
 
 	public void setWriteStrategy(WriteStrategy writeStrategy2) {
@@ -53,7 +53,7 @@ public class EntryFileFactory {
 		}
 
 		EntryFile flippingEntryFile = new FlippingEntryFile(fileName, fileChannelFactory, writeStrategy);
-		if (multiThreadedEnvironment.get()) {
+		if (threadingEnvironment.get() == ThreadingEnvironment.MULTITHREADED) {
 			flippingEntryFile = new ThreadSafeEntryFile(flippingEntryFile);
 		}
 		files.add(fileName);

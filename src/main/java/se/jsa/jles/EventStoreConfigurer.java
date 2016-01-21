@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import se.jsa.jles.configuration.EntryFileFactory;
 import se.jsa.jles.configuration.EntryFileNameGenerator;
 import se.jsa.jles.configuration.EventFieldIndexFactory;
+import se.jsa.jles.configuration.ThreadingEnvironment;
 import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventFile;
@@ -62,18 +63,18 @@ public class EventStoreConfigurer {
 
 	private final Set<Class<?>> indexedEventTypes = new HashSet<Class<?>>();
 	private final Set<EventFieldIndexConfiguration> indexedEventFields = new HashSet<EventFieldIndexConfiguration>();
-	private final AtomicReference<Boolean> multiThreadedEnvironment = new AtomicReference<Boolean>(Boolean.TRUE);
+	private final AtomicReference<ThreadingEnvironment> threadingEnvironment = new AtomicReference<ThreadingEnvironment>(ThreadingEnvironment.MULTITHREADED);
 	private final EntryFileFactory entryFileFactory;
 
 	private boolean useFileBasedEventDefinitions;
 
 	private EventStoreConfigurer(InMemoryFileRepository inMemoryFileRepository) {
-		this.entryFileFactory = new EntryFileFactory(null, inMemoryFileRepository, multiThreadedEnvironment);
+		this.entryFileFactory = new EntryFileFactory(null, inMemoryFileRepository, threadingEnvironment);
 		this.useFileBasedEventDefinitions = true;
 	}
 
 	private EventStoreConfigurer(FileChannelFactory fileChannelFactory) {
-		this.entryFileFactory = new EntryFileFactory(fileChannelFactory, null, multiThreadedEnvironment);
+		this.entryFileFactory = new EntryFileFactory(fileChannelFactory, null, threadingEnvironment);
 		this.useFileBasedEventDefinitions = true;
 	}
 
@@ -105,12 +106,12 @@ public class EventStoreConfigurer {
 	}
 
 	public EventStoreConfigurer multiThreadedEnvironment() {
-		this.multiThreadedEnvironment.set(Boolean.TRUE);
+		this.threadingEnvironment.set(ThreadingEnvironment.MULTITHREADED);
 		return this;
 	}
 
 	public EventStoreConfigurer singleThreadedEnvironment() {
-		this.multiThreadedEnvironment.set(Boolean.FALSE);
+		this.threadingEnvironment.set(ThreadingEnvironment.SINGLE_THREAD);
 		return this;
 	}
 
@@ -130,7 +131,7 @@ public class EventStoreConfigurer {
 		EventDefinitions eventDefinitions = createEventDefinitions();
 		Indexing indexing = createIndexing(eventTypeIndexFile, eventDefinitions, eventFile);
 
-		EventStore result = new EventStore(eventFile, indexing, eventDefinitions);
+		EventStore result = new EventStore(eventFile, indexing, eventDefinitions, threadingEnvironment.get());
 		return result;
 	}
 
@@ -152,7 +153,7 @@ public class EventStoreConfigurer {
 		HashMap<EventTypeId, EventIndex> eventIndicies = createEventIndicies(eventDefinitions, eventIndexPreparer);
 		HashMap<EventFieldIndex.EventFieldId, EventFieldIndex> eventFieldIndicies = createEventFieldIndicies(eventDefinitions, eventIndexPreparer);
 
-		return new Indexing(eventTypeIndex, eventIndicies, eventFieldIndicies, multiThreadedEnvironment.get());
+		return new Indexing(eventTypeIndex, eventIndicies, eventFieldIndicies, threadingEnvironment.get() == ThreadingEnvironment.MULTITHREADED);
 	}
 
 	private HashMap<EventTypeId, EventIndex> createEventIndicies(EventDefinitions eventDefinitions, EventIndexPreparationImpl preparation) {

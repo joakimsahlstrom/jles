@@ -33,6 +33,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import se.jsa.jles.configuration.ThreadingEnvironment;
 import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventFile;
 import se.jsa.jles.internal.PerformanceTest;
@@ -247,7 +248,7 @@ public class EventStoreTest {
 		this.eventEntryFile = entryFileFactory.create("events.ef");
 		this.indexEntryFile = entryFileFactory.create("eventIndexes.if");
 		this.eventFile = new EventFile(eventEntryFile);
-		this.eventStore = new EventStore(eventFile, indexEntryFile);
+		this.eventStore = new EventStore(eventFile, indexEntryFile, ThreadingEnvironment.MULTITHREADED);
 	}
 
 	@After
