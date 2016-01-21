@@ -16,11 +16,6 @@
 package se.jsa.jles;
 
 import java.util.Collections;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import se.jsa.jles.NewEventNotificationListeners.NewEventNotificationListener;
 import se.jsa.jles.internal.EntryFile;
@@ -53,7 +48,6 @@ public class EventStore {
 	private final EventFile eventFile; // Wrap this in "Events"?
 	private final Indexing indexing;
 	private final EventDefinitions eventDefinitions;
-	private final EventWriter eventWriter;
 	private final NewEventNotificationListeners eventListeners = new NewEventNotificationListeners();
 
 	/**
@@ -64,7 +58,11 @@ public class EventStore {
 	 */
 	EventStore(EventFile eventFile, EntryFile eventTypeIndexFile) {
 		this(eventFile,
-			 new Indexing(new IndexFile(new StorableLongField(), eventTypeIndexFile), Collections.<EventTypeId, EventIndex>emptyMap(), Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>emptyMap(), false),
+			 new Indexing(
+					 new IndexFile(new StorableLongField(), eventTypeIndexFile),
+					 Collections.<EventTypeId, EventIndex>emptyMap(),
+					 Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>emptyMap(),
+					 false),
 			 new MappingEventDefinitions(new MemoryBasedEventDefinitions()));
 	}
 
@@ -78,11 +76,6 @@ public class EventStore {
 		this.eventFile = Objects.requireNonNull(eventFile);
 		this.indexing = Objects.requireNonNull(indexing);
 		this.eventDefinitions = Objects.requireNonNull(eventDefinitions);
-		this.eventWriter = createEventWriter(eventFile, indexing);
-	}
-
-	private static EventWriter createEventWriter(EventFile eventFile, Indexing indexing) {
-		return new SimpleEventWriter(eventFile, indexing);
 	}
 
 	public void registerEventListener(NewEventNotificationListener listener) {
@@ -95,7 +88,8 @@ public class EventStore {
 	 */
 	public void write(Object event) {
 		EventSerializer ed = eventDefinitions.getEventSerializer(event);
-		eventWriter.onNewEvent(event, ed);
+		long eventId = eventFile.writeEvent(event, ed);
+		indexing.onNewEvent(eventId, ed, event);
 		eventListeners.onNewEvent();
 	}
 
@@ -118,7 +112,6 @@ public class EventStore {
 	 * This instance will no longer be usable after this method has been called.
 	 */
 	public void stop() {
-		eventWriter.stop();
 		indexing.stop();
 		eventFile.close();
 		eventDefinitions.close();
@@ -151,94 +144,6 @@ public class EventStore {
 			return eventFile.readEventField(eventId.toLong(), eventDeserializer, eventField);
 		}
 
-	}
-
-	// Is this really necessary or should the thread safing be done in Indexing instead?
-	private interface EventWriter {
-		void onNewEvent(Object event, EventSerializer ed);
-		void stop();
-	}
-
-	private static class SimpleEventWriter implements EventWriter {
-		private final EventFile eventFile;
-		private final Indexing indexing;
-
-		public SimpleEventWriter(EventFile eventFile, Indexing indexing) {
-			this.eventFile = Objects.requireNonNull(eventFile);
-			this.indexing = Objects.requireNonNull(indexing);
-		}
-
-		@Override
-		public void onNewEvent(Object event, EventSerializer ed) {
-			long eventId = eventFile.writeEvent(event, ed);
-			indexing.onNewEvent(eventId, ed, event);
-		}
-
-		@Override
-		public void stop() {
-			/* do nothing */
-		}
-
-		@Override
-		public String toString() {
-			return "SimpleEventWriter [eventFile=" + eventFile + ", indexing=" + indexing + "]";
-		}
-	}
-
-	@SuppressWarnings("unused")
-	private static class ThreadsafeEventWriter implements EventWriter {
-		final EventFile eventFile;
-		final Indexing indexing;
-		private final ExecutorService executor = Executors.newSingleThreadExecutor();
-
-		public ThreadsafeEventWriter(EventFile eventFile, Indexing indexing) {
-			this.eventFile = Objects.requireNonNull(eventFile);
-			this.indexing = Objects.requireNonNull(indexing);
-		}
-
-		@Override
-		public void onNewEvent(Object event, EventSerializer ed) {
-			Future<Void> future = executor.submit(new WriteEventJob(event, ed));
-			try {
-				future.get();
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			} catch (ExecutionException e) {
-				Throwable cause = e.getCause();
-				if (cause instanceof RuntimeException) {
-					throw (RuntimeException) cause;
-				} else {
-					throw new RuntimeException("Could not execute append command", cause);
-				}
-			}
-		}
-
-		@Override
-		public void stop() {
-			executor.shutdown();
-		}
-
-		private class WriteEventJob implements Callable<Void> {
-			private final Object event;
-			private final EventSerializer ed;
-
-			public WriteEventJob(Object event, EventSerializer ed) {
-				this.event = Objects.requireNonNull(event);
-				this.ed = Objects.requireNonNull(ed);
-			}
-
-			@Override
-			public Void call() throws Exception {
-				long eventId = eventFile.writeEvent(event, ed);
-				indexing.onNewEvent(eventId, ed, event);
-				return null;
-			}
-		}
-
-		@Override
-		public String toString() {
-			return "ThreadsafeEventWriter [eventFile=" + eventFile + ", indexing=" + indexing + ", executor=" + executor + "]";
-		}
 	}
 
 }
