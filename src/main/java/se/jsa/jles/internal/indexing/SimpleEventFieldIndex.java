@@ -13,12 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.jsa.jles.internal;
+package se.jsa.jles.internal.indexing;
 
 import java.util.Iterator;
 
-import se.jsa.jles.internal.IndexFile.IndexKeyMatcher;
+import se.jsa.jles.internal.EntryFile;
+import se.jsa.jles.internal.EventDeserializer;
+import se.jsa.jles.internal.EventId;
+import se.jsa.jles.internal.EventTypeId;
+import se.jsa.jles.internal.FieldConstraint;
 import se.jsa.jles.internal.fields.EventField;
+import se.jsa.jles.internal.indexing.IndexFile.IndexKeyMatcher;
 
 public class SimpleEventFieldIndex implements EventFieldIndex {
 

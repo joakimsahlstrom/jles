@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.jsa.jles.internal;
+package se.jsa.jles.internal.indexing;
 
 import static org.junit.Assert.assertEquals;
 
@@ -26,9 +26,15 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Test;
 
+import se.jsa.jles.internal.Constraint;
+import se.jsa.jles.internal.EventId;
+import se.jsa.jles.internal.EventTypeId;
+import se.jsa.jles.internal.FieldConstraint;
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
 import se.jsa.jles.internal.fields.StorableLongField;
 import se.jsa.jles.internal.file.SynchronousEntryFile;
+import se.jsa.jles.internal.indexing.Indexing;
+import se.jsa.jles.internal.indexing.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.testevents.TestEvent;
 import se.jsa.jles.internal.util.Objects;
 

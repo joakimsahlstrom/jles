@@ -22,13 +22,13 @@ import java.util.Iterator;
 import org.junit.Test;
 
 import se.jsa.jles.configuration.EntryFileNameGenerator;
-import se.jsa.jles.internal.EventFieldIndex;
-import se.jsa.jles.internal.EventIndex;
 import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.FieldConstraint;
-import se.jsa.jles.internal.SimpleEventFieldIndex;
 import se.jsa.jles.internal.fields.EventFieldFactory;
 import se.jsa.jles.internal.file.InMemoryFileRepository;
+import se.jsa.jles.internal.indexing.EventFieldIndex;
+import se.jsa.jles.internal.indexing.EventIndex;
+import se.jsa.jles.internal.indexing.SimpleEventFieldIndex;
 import se.jsa.jles.internal.testevents.TestEvent;
 
 

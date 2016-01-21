@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.jsa.jles.internal;
+package se.jsa.jles.internal.indexing;
 
 import java.util.Collections;
 import java.util.Map;
@@ -25,8 +25,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import se.jsa.jles.EventStore;
-import se.jsa.jles.internal.EventFieldIndex.EventFieldId;
-import se.jsa.jles.internal.IndexFile.IndexKeyMatcher;
+import se.jsa.jles.internal.EventId;
+import se.jsa.jles.internal.EventSerializer;
+import se.jsa.jles.internal.EventTypeId;
+import se.jsa.jles.internal.FieldConstraint;
+import se.jsa.jles.internal.TypedEventRepo;
+import se.jsa.jles.internal.indexing.EventFieldIndex.EventFieldId;
+import se.jsa.jles.internal.indexing.IndexFile.IndexKeyMatcher;
 import se.jsa.jles.internal.util.Objects;
 
 /**

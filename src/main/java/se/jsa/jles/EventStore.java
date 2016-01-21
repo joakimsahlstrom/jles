@@ -15,7 +15,6 @@
  */
 package se.jsa.jles;
 
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -27,23 +26,22 @@ import se.jsa.jles.NewEventNotificationListeners.NewEventNotificationListener;
 import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventDeserializer;
-import se.jsa.jles.internal.EventFieldIndex;
 import se.jsa.jles.internal.EventFile;
 import se.jsa.jles.internal.EventId;
-import se.jsa.jles.internal.EventIndex;
 import se.jsa.jles.internal.EventSerializer;
 import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.FieldConstraint;
-import se.jsa.jles.internal.IndexFile;
-import se.jsa.jles.internal.IndexType;
-import se.jsa.jles.internal.Indexing;
 import se.jsa.jles.internal.LoadingIterable;
 import se.jsa.jles.internal.TypedEventRepo;
 import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
+import se.jsa.jles.internal.fields.EventField;
 import se.jsa.jles.internal.fields.StorableLongField;
+import se.jsa.jles.internal.indexing.EventFieldIndex;
+import se.jsa.jles.internal.indexing.EventIndex;
+import se.jsa.jles.internal.indexing.IndexFile;
+import se.jsa.jles.internal.indexing.Indexing;
 import se.jsa.jles.internal.util.Objects;
-import se.jsa.jles.internal.util.ReflectionUtil;
 
 
 /**
@@ -147,22 +145,11 @@ public class EventStore {
 		}
 
 		@Override
-		public Object readEventField(EventId eventIndex, String fieldName) {
-//			EventField eventField = eventDefinitions.getEventField(eventTypeId, fieldName);
-			Object event = eventFile.readEvent(eventIndex.toLong(), eventDeserializer);
-			Method getMethod = ReflectionUtil.getPropertyRetrieveMethod(event.getClass(), fieldName);
-			try {
-				return getMethod.invoke(event);
-			} catch (Exception e) {
-				throw new RuntimeException("Unknown event field!");
-			}
-			//return eventFile.readEventField(eventIndex.getEventId(), eventDeserializer, eventField);
+		public Object readEventField(EventId eventId, String fieldName) {
+			EventField eventField = eventDefinitions.getEventField(eventTypeId, fieldName);
+			return eventFile.readEventField(eventId.toLong(), eventDeserializer, eventField);
 		}
 
-		@Override
-		public IndexType getIndexing(String fieldName) {
-			return indexing.getIndexing(eventTypeId, fieldName);
-		}
 	}
 
 	// Is this really necessary or should the thread safing be done in Indexing instead?

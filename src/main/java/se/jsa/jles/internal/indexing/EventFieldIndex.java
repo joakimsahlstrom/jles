@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.jsa.jles.internal;
+package se.jsa.jles.internal.indexing;
+
+import se.jsa.jles.internal.EventId;
+import se.jsa.jles.internal.EventTypeId;
+import se.jsa.jles.internal.FieldConstraint;
 
 
 public interface EventFieldIndex {

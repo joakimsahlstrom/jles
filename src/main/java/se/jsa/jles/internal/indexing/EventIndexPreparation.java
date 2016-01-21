@@ -13,10 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.jsa.jles.internal;
+package se.jsa.jles.internal.indexing;
 
-public enum IndexType {
-	NONE,
-	SIMPLE,
-	ADVANCED;
+import se.jsa.jles.internal.EventDefinitions;
+import se.jsa.jles.internal.EventFile;
+
+
+public interface EventIndexPreparation {
+	EventFile getEventFile();
+	IndexFile getEventTypeIndex();
+	EventDefinitions getEventDefinitions();
+	void schedule(Runnable runnable);
 }

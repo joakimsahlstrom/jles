@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.jsa.jles.internal;
+package se.jsa.jles.internal.indexing;
 
 import java.nio.ByteBuffer;
 
-import se.jsa.jles.internal.IndexFile.IndexKeyMatcher;
+import se.jsa.jles.internal.EntryFile;
+import se.jsa.jles.internal.EventId;
+import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.fields.StorableField;
+import se.jsa.jles.internal.indexing.IndexFile.IndexKeyMatcher;
 import se.jsa.jles.internal.util.Objects;
 
 /**

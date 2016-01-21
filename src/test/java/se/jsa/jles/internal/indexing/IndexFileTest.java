@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.jsa.jles.internal;
+package se.jsa.jles.internal.indexing;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -24,10 +24,15 @@ import java.util.Iterator;
 import org.junit.After;
 import org.junit.Test;
 
+import se.jsa.jles.internal.EventFileTest;
+import se.jsa.jles.internal.EventId;
+import se.jsa.jles.internal.EventFileTest.SingleLongEvent;
+import se.jsa.jles.internal.EventFileTest.SingleStringEvent;
 import se.jsa.jles.internal.fields.LongField;
 import se.jsa.jles.internal.fields.StorableLongField;
 import se.jsa.jles.internal.fields.StringField;
 import se.jsa.jles.internal.file.SynchronousEntryFile;
+import se.jsa.jles.internal.indexing.IndexFile;
 
 public class IndexFileTest {
 

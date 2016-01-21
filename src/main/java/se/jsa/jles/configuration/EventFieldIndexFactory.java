@@ -17,13 +17,13 @@ package se.jsa.jles.configuration;
 
 import se.jsa.jles.EventStoreConfigurer.EventFieldIndexConfiguration;
 import se.jsa.jles.internal.EventDefinitions;
-import se.jsa.jles.internal.EventFieldIndex;
-import se.jsa.jles.internal.EventFieldIndex.EventFieldId;
-import se.jsa.jles.internal.EventIndexPreparation;
 import se.jsa.jles.internal.EventTypeId;
-import se.jsa.jles.internal.InMemoryEventFieldIndex;
-import se.jsa.jles.internal.SimpleEventFieldIndex;
 import se.jsa.jles.internal.fields.EventField;
+import se.jsa.jles.internal.indexing.EventFieldIndex;
+import se.jsa.jles.internal.indexing.EventIndexPreparation;
+import se.jsa.jles.internal.indexing.InMemoryEventFieldIndex;
+import se.jsa.jles.internal.indexing.SimpleEventFieldIndex;
+import se.jsa.jles.internal.indexing.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.util.Objects;
 
 public class EventFieldIndexFactory {

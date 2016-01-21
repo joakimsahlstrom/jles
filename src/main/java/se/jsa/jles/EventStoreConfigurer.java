@@ -29,21 +29,21 @@ import se.jsa.jles.configuration.EntryFileNameGenerator;
 import se.jsa.jles.configuration.EventFieldIndexFactory;
 import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventDefinitions;
-import se.jsa.jles.internal.EventFieldIndex;
-import se.jsa.jles.internal.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.EventFile;
 import se.jsa.jles.internal.EventId;
-import se.jsa.jles.internal.EventIndex;
-import se.jsa.jles.internal.EventIndexPreparation;
 import se.jsa.jles.internal.EventTypeId;
-import se.jsa.jles.internal.IndexFile;
-import se.jsa.jles.internal.Indexing;
 import se.jsa.jles.internal.eventdefinitions.EventDefinitionFile;
 import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.PersistingEventDefinitions;
 import se.jsa.jles.internal.fields.StorableLongField;
 import se.jsa.jles.internal.file.InMemoryFileRepository;
+import se.jsa.jles.internal.indexing.EventFieldIndex;
+import se.jsa.jles.internal.indexing.EventIndex;
+import se.jsa.jles.internal.indexing.EventIndexPreparation;
+import se.jsa.jles.internal.indexing.IndexFile;
+import se.jsa.jles.internal.indexing.Indexing;
+import se.jsa.jles.internal.indexing.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.util.Objects;
 
 /**
