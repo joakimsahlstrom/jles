@@ -39,11 +39,11 @@ import se.jsa.jles.internal.eventdefinitions.PersistingEventDefinitions;
 import se.jsa.jles.internal.fields.StorableLongField;
 import se.jsa.jles.internal.file.InMemoryFileRepository;
 import se.jsa.jles.internal.indexing.EventFieldIndex;
+import se.jsa.jles.internal.indexing.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.indexing.EventIndex;
 import se.jsa.jles.internal.indexing.EventIndexPreparation;
 import se.jsa.jles.internal.indexing.IndexFile;
 import se.jsa.jles.internal.indexing.Indexing;
-import se.jsa.jles.internal.indexing.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.util.Objects;
 
 /**
@@ -60,16 +60,12 @@ public class EventStoreConfigurer {
 
 	private static EntryFileNameGenerator entryFileNameGenerator = new EntryFileNameGenerator();
 
-//	private final FileChannelFactory fileChannelFactory;
-//	private final InMemoryFileRepository inMemoryFileRepository;
 	private final Set<Class<?>> indexedEventTypes = new HashSet<Class<?>>();
 	private final Set<EventFieldIndexConfiguration> indexedEventFields = new HashSet<EventFieldIndexConfiguration>();
-	private boolean useFileBasedEventDefinitions;
 	private final AtomicReference<Boolean> multiThreadedEnvironment = new AtomicReference<Boolean>(Boolean.TRUE);
-//	private WriteStrategy writeStrategy = WriteStrategy.FAST;
-
-//	private final List<String> files = new ArrayList<String>();
 	private final EntryFileFactory entryFileFactory;
+
+	private boolean useFileBasedEventDefinitions;
 
 	private EventStoreConfigurer(InMemoryFileRepository inMemoryFileRepository) {
 		this.entryFileFactory = new EntryFileFactory(null, inMemoryFileRepository, multiThreadedEnvironment);

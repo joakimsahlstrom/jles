@@ -17,6 +17,7 @@ package se.jsa.jles.internal.fields;
 
 import java.nio.ByteBuffer;
 
+// This field is not bound to an event type (compare to EventField)
 public class StorableLongField extends StorableField {
 
 	@Override
