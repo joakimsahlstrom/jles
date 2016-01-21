@@ -101,14 +101,15 @@ public class EventStore {
 
 	public Iterable<Object> readEvents(EventQuery query) {
 		LoadingIterable loadingIterable = LoadingIterable.empty();
+		EventQuery subQuery = query;
 		do {
-			for (EventTypeId eventTypeId : eventDefinitions.getEventTypeIds(query.getEventType())) {
+			for (EventTypeId eventTypeId : eventDefinitions.getEventTypeIds(subQuery.getEventType())) {
 				InternalTypedEventRepo typedEventRepo = new InternalTypedEventRepo(eventTypeId);
-				Iterable<EventId> iterable = typedEventRepo.getIterator(query.createFieldConstraint());
+				Iterable<EventId> iterable = typedEventRepo.getIterator(subQuery.createFieldConstraint());
 				loadingIterable = loadingIterable.with(iterable, typedEventRepo);
 			}
-			query = query.next();
-		} while (query != null);
+			subQuery = subQuery.next();
+		} while (subQuery != null);
 		return loadingIterable;
 	}
 
