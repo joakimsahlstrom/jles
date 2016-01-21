@@ -33,8 +33,6 @@ import se.jsa.jles.internal.FieldConstraint;
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
 import se.jsa.jles.internal.fields.StorableLongField;
 import se.jsa.jles.internal.file.SynchronousEntryFile;
-import se.jsa.jles.internal.indexing.Indexing;
-import se.jsa.jles.internal.indexing.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.testevents.TestEvent;
 import se.jsa.jles.internal.util.Objects;
 
