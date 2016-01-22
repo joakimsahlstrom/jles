@@ -17,6 +17,7 @@ package se.jsa.jles.internal;
 
 import java.util.Set;
 
+import se.jsa.jles.EventRepoReport;
 import se.jsa.jles.internal.fields.EventField;
 
 public interface EventDefinitions {
@@ -33,5 +34,7 @@ public interface EventDefinitions {
 	EventDeserializer getEventDeserializer(EventTypeId eventTypeId);
 
 	EventField getEventField(EventTypeId eventTypeId, String fieldName);
+
+	EventRepoReport report();
 
 }

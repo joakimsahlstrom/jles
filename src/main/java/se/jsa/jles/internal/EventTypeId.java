@@ -49,7 +49,7 @@ public class EventTypeId {
 
 	@Override
 	public String toString() {
-		return "EventTypeId [eventTypeId=" + eventTypeId + "]";
+		return Long.toString(eventTypeId);
 	}
 
 }

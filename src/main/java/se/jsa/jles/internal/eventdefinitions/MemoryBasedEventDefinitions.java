@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import se.jsa.jles.EventRepoReport;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventSerializer;
@@ -55,6 +56,18 @@ public class MemoryBasedEventDefinitions implements EventDefinitions {
 		init(definitions, Collections.<Flag>emptySet());
 	}
 
+	@Override
+	public EventRepoReport report() {
+		EventRepoReport result = new EventRepoReport().appendLine("MemoryBasedEventDefinitions");
+		for (EventDefinition eventDefintion : eventDefinitionsByType.values()) {
+			EventRepoReport subReport = new EventRepoReport();
+			for (EventField field : eventDefintion.getFields()) {
+				subReport.appendLine(field.getFieldType().getSimpleName() + " " + field.getPropertyName() + (field.getFieldName() != null ? " (->" + field.getFieldName() + ")" : ""));
+			}
+			result.appendReport(eventDefintion.getEventType().getCanonicalName() + "(" + eventDefintion.getEventTypeId() + ")", subReport);
+		}
+		return result;
+	}
 
 	@Override
 	public void init() {

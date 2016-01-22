@@ -17,6 +17,7 @@ package se.jsa.jles.internal;
 
 import java.nio.ByteBuffer;
 
+import se.jsa.jles.EventRepoReport;
 import se.jsa.jles.internal.fields.EventField;
 
 /**
@@ -64,6 +65,11 @@ public class EventFile {
 
 	public void close() {
 		entryFile.close();
+	}
+
+	public EventRepoReport report() {
+		return new EventRepoReport()
+			.appendLine("Event file size: " + entryFile.size() + " bytes");
 	}
 
 }

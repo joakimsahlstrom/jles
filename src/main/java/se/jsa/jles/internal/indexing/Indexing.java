@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import se.jsa.jles.EventRepoReport;
 import se.jsa.jles.EventStore;
 import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.EventSerializer;
@@ -62,6 +63,17 @@ public class Indexing {
 		return multiThreadedEnvironment
 				? new ThreadsafeIndexUpdater(eventTypeIndexFile, eventIndicies, eventFieldIds)
 				: new SimpleIndexUpdater(eventTypeIndexFile, eventIndicies, eventFieldIds);
+	}
+
+
+	public EventRepoReport report() {
+		EventRepoReport report = new EventRepoReport().appendLine(Indexing.class.getSimpleName());
+		report.appendReport("IndexFile", eventTypeIndexFile.report());
+		for (EventIndex eventIndex : eventIndicies.values()) {
+			report.appendReport("EventIndex " + eventIndex.getEventTypeId().toString(), eventIndex.report());
+		}
+		report.appendLine("IndexUpdater: " + indexUpdater.getClass().getSimpleName());
+		return report;
 	}
 
 	/**

@@ -84,6 +84,10 @@ public abstract class EventField extends StorableField implements Comparable<Eve
 		return propertyName;
 	}
 
+	public String getFieldName() {
+		return fieldName;
+	}
+
 	@Override
 	public final Class<?> getFieldType() {
 		return getMethod.getReturnType();

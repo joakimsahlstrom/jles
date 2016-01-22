@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import se.jsa.jles.EventRepoReport;
 import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventSerializer;
 import se.jsa.jles.internal.EventTypeId;
@@ -35,6 +36,29 @@ public class ConventionbasedEventResolver implements EventResolver {
 	private final Map<Class<?>, Set<Class<?>>> eventToSerializableEventMap = new HashMap<Class<?>, Set<Class<?>>>();
 	private final Map<Class<?>, Method> eventToGetSerializableEventMethodMap = new HashMap<Class<?>, Method>();
 	private final Map<Class<?>, Method> serializableEventToAsEventMethodMap = new HashMap<Class<?>, Method>();
+
+	@Override
+	public EventRepoReport report() {
+		EventRepoReport result = new EventRepoReport().appendLine("ConventionbasedEventResolver");
+		for (Map.Entry<Class<?>, Set<Class<?>>> eventmapping : eventToSerializableEventMap.entrySet()) {
+			result.appendLine(eventmapping.getKey().getSimpleName() + " -> " + describe(eventmapping.getValue()));
+		}
+		return result;
+	}
+
+	private String describe(Set<Class<?>> classes) {
+		StringBuilder res = new StringBuilder().append("[");
+		boolean first = true;
+		for (Class<?> c : classes) {
+			if (first) {
+				first = false;
+			} else {
+				res.append(", ");
+			}
+			res.append(c.getCanonicalName());
+		}
+		return res.append("]").toString();
+	}
 
 	@Override
 	public Class<?>[] getSerializableEventTypes(Class<?>[] eventTypes) {

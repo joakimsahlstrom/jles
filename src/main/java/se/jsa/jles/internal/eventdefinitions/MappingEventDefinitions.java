@@ -17,6 +17,7 @@ package se.jsa.jles.internal.eventdefinitions;
 
 import java.util.Set;
 
+import se.jsa.jles.EventRepoReport;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventSerializer;
@@ -117,6 +118,14 @@ public class MappingEventDefinitions implements EventDefinitions {
 	@Override
 	public EventField getEventField(EventTypeId eventTypeId, String fieldName) {
 		return definitions.getEventField(eventTypeId, fieldName);
+	}
+
+	@Override
+	public EventRepoReport report() {
+		return new EventRepoReport()
+			.appendLine("MappingEventDefinitions")
+			.appendReport("EventResolver", eventResolver.report())
+			.appendReport("Definitions", definitions.report());
 	}
 
 }

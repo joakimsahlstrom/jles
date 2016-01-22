@@ -173,7 +173,7 @@ class EventDefinition implements EventSerializer, EventDeserializer {
 
 	@Override
 	public String toString() {
-		return "EventDefinition [id=" + id + ", eventType=" + eventType + ", fields=" + fields + "]";
+		return "EventDefinition [id=" + id + ", eventType=" + eventType.getSimpleName() + ", fields=" + fields + "]";
 	}
 
 }

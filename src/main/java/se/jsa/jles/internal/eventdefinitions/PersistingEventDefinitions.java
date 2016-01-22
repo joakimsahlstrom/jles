@@ -18,6 +18,7 @@ package se.jsa.jles.internal.eventdefinitions;
 import java.util.Collections;
 import java.util.Set;
 
+import se.jsa.jles.EventRepoReport;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventSerializer;
@@ -33,6 +34,12 @@ public class PersistingEventDefinitions implements EventDefinitions, MemoryBased
 	public PersistingEventDefinitions(EventDefinitionFile eventDefinitionFile) {
 		this.eventDefinitionFile = Objects.requireNonNull(eventDefinitionFile);
 		this.eventDefinitionCache = new MemoryBasedEventDefinitions();
+	}
+
+	@Override
+	public EventRepoReport report() {
+		return new EventRepoReport()
+			.appendReport("PersistingEventDefinitions, cache", eventDefinitionCache.report());
 	}
 
 	@Override

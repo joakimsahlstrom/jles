@@ -15,6 +15,7 @@
  */
 package se.jsa.jles.internal.eventdefinitions;
 
+import se.jsa.jles.EventRepoReport;
 import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventSerializer;
 
@@ -37,5 +38,7 @@ public interface EventResolver {
 	public EventDeserializer wrapDeserializer(EventDeserializer eventDeserializer);
 
 	public EventSerializer wrapSerializer(EventSerializer eventSerializer);
+
+	public EventRepoReport report();
 
 }

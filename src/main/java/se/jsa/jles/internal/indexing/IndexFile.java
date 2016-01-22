@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import se.jsa.jles.EventRepoReport;
 import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.fields.StorableField;
@@ -43,6 +44,12 @@ public class IndexFile {
 	public IndexFile(StorableField eventKeyField, EntryFile entryFile) {
 		this.eventKeyField = eventKeyField;
 		this.entryFile = entryFile;
+	}
+
+	public EventRepoReport report() {
+		return new EventRepoReport().appendLine("IndexFile")
+			.appendLine("Field: " + eventKeyField)
+			.appendLine("Index file size: " + entryFile.size() + " bytes");
 	}
 
 	public void writeIndex(long eventId, Object event) {

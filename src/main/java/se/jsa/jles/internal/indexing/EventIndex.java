@@ -17,6 +17,7 @@ package se.jsa.jles.internal.indexing;
 
 import java.nio.ByteBuffer;
 
+import se.jsa.jles.EventRepoReport;
 import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.EventTypeId;
@@ -46,6 +47,10 @@ public class EventIndex {
 			return true;
 		}
 	};
+
+	public EventRepoReport report() {
+		return indexFile.report();
+	}
 
 	public Iterable<EventId> readIndicies() {
 		return indexFile.readIndicies(ALWAYS_MATCHER);

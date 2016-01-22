@@ -125,6 +125,15 @@ public class EventStore {
 		eventDefinitions.close();
 	}
 
+	public EventRepoReport report() {
+		return new EventRepoReport()
+			.appendLine("EventStore report")
+			.appendLine("==================")
+			.appendReport("EventFile", eventFile.report())
+			.appendReport("EventDefinitions", eventDefinitions.report())
+			.appendReport("Indexing", indexing.report());
+	}
+
 	// ----- Helper classes -----
 
 	private class InternalTypedEventRepo implements TypedEventRepo {
