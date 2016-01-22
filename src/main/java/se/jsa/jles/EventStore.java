@@ -32,7 +32,6 @@ import se.jsa.jles.internal.EventFile;
 import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.EventSerializer;
 import se.jsa.jles.internal.EventTypeId;
-import se.jsa.jles.internal.FieldConstraint;
 import se.jsa.jles.internal.LoadingIterable;
 import se.jsa.jles.internal.TypedEventRepo;
 import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
@@ -107,7 +106,7 @@ public class EventStore {
 		do {
 			for (EventTypeId eventTypeId : eventDefinitions.getEventTypeIds(subQuery.getEventType())) {
 				InternalTypedEventRepo typedEventRepo = new InternalTypedEventRepo(eventTypeId);
-				Iterable<EventId> iterable = typedEventRepo.getIterator(subQuery.createFieldConstraint());
+				Iterable<EventId> iterable = indexing.readIndicies(eventTypeId, subQuery.createFieldConstraint(), typedEventRepo);
 				loadingIterable = loadingIterable.with(iterable, typedEventRepo);
 			}
 			subQuery = subQuery.next();
@@ -135,11 +134,6 @@ public class EventStore {
 		public InternalTypedEventRepo(EventTypeId eventTypeId) {
 			this.eventTypeId = Objects.requireNonNull(eventTypeId);
 			this.eventDeserializer = eventDefinitions.getEventDeserializer(eventTypeId);
-		}
-
-		@Override
-		public Iterable<EventId> getIterator(FieldConstraint constraint) {
-			return indexing.readIndicies(eventTypeId, constraint, this);
 		}
 
 		@Override
