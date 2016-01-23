@@ -39,7 +39,7 @@ public class ConventionbasedEventResolver implements EventResolver {
 
 	@Override
 	public EventRepoReport report() {
-		EventRepoReport result = new EventRepoReport().appendLine("ConventionbasedEventResolver");
+		EventRepoReport result = new EventRepoReport().appendLine(ConventionbasedEventResolver.class.getSimpleName());
 		for (Map.Entry<Class<?>, Set<Class<?>>> eventmapping : eventToSerializableEventMap.entrySet()) {
 			result.appendLine(eventmapping.getKey().getSimpleName() + " -> " + describe(eventmapping.getValue()));
 		}

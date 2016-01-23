@@ -58,7 +58,7 @@ public class MemoryBasedEventDefinitions implements EventDefinitions {
 
 	@Override
 	public EventRepoReport report() {
-		EventRepoReport result = new EventRepoReport().appendLine("MemoryBasedEventDefinitions");
+		EventRepoReport result = new EventRepoReport().appendLine(MemoryBasedEventDefinitions.class.getSimpleName());
 		for (EventDefinition eventDefintion : eventDefinitionsByType.values()) {
 			EventRepoReport subReport = new EventRepoReport();
 			for (EventField field : eventDefintion.getFields()) {

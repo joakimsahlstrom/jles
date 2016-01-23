@@ -69,7 +69,7 @@ public class EventFile {
 
 	public EventRepoReport report() {
 		return new EventRepoReport()
-			.appendLine("Event file size: " + entryFile.size() + " bytes");
+			.appendLine(EventFile.class.getSimpleName() + " size: " + entryFile.size() + " bytes");
 	}
 
 }

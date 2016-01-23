@@ -123,7 +123,7 @@ public class MappingEventDefinitions implements EventDefinitions {
 	@Override
 	public EventRepoReport report() {
 		return new EventRepoReport()
-			.appendLine("MappingEventDefinitions")
+			.appendLine(MappingEventDefinitions.class.getSimpleName())
 			.appendReport("EventResolver", eventResolver.report())
 			.appendReport("Definitions", definitions.report());
 	}

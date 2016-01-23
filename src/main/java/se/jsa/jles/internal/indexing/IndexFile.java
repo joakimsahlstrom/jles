@@ -47,7 +47,7 @@ public class IndexFile {
 	}
 
 	public EventRepoReport report() {
-		return new EventRepoReport().appendLine("IndexFile")
+		return new EventRepoReport().appendLine(IndexFile.class.getSimpleName())
 			.appendLine("Field: " + eventKeyField)
 			.appendLine("Index file size: " + entryFile.size() + " bytes");
 	}

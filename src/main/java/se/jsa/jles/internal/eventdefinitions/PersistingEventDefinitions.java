@@ -39,7 +39,7 @@ public class PersistingEventDefinitions implements EventDefinitions, MemoryBased
 	@Override
 	public EventRepoReport report() {
 		return new EventRepoReport()
-			.appendReport("PersistingEventDefinitions, cache", eventDefinitionCache.report());
+			.appendReport(PersistingEventDefinitions.class.getSimpleName() + ", cache", eventDefinitionCache.report());
 	}
 
 	@Override
