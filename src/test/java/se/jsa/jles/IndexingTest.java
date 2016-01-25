@@ -120,7 +120,6 @@ public class IndexingTest {
 	}
 
 	@Test
-	@Ignore("Currently a bug here!")
 	public void fieldIndexCanBeAddedAtLaterStartup() throws Exception {
 		es.write(new TestEvent("a", 0, true));
 		es.write(new TestEvent("a", 1, true));

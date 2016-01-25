@@ -69,7 +69,7 @@ public class EventStoreConfigurerTest {
 		InMemoryFileRepository inMemoryFileRepository = new InMemoryFileRepository();
 		EventFieldIndex eventFieldIndex = new SimpleEventFieldIndex(
 				new EventTypeId(0L),
-				new EventFieldFactory().createEventField(Long.class, "Id", TestEvent.class),
+				new EventFieldFactory().createEventField(TestEvent.class, "Id", Long.class),
 				inMemoryFileRepository.getEntryFile(new EntryFileNameGenerator().getEventFieldIndexFileName(new EventTypeId(0L), "Id")));
 
 		EventStore initialEventStore = EventStoreConfigurer.createMemoryOnlyConfigurer(inMemoryFileRepository)

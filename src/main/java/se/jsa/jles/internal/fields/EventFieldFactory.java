@@ -49,7 +49,7 @@ public class EventFieldFactory {
 		}
 
 		public EventField createEventField(Class<?> eventType) {
-			return EventFieldFactory.this.createEventField(type, name, eventType);
+			return EventFieldFactory.this.createEventField(eventType, name, type);
 		}
 
 		@Override
@@ -74,7 +74,18 @@ public class EventFieldFactory {
 		return result;
 	}
 
-	public EventField createEventField(Class<?> fieldType, String name, Class<?> eventType) {
+	public EventField createEventField(Class<?> eventType, String name) {
+		try {
+			Class<?> fieldType = eventType.getMethod("get" + name).getReturnType();
+			return createEventField(eventType, name, fieldType);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException("Cannot create EventField for type " + eventType + " with property name " + name);
+		} catch (SecurityException e) {
+			throw new RuntimeException("Cannot create EventField for type " + eventType + " with property name " + name);
+		}
+	}
+
+	public EventField createEventField(Class<?> eventType, String name, Class<?> fieldType) {
 		if (fieldType.equals(Boolean.TYPE) || fieldType.equals(Boolean.class)) {
 			return new BooleanField(eventType, name);
 		} else if (fieldType.equals(Integer.TYPE) || fieldType.equals(Integer.class)) {

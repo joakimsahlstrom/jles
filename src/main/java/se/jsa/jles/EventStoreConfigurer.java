@@ -167,7 +167,7 @@ public class EventStoreConfigurer {
 	}
 
 	private Map<EventFieldIndex.EventFieldId, EventFieldIndex> createEventFieldIndicies(EventDefinitions eventDefinitions, EventIndexPreparation preparation) {
-		EventFieldIndexFactory eventFieldIndexFactory = new EventFieldIndexFactory(eventDefinitions, preparation, entryFileNameGenerator, entryFileFactory);
+		EventFieldIndexFactory eventFieldIndexFactory = new EventFieldIndexFactory(preparation, entryFileNameGenerator, entryFileFactory);
 
 		Map<EventFieldIndex.EventFieldId, EventFieldIndex> eventFieldIndicies = new HashMap<EventFieldIndex.EventFieldId, EventFieldIndex>();
 		for (EventFieldIndexConfiguration eventFieldIndexConfiguration : indexedEventFields) {

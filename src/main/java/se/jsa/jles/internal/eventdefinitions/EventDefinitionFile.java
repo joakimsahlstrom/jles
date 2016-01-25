@@ -81,7 +81,7 @@ public class EventDefinitionFile {
 			String fieldTypeName = fieldSerializer.getString(entry);
 			String fieldName = fieldSerializer.getString(entry);
 			Class<?> fieldType = loadClass(fieldTypeName);
-			fields.add(eventFieldFactory.createEventField(fieldType, fieldName, eventType));
+			fields.add(eventFieldFactory.createEventField(eventType, fieldName, fieldType));
 		}
 		return new EventDefinition(new EventTypeId(eventTypeId), eventType, fields);
 	}

@@ -16,9 +16,8 @@
 package se.jsa.jles.configuration;
 
 import se.jsa.jles.EventStoreConfigurer.EventFieldIndexConfiguration;
-import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventTypeId;
-import se.jsa.jles.internal.fields.EventField;
+import se.jsa.jles.internal.fields.EventFieldFactory;
 import se.jsa.jles.internal.indexing.EventFieldIndex;
 import se.jsa.jles.internal.indexing.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.indexing.EventIndexPreparation;
@@ -28,31 +27,26 @@ import se.jsa.jles.internal.util.Objects;
 
 public class EventFieldIndexFactory {
 
-	private final EventDefinitions eventDefinitions;
+	private final EventFieldFactory eventFieldFactory = new EventFieldFactory();
 	private final EventIndexPreparation preparation;
 	private final EntryFileNameGenerator entryFileNameGenerator;
 	private final EntryFileFactory entryFileFactory;
 
-	public EventFieldIndexFactory(EventDefinitions eventDefinitions,
-			EventIndexPreparation preparation,
+	public EventFieldIndexFactory(EventIndexPreparation preparation,
 			EntryFileNameGenerator entryFileNameGenerator,
 			EntryFileFactory entryFileFactory) {
 		this.entryFileFactory = entryFileFactory;
-		this.eventDefinitions = Objects.requireNonNull(eventDefinitions);
 		this.preparation = Objects.requireNonNull(preparation);
 		this.entryFileNameGenerator = Objects.requireNonNull(entryFileNameGenerator);
 	}
 
 	public EventFieldIndex createEventFieldIndex(EventFieldIndexConfiguration eventFieldIndexConfiguration, EventTypeId eventTypeId) {
-		EventFieldIndex eventFieldIndex = createEventFieldIndex(
-				eventFieldIndexConfiguration,
-				eventTypeId,
-				eventDefinitions.getEventField(eventTypeId, eventFieldIndexConfiguration.getFieldName()));
+		EventFieldIndex eventFieldIndex = doCreateEventFieldIndex(eventFieldIndexConfiguration, eventTypeId);
 		eventFieldIndex.prepare(preparation);
 		return eventFieldIndex;
 	}
 
-	private EventFieldIndex createEventFieldIndex(EventFieldIndexConfiguration eventFieldIndexConfiguration, EventTypeId eventTypeId, EventField eventField) {
+	private EventFieldIndex doCreateEventFieldIndex(EventFieldIndexConfiguration eventFieldIndexConfiguration, EventTypeId eventTypeId) {
 		if (eventFieldIndexConfiguration.inMemory()) {
 			return new InMemoryEventFieldIndex(
 					new EventFieldId(eventTypeId, eventFieldIndexConfiguration.getFieldName()),
@@ -61,7 +55,7 @@ public class EventFieldIndexFactory {
 		} else {
 			return new SimpleEventFieldIndex(
 					eventTypeId,
-					eventField,
+					eventFieldFactory.createEventField(eventFieldIndexConfiguration.getEventType(), eventFieldIndexConfiguration.getFieldName()),
 					entryFileFactory.createEntryFile(entryFileNameGenerator.getEventFieldIndexFileName(eventTypeId, eventFieldIndexConfiguration.getFieldName())));
 		}
 	}
