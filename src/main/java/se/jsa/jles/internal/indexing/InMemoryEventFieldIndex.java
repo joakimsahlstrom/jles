@@ -20,13 +20,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import se.jsa.jles.internal.EventDefinitions;
-import se.jsa.jles.internal.EventDeserializer;
-import se.jsa.jles.internal.EventFile;
 import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.FieldConstraint;
-import se.jsa.jles.internal.fields.EventField;
+import se.jsa.jles.internal.TypedEventRepo;
 import se.jsa.jles.internal.util.Objects;
 
 public class InMemoryEventFieldIndex implements EventFieldIndex {
@@ -35,8 +32,8 @@ public class InMemoryEventFieldIndex implements EventFieldIndex {
 		private final EventId eventId;
 		private final Object fieldValue;
 		public EventFieldEntry(EventId eventId, Object fieldValue) {
-			this.eventId = eventId;
-			this.fieldValue = fieldValue;
+			this.eventId = Objects.requireNonNull(eventId);
+			this.fieldValue = Objects.requireNonNull(fieldValue);
 		}
 		public EventId getEventId() {
 			return eventId;
@@ -96,17 +93,13 @@ public class InMemoryEventFieldIndex implements EventFieldIndex {
 
 	private final List<EventFieldEntry> entries = new ArrayList<EventFieldEntry>();
 	private final EventFieldId eventFieldId;
-	private final EventField eventField;
 	private final Iterator<EventId> eventIndicies;
-	private final EventDeserializer eventDeserializer;
-	private final EventFile eventFile;
+	private final TypedEventRepo typedEventRepo;
 
-	public InMemoryEventFieldIndex(EventFieldId eventFieldId, EventField eventField, IndexFile eventTypeIndex, EventDefinitions eventDefinitions, EventFile eventFile) {
-		this.eventFieldId = eventFieldId;
-		this.eventField = eventField;
+	public InMemoryEventFieldIndex(EventFieldId eventFieldId, TypedEventRepo typedEventRepo, IndexFile eventTypeIndex) {
+		this.eventFieldId = Objects.requireNonNull(eventFieldId);
 		this.eventIndicies = eventTypeIndex.readIndicies(new Indexing.EventTypeMatcher(eventFieldId.getEventTypeId())).iterator();
-		this.eventDeserializer = eventDefinitions.getEventDeserializer(eventFieldId.getEventTypeId());
-		this.eventFile = Objects.requireNonNull(eventFile);
+		this.typedEventRepo = Objects.requireNonNull(typedEventRepo);
 	}
 
 	@Override
@@ -153,14 +146,14 @@ public class InMemoryEventFieldIndex implements EventFieldIndex {
 	synchronized void sync() {
 		while (eventIndicies.hasNext()) {
 			EventId eventId = eventIndicies.next();
-			Object fieldValue = eventFile.readEventField(eventId.toLong(), eventDeserializer, eventField);
+			Object fieldValue = typedEventRepo.readEventField(eventId, eventFieldId.getFieldName());
 			entries.add(new EventFieldEntry(eventId, fieldValue));
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "InMemoryEventFieldIndex [eventField=" + eventField + "]";
+		return "InMemoryEventFieldIndex [eventFieldId=" + eventFieldId + "]";
 	}
 
 }

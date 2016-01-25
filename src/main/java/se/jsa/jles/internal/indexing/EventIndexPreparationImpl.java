@@ -10,33 +10,30 @@ import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventFile;
 import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.EventTypeId;
+import se.jsa.jles.internal.InternalTypedEventRepo;
+import se.jsa.jles.internal.TypedEventRepo;
 import se.jsa.jles.internal.util.Objects;
 
 public class EventIndexPreparationImpl implements EventIndexPreparation {
 	private final IndexFile eventTypeIndex;
-	private final EventFile eventFile;
 	private final EventDefinitions eventDefinitions;
 	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+	private final EventFile eventFile;
 
 	public EventIndexPreparationImpl(IndexFile eventTypeIndex, EventDefinitions eventDefinitions, EventFile eventFile) {
 		this.eventTypeIndex = Objects.requireNonNull(eventTypeIndex);
-		this.eventFile = Objects.requireNonNull(eventFile);
 		this.eventDefinitions = Objects.requireNonNull(eventDefinitions);
+		this.eventFile = Objects.requireNonNull(eventFile);
 	}
 
 	@Override
-	public EventFile getEventFile() {
-		return eventFile;
+	public TypedEventRepo getTypedEventRepo(EventTypeId eventTypeId) {
+		return new InternalTypedEventRepo(eventTypeId, eventFile, eventDefinitions);
 	}
 
 	@Override
 	public IndexFile getEventTypeIndex() {
 		return eventTypeIndex;
-	}
-
-	@Override
-	public EventDefinitions getEventDefinitions() {
-		return eventDefinitions;
 	}
 
 	@Override

@@ -18,7 +18,6 @@ package se.jsa.jles.internal.indexing;
 import java.util.Iterator;
 
 import se.jsa.jles.internal.EntryFile;
-import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.FieldConstraint;
@@ -81,10 +80,9 @@ public class SimpleEventFieldIndex implements EventFieldIndex {
 				throw new RuntimeException("Indexing between event index and source event type index did not match for eventType " + getEventTypeId());
 			}
 		}
-		EventDeserializer eventDeserializer = preparation.getEventDefinitions().getEventDeserializer(getEventTypeId());
 		while (sourceIndicies.hasNext()) {
 			EventId eventId = sourceIndicies.next();
-			onNewEvent(eventId.toLong(), preparation.getEventFile().readEvent(eventId.toLong(), eventDeserializer));
+			onNewEvent(eventId.toLong(), preparation.getTypedEventRepo(getEventTypeId()).readEvent(eventId));
 		}
 	}
 

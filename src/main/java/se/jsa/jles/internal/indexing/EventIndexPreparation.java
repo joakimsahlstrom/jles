@@ -17,15 +17,13 @@ package se.jsa.jles.internal.indexing;
 
 import java.util.Map;
 
-import se.jsa.jles.internal.EventDefinitions;
-import se.jsa.jles.internal.EventFile;
 import se.jsa.jles.internal.EventTypeId;
+import se.jsa.jles.internal.TypedEventRepo;
 
 
 public interface EventIndexPreparation {
-	EventFile getEventFile();
+	TypedEventRepo getTypedEventRepo(EventTypeId eventTypeId);
 	IndexFile getEventTypeIndex();
-	EventDefinitions getEventDefinitions();
 	void schedule(Runnable runnable);
 	void prepare(Map<EventTypeId, EventIndex> eventIndicies);
 }

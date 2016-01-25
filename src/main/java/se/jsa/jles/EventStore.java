@@ -27,16 +27,14 @@ import se.jsa.jles.NewEventNotificationListeners.NewEventNotificationListener;
 import se.jsa.jles.configuration.ThreadingEnvironment;
 import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventDefinitions;
-import se.jsa.jles.internal.EventDeserializer;
 import se.jsa.jles.internal.EventFile;
 import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.EventSerializer;
 import se.jsa.jles.internal.EventTypeId;
+import se.jsa.jles.internal.InternalTypedEventRepo;
 import se.jsa.jles.internal.LoadingIterable;
-import se.jsa.jles.internal.TypedEventRepo;
 import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
-import se.jsa.jles.internal.fields.EventField;
 import se.jsa.jles.internal.fields.StorableLongField;
 import se.jsa.jles.internal.indexing.EventFieldIndex;
 import se.jsa.jles.internal.indexing.EventIndex;
@@ -105,7 +103,7 @@ public class EventStore {
 		EventQuery subQuery = query;
 		do {
 			for (EventTypeId eventTypeId : eventDefinitions.getEventTypeIds(subQuery.getEventType())) {
-				InternalTypedEventRepo typedEventRepo = new InternalTypedEventRepo(eventTypeId);
+				InternalTypedEventRepo typedEventRepo = new InternalTypedEventRepo(eventTypeId, eventFile, eventDefinitions);
 				Iterable<EventId> iterable = indexing.readIndicies(eventTypeId, subQuery.createFieldConstraint(), typedEventRepo);
 				loadingIterable = loadingIterable.with(iterable, typedEventRepo);
 			}
@@ -135,27 +133,6 @@ public class EventStore {
 	}
 
 	// ----- Helper classes -----
-
-	private class InternalTypedEventRepo implements TypedEventRepo {
-		private final EventTypeId eventTypeId;
-		private final EventDeserializer eventDeserializer;
-
-		public InternalTypedEventRepo(EventTypeId eventTypeId) {
-			this.eventTypeId = Objects.requireNonNull(eventTypeId);
-			this.eventDeserializer = eventDefinitions.getEventDeserializer(eventTypeId);
-		}
-
-		@Override
-		public Object readEvent(EventId eventIndex) {
-			return eventFile.readEvent(eventIndex.toLong(), eventDeserializer);
-		}
-
-		@Override
-		public Object readEventField(EventId eventId, String fieldName) {
-			EventField eventField = eventDefinitions.getEventField(eventTypeId, fieldName);
-			return eventFile.readEventField(eventId.toLong(), eventDeserializer, eventField);
-		}
-	}
 
 	private class EventRegistration implements Callable<Void> {
 		private final Object event;
