@@ -115,18 +115,6 @@ public class Indexing {
 	}
 
 	/**
-	 * @param eventTypeId {@link Long} event type id
-	 * @param fieldName String
-	 * @return The {@link IndexType} used for indexing the given field for the given event type
-	 */
-	public IndexType getIndexing(EventTypeId eventTypeId, String fieldName) {
-		if (eventFieldIndicies.containsKey(new EventFieldId(eventTypeId, fieldName))) {
-			return IndexType.SIMPLE; // Advanced indexing not yet supported
-		}
-		return IndexType.NONE;
-	}
-
-	/**
 	 * Stops this {@link Indexing} and closes all associated files. This indexing is no longer usable after this method has been called.
 	 */
 	public void stop() {
