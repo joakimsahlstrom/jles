@@ -23,6 +23,7 @@ import se.jsa.jles.EventRepoReport;
 import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.fields.StorableField;
+import se.jsa.jles.internal.indexing.events.EventIndexEntry;
 
 /**
  * IndexFile

@@ -36,10 +36,11 @@ import se.jsa.jles.internal.LoadingIterable;
 import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
 import se.jsa.jles.internal.fields.StorableLongField;
-import se.jsa.jles.internal.indexing.EventFieldIndex;
-import se.jsa.jles.internal.indexing.EventIndex;
 import se.jsa.jles.internal.indexing.IndexFile;
 import se.jsa.jles.internal.indexing.Indexing;
+import se.jsa.jles.internal.indexing.events.EventIndex;
+import se.jsa.jles.internal.indexing.events.EventIndexingSingleFile;
+import se.jsa.jles.internal.indexing.fields.EventFieldIndex;
 import se.jsa.jles.internal.util.Objects;
 
 
@@ -64,8 +65,9 @@ public class EventStore {
 	EventStore(EventFile eventFile, EntryFile eventTypeIndexFile, ThreadingEnvironment threadingEnvironment) {
 		this(eventFile,
 			 new Indexing(
-					 new IndexFile(new StorableLongField(), eventTypeIndexFile),
-					 Collections.<EventTypeId, EventIndex>emptyMap(),
+					 new EventIndexingSingleFile(
+							 new IndexFile(new StorableLongField(), eventTypeIndexFile),
+							 Collections.<EventTypeId, EventIndex>emptyMap()),
 					 Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>emptyMap(),
 					 threadingEnvironment == ThreadingEnvironment.MULTITHREADED),
 			 new MappingEventDefinitions(new MemoryBasedEventDefinitions()),

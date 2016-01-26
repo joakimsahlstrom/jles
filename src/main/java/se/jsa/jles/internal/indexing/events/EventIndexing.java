@@ -13,13 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.jsa.jles.internal.indexing;
+package se.jsa.jles.internal.indexing.events;
 
+import se.jsa.jles.EventRepoReport;
+import se.jsa.jles.internal.EventId;
+import se.jsa.jles.internal.EventSerializer;
 import se.jsa.jles.internal.EventTypeId;
-import se.jsa.jles.internal.TypedEventRepo;
 
-public interface EventIndexPreparation {
-	TypedEventRepo getTypedEventRepo(EventTypeId eventTypeId);
-	IndexFile getEventTypeIndex();
-	void schedule(Runnable runnable);
+public interface EventIndexing {
+
+	void prepare();
+	void onNewEvent(long eventId, EventSerializer ed, Object event);
+	Iterable<EventId> getIndexEntryIterable(EventTypeId eventTypeId);
+
+	void stop();
+	EventRepoReport report();
+
 }

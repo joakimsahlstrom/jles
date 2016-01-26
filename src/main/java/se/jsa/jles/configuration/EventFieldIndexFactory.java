@@ -18,11 +18,12 @@ package se.jsa.jles.configuration;
 import se.jsa.jles.EventStoreConfigurer.EventFieldIndexConfiguration;
 import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.fields.EventFieldFactory;
-import se.jsa.jles.internal.indexing.EventFieldIndex;
-import se.jsa.jles.internal.indexing.EventFieldIndex.EventFieldId;
+import se.jsa.jles.internal.file.EntryFileNameGenerator;
+import se.jsa.jles.internal.indexing.fields.EventFieldIndex;
+import se.jsa.jles.internal.indexing.fields.InMemoryEventFieldIndex;
+import se.jsa.jles.internal.indexing.fields.SimpleEventFieldIndex;
+import se.jsa.jles.internal.indexing.fields.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.indexing.EventIndexPreparation;
-import se.jsa.jles.internal.indexing.InMemoryEventFieldIndex;
-import se.jsa.jles.internal.indexing.SimpleEventFieldIndex;
 import se.jsa.jles.internal.util.Objects;
 
 public class EventFieldIndexFactory {
@@ -30,11 +31,11 @@ public class EventFieldIndexFactory {
 	private final EventFieldFactory eventFieldFactory = new EventFieldFactory();
 	private final EventIndexPreparation preparation;
 	private final EntryFileNameGenerator entryFileNameGenerator;
-	private final EntryFileFactory entryFileFactory;
+	private final EntryFileFactoryConfiguration entryFileFactory;
 
 	public EventFieldIndexFactory(EventIndexPreparation preparation,
 			EntryFileNameGenerator entryFileNameGenerator,
-			EntryFileFactory entryFileFactory) {
+			EntryFileFactoryConfiguration entryFileFactory) {
 		this.entryFileFactory = entryFileFactory;
 		this.preparation = Objects.requireNonNull(preparation);
 		this.entryFileNameGenerator = Objects.requireNonNull(entryFileNameGenerator);

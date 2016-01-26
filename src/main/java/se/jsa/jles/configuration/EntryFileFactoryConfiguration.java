@@ -22,11 +22,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import se.jsa.jles.EventStoreConfigurer.WriteStrategy;
 import se.jsa.jles.FileChannelFactory;
 import se.jsa.jles.internal.EntryFile;
+import se.jsa.jles.internal.file.EntryFileCreator;
 import se.jsa.jles.internal.file.FlippingEntryFile;
 import se.jsa.jles.internal.file.InMemoryFileRepository;
 import se.jsa.jles.internal.file.ThreadSafeEntryFile;
 
-public class EntryFileFactory {
+public class EntryFileFactoryConfiguration implements EntryFileCreator {
 
 	private final FileChannelFactory fileChannelFactory;
 	private final InMemoryFileRepository inMemoryFileRepository;
@@ -35,7 +36,7 @@ public class EntryFileFactory {
 	private final List<String> files = new ArrayList<String>();
 	private WriteStrategy writeStrategy = WriteStrategy.FAST;
 
-	public EntryFileFactory(FileChannelFactory fileChannelFactory,
+	public EntryFileFactoryConfiguration(FileChannelFactory fileChannelFactory,
 			InMemoryFileRepository inMemoryFileRepository,
 			AtomicReference<ThreadingEnvironment> threadingEnvironment) {
 		this.fileChannelFactory = fileChannelFactory;
@@ -43,10 +44,11 @@ public class EntryFileFactory {
 		this.threadingEnvironment = threadingEnvironment;
 	}
 
-	public void setWriteStrategy(WriteStrategy writeStrategy2) {
-		this.writeStrategy = writeStrategy2;
+	public void setWriteStrategy(WriteStrategy writeStrategy) {
+		this.writeStrategy = writeStrategy;
 	}
 
+	@Override
 	public EntryFile createEntryFile(String fileName) {
 		if (fileChannelFactory == null) {
 			return inMemoryFileRepository.getEntryFile(fileName);

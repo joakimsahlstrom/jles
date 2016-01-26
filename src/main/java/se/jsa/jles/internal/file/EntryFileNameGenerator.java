@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.jsa.jles.configuration;
+package se.jsa.jles.internal.file;
 
 import se.jsa.jles.internal.EventTypeId;
 

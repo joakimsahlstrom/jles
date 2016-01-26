@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.jsa.jles.internal.indexing;
+package se.jsa.jles.internal.file;
 
-import se.jsa.jles.internal.EventTypeId;
-import se.jsa.jles.internal.TypedEventRepo;
+import se.jsa.jles.internal.EntryFile;
 
-public interface EventIndexPreparation {
-	TypedEventRepo getTypedEventRepo(EventTypeId eventTypeId);
-	IndexFile getEventTypeIndex();
-	void schedule(Runnable runnable);
+public interface EntryFileCreator {
+	EntryFile createEntryFile(String fileName);
 }

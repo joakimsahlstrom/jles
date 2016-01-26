@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.jsa.jles.internal.indexing;
+package se.jsa.jles.internal.indexing.fields;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -24,6 +24,9 @@ import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.FieldConstraint;
 import se.jsa.jles.internal.TypedEventRepo;
+import se.jsa.jles.internal.indexing.EventIndexPreparation;
+import se.jsa.jles.internal.indexing.IndexFile;
+import se.jsa.jles.internal.indexing.Indexing;
 import se.jsa.jles.internal.util.Objects;
 
 public class InMemoryEventFieldIndex implements EventFieldIndex {

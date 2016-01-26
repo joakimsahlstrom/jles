@@ -30,6 +30,7 @@ import se.jsa.jles.internal.fields.LongField;
 import se.jsa.jles.internal.fields.StorableLongField;
 import se.jsa.jles.internal.fields.StringField;
 import se.jsa.jles.internal.file.SynchronousEntryFile;
+import se.jsa.jles.internal.indexing.events.EventIndex;
 
 public class IndexFileTest {
 

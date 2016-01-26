@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.jsa.jles.internal.indexing;
+package se.jsa.jles.internal.indexing.fields;
 
 import java.util.Iterator;
 
@@ -22,7 +22,10 @@ import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.FieldConstraint;
 import se.jsa.jles.internal.fields.EventField;
+import se.jsa.jles.internal.indexing.EventIndexPreparation;
+import se.jsa.jles.internal.indexing.IndexFile;
 import se.jsa.jles.internal.indexing.IndexFile.IndexKeyMatcher;
+import se.jsa.jles.internal.indexing.Indexing;
 
 public class SimpleEventFieldIndex implements EventFieldIndex {
 

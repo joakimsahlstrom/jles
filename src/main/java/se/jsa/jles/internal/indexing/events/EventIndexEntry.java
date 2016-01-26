@@ -1,4 +1,4 @@
-package se.jsa.jles.internal.indexing;
+package se.jsa.jles.internal.indexing.events;
 
 import se.jsa.jles.internal.EventId;
 

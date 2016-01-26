@@ -22,8 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import se.jsa.jles.configuration.EntryFileFactory;
-import se.jsa.jles.configuration.EntryFileNameGenerator;
+import se.jsa.jles.configuration.EntryFileFactoryConfiguration;
 import se.jsa.jles.configuration.EventFieldIndexFactory;
 import se.jsa.jles.configuration.ThreadingEnvironment;
 import se.jsa.jles.internal.EntryFile;
@@ -35,14 +34,17 @@ import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.PersistingEventDefinitions;
 import se.jsa.jles.internal.fields.StorableLongField;
+import se.jsa.jles.internal.file.EntryFileNameGenerator;
 import se.jsa.jles.internal.file.InMemoryFileRepository;
-import se.jsa.jles.internal.indexing.EventFieldIndex;
-import se.jsa.jles.internal.indexing.EventFieldIndex.EventFieldId;
-import se.jsa.jles.internal.indexing.EventIndex;
 import se.jsa.jles.internal.indexing.EventIndexPreparation;
 import se.jsa.jles.internal.indexing.EventIndexPreparationImpl;
 import se.jsa.jles.internal.indexing.IndexFile;
 import se.jsa.jles.internal.indexing.Indexing;
+import se.jsa.jles.internal.indexing.events.EventIndex;
+import se.jsa.jles.internal.indexing.events.EventIndexing;
+import se.jsa.jles.internal.indexing.events.EventIndexingSingleFile;
+import se.jsa.jles.internal.indexing.fields.EventFieldIndex;
+import se.jsa.jles.internal.indexing.fields.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.util.Objects;
 
 /**
@@ -62,17 +64,17 @@ public class EventStoreConfigurer {
 	private final Set<Class<?>> indexedEventTypes = new HashSet<Class<?>>();
 	private final Set<EventFieldIndexConfiguration> indexedEventFields = new HashSet<EventFieldIndexConfiguration>();
 	private final AtomicReference<ThreadingEnvironment> threadingEnvironment = new AtomicReference<ThreadingEnvironment>(ThreadingEnvironment.MULTITHREADED);
-	private final EntryFileFactory entryFileFactory;
+	private final EntryFileFactoryConfiguration entryFileFactory;
 
 	private boolean useFileBasedEventDefinitions;
 
 	private EventStoreConfigurer(InMemoryFileRepository inMemoryFileRepository) {
-		this.entryFileFactory = new EntryFileFactory(null, inMemoryFileRepository, threadingEnvironment);
+		this.entryFileFactory = new EntryFileFactoryConfiguration(null, inMemoryFileRepository, threadingEnvironment);
 		this.useFileBasedEventDefinitions = true;
 	}
 
 	private EventStoreConfigurer(FileChannelFactory fileChannelFactory) {
-		this.entryFileFactory = new EntryFileFactory(fileChannelFactory, null, threadingEnvironment);
+		this.entryFileFactory = new EntryFileFactoryConfiguration(fileChannelFactory, null, threadingEnvironment);
 		this.useFileBasedEventDefinitions = true;
 	}
 
@@ -124,10 +126,9 @@ public class EventStoreConfigurer {
 	}
 
 	public EventStore configure() {
-		EntryFile eventTypeIndexFile = entryFileFactory.createEntryFile(entryFileNameGenerator.getEventTypeIndexFileName());
 		EventFile eventFile = new EventFile(entryFileFactory.createEntryFile(entryFileNameGenerator.getEventFileName()));
 		EventDefinitions eventDefinitions = createEventDefinitions();
-		Indexing indexing = createIndexing(eventTypeIndexFile, eventDefinitions, eventFile);
+		Indexing indexing = createIndexing(eventDefinitions, eventFile);
 
 		EventStore result = new EventStore(eventFile, indexing, eventDefinitions, threadingEnvironment.get());
 		return result;
@@ -145,16 +146,22 @@ public class EventStoreConfigurer {
 		}
 	}
 
-	private Indexing createIndexing(EntryFile eventTypeIndexFile, EventDefinitions eventDefinitions, EventFile eventFile) {
+	private Indexing createIndexing(EventDefinitions eventDefinitions, EventFile eventFile) {
+		EntryFile eventTypeIndexFile = entryFileFactory.createEntryFile(entryFileNameGenerator.getEventTypeIndexFileName());
 		IndexFile eventTypeIndex = new IndexFile(new StorableLongField(), eventTypeIndexFile);
+		Map<EventTypeId, EventIndex> eventIndicies = createEventIndicies(eventDefinitions);
+		EventIndexing eventIndexing = new EventIndexingSingleFile(eventTypeIndex, eventIndicies);
+		eventIndexing.prepare();
+
+		EventIndexingSingleFile.create(indexedEventTypes, entryFileFactory, entryFileNameGenerator, eventDefinitions);
+
 		EventIndexPreparation eventIndexPreparer = new EventIndexPreparationImpl(eventTypeIndex, eventDefinitions, eventFile);
-		Map<EventTypeId, EventIndex> eventIndicies = createEventIndicies(eventDefinitions, eventIndexPreparer);
 		Map<EventFieldIndex.EventFieldId, EventFieldIndex> eventFieldIndicies = createEventFieldIndicies(eventDefinitions, eventIndexPreparer);
 
-		return new Indexing(eventTypeIndex, eventIndicies, eventFieldIndicies, threadingEnvironment.get() == ThreadingEnvironment.MULTITHREADED);
+		return new Indexing(eventIndexing, eventFieldIndicies, threadingEnvironment.get() == ThreadingEnvironment.MULTITHREADED);
 	}
 
-	private Map<EventTypeId, EventIndex> createEventIndicies(EventDefinitions eventDefinitions, EventIndexPreparation preparation) {
+	private Map<EventTypeId, EventIndex> createEventIndicies(EventDefinitions eventDefinitions) {
 		Map<EventTypeId, EventIndex> eventIndicies = new HashMap<EventTypeId, EventIndex>();
 		for (Class<?> indexedEventType : indexedEventTypes) {
 			for (EventTypeId eventTypeId : eventDefinitions.getEventTypeIds(indexedEventType)) {
@@ -162,7 +169,6 @@ public class EventStoreConfigurer {
 				eventIndicies.put(eventTypeId, eventIndex);
 			}
 		}
-		preparation.prepare(eventIndicies);
 		return eventIndicies;
 	}
 
