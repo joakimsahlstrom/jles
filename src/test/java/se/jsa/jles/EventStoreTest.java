@@ -204,16 +204,6 @@ public class EventStoreTest {
 	@Parameters
 	public static Collection<Object[]> entryFiles() {
 		return Arrays.asList(
-//				new Object[] {
-//						new EntryFileFactory() {
-//							@Override
-//							public EntryFile create(String fileName) {
-//								return new SynchronousEntryFile(fileName);
-//							}
-//							@Override
-//							public String toString() { return "SynchronousEntryFile"; }
-//						}
-//					},
 				new Object[] {
 						new EntryFileFactory() {
 							@Override

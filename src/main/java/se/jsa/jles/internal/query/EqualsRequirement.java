@@ -24,13 +24,15 @@ class EqualsRequirement extends Requirement {
 	private final Object equality;
 
 	public EqualsRequirement(Class<?> eventType, String fieldName, Object equality) {
-		validateFieldType(eventType, fieldName, equality.getClass());
+		if (equality != null) {
+			validateFieldType(eventType, fieldName, equality.getClass());
+		}
 		this.fieldName = Objects.requireNonNull(fieldName);
-		this.equality = Objects.requireNonNull(equality);
+		this.equality = equality;
 	}
 
 	@Override
-	public FieldConstraint createFieldContraint() {
+	public FieldConstraint createFieldConstraint() {
 		return FieldConstraint.create(fieldName, new EqualsConstraint(equality));
 	}
 
@@ -44,6 +46,15 @@ class EqualsRequirement extends Requirement {
 		@Override
 		protected boolean isSatisfied(Object eventFieldValue) {
 			return equality == null ? eventFieldValue == null : eventFieldValue.equals(equality);
+		}
+
+		@Override
+		protected Object cast(Object eventFieldValue) {
+			if (equality == null) {
+				return eventFieldValue;
+			} else {
+				return super.cast(eventFieldValue);
+			}
 		}
 
 		@Override

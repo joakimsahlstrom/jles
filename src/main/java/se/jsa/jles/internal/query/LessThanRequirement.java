@@ -33,7 +33,7 @@ class LessThanRequirement extends Requirement {
 	}
 
 	@Override
-	public FieldConstraint createFieldContraint() {
+	public FieldConstraint createFieldConstraint() {
 		return FieldConstraint.create(fieldName, new LessThanConstraint(number));
 	}
 

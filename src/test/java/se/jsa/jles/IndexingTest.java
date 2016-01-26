@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import se.jsa.jles.EventStoreTest.EmptyEvent;
@@ -75,22 +74,6 @@ public class IndexingTest {
 		es.write(new TestEvent("a", 1, true));
 		es.write(new TestEvent("a", 2, true));
 		List<Object> events = TestUtil.collect(es.readEvents(EventQuery.select(TestEvent.class).where("Id").is(1L)));
-		/*, new Matcher() {
-				@Override
-				public Iterable<EventId> buildFilteringIterator(TypedEventRepo eventRepo) {
-					return eventRepo.getIterator(FieldConstraint.create("Id", new Constraint() {
-						@Override
-						public boolean isSatisfied(Object eventFieldValue) {
-							boolean res = Long.valueOf(1).equals(eventFieldValue);
-							return res;
-						}
-						@Override
-						public Class<Long> getFieldType() {
-							return Long.class;
-						}
-					}));
-				}
-			}).build());*/
 		assertEquals(Arrays.asList(new TestEvent("a", 1, true)), events);
 	}
 
@@ -134,7 +117,6 @@ public class IndexingTest {
 		assertFalse(events.hasNext());
 	}
 
-	@Ignore
 	@Test
 	public void canIndexNullValues() throws Exception {
 		es.stop();

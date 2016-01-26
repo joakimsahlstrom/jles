@@ -39,7 +39,7 @@ public class InRequirement extends Requirement {
 	}
 
 	@Override
-	public FieldConstraint createFieldContraint() {
+	public FieldConstraint createFieldConstraint() {
 		return FieldConstraint.create(fieldName, new InConstraint(equalities == null ? null : new HashSet<Object>(Arrays.asList(equalities)), fieldType));
 	}
 

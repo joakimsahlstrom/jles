@@ -23,7 +23,7 @@ import se.jsa.jles.internal.util.ReflectionUtil;
 
 public final class EventQuery {
 
-	private static final RequirementFactory REQUIREMENT_FACTORY = new RequirementFactory();
+	static final RequirementFactory REQUIREMENT_FACTORY = new RequirementFactory();
 
 	private final Class<?> eventType;
 	private final Requirement requirement;
@@ -64,7 +64,7 @@ public final class EventQuery {
 	}
 
 	FieldConstraint createFieldConstraint() {
-		return requirement.createFieldContraint();
+		return requirement.createFieldConstraint();
 	}
 
 	public static class EventQueryWhere {

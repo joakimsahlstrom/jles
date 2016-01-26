@@ -24,7 +24,7 @@ import se.jsa.jles.internal.util.ReflectionUtil;
 public abstract class Requirement {
 	public static Requirement NONE = new Requirement() {
 		@Override
-		public FieldConstraint createFieldContraint() {
+		public FieldConstraint createFieldConstraint() {
 			return FieldConstraint.noConstraint();
 		}
 
@@ -34,7 +34,7 @@ public abstract class Requirement {
 		}
 	};
 
-	public abstract FieldConstraint createFieldContraint();
+	public abstract FieldConstraint createFieldConstraint();
 
 	protected void validateFieldType(Class<?> eventType, String fieldName, Class<?> compareToType) {
 		try {

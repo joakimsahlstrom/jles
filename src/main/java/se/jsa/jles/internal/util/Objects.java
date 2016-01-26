@@ -22,11 +22,11 @@ public class Objects {
 		//hide this
 	}
 
-	public static <T> T requireNonNull(T indicies) {
-		if (indicies == null) {
+	public static <T> T requireNonNull(T object) {
+		if (object == null) {
 			throw new NullPointerException();
 		}
-		return indicies;
+		return object;
 	}
 
 }

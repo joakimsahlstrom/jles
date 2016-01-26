@@ -32,7 +32,7 @@ class GreaterThanRequirement extends Requirement {
 	}
 
 	@Override
-	public FieldConstraint createFieldContraint() {
+	public FieldConstraint createFieldConstraint() {
 		return FieldConstraint.create(fieldName, new GreaterThanConstraint(number));
 	}
 

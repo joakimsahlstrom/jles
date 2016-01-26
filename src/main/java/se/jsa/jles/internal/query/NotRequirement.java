@@ -17,6 +17,7 @@ package se.jsa.jles.internal.query;
 
 import se.jsa.jles.internal.Constraint;
 import se.jsa.jles.internal.FieldConstraint;
+import se.jsa.jles.internal.util.Objects;
 
 class NotRequirement extends Requirement {
 
@@ -27,16 +28,16 @@ class NotRequirement extends Requirement {
 	}
 
 	@Override
-	public FieldConstraint createFieldContraint() {
-		FieldConstraint fieldContraint = requirement.createFieldContraint();
-		return FieldConstraint.create(fieldContraint.getFieldName(), new NotConstraint(fieldContraint.getConstraint()));
+	public FieldConstraint createFieldConstraint() {
+		FieldConstraint fieldConstraint = requirement.createFieldConstraint();
+		return FieldConstraint.create(fieldConstraint.getFieldName(), new NotConstraint(fieldConstraint.getConstraint()));
 	}
 
 	private static class NotConstraint extends Constraint {
 		private final Constraint constraint;
 
 		public NotConstraint(Constraint constraint) {
-			this.constraint = constraint;
+			this.constraint = Objects.requireNonNull(constraint);
 		}
 
 		@Override
