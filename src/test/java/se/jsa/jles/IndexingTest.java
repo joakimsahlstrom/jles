@@ -152,7 +152,7 @@ public class IndexingTest {
 
 		long unindexedRead = end2 - start2;
 		long indexedRead = end3 - start3;
-		assertTrue("Indexed read should be at least a factor 10 faster under conditions given in this test case (" + indexedRead + " vs " + unindexedRead + ")", indexedRead * 10 < unindexedRead);
+		assertTrue("Indexed read should be at least a factor 5 faster under conditions given in this test case (" + indexedRead + " vs " + unindexedRead + ")", indexedRead * 5 < unindexedRead);
 	}
 
 	private static Random random = new Random(System.nanoTime());
