@@ -25,8 +25,6 @@ import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.FieldConstraint;
 import se.jsa.jles.internal.TypedEventRepo;
 import se.jsa.jles.internal.indexing.EventIndexPreparation;
-import se.jsa.jles.internal.indexing.IndexFile;
-import se.jsa.jles.internal.indexing.Indexing;
 import se.jsa.jles.internal.util.Objects;
 
 public class InMemoryEventFieldIndex implements EventFieldIndex {

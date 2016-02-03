@@ -46,7 +46,6 @@ public class EventWithNonStaticSerializable {
 	}
 
 	public class SerializableEventV1 {
-		@SuppressWarnings("hiding")
 		private String name;
 
 		public SerializableEventV1() {

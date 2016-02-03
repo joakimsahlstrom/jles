@@ -61,6 +61,7 @@ public class FlippingEntryFile implements EntryFile {
 			case SUPERSAFE:
 				closeOutputStream();
 				break;
+			case FAST: break;
 			}
 			return result;
 		} catch (IOException e) {

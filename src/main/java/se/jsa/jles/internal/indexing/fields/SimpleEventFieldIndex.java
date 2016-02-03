@@ -25,7 +25,6 @@ import se.jsa.jles.internal.fields.EventField;
 import se.jsa.jles.internal.indexing.EventIndexPreparation;
 import se.jsa.jles.internal.indexing.IndexFile;
 import se.jsa.jles.internal.indexing.IndexFile.IndexKeyMatcher;
-import se.jsa.jles.internal.indexing.Indexing;
 
 public class SimpleEventFieldIndex implements EventFieldIndex {
 

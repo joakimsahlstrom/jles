@@ -20,7 +20,6 @@ import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.fields.EventFieldFactory;
 import se.jsa.jles.internal.file.EntryFileNameGenerator;
 import se.jsa.jles.internal.indexing.EventIndexPreparation;
-import se.jsa.jles.internal.indexing.Indexing;
 import se.jsa.jles.internal.indexing.fields.EventFieldIndex;
 import se.jsa.jles.internal.indexing.fields.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.indexing.fields.InMemoryEventFieldIndex;

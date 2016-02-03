@@ -43,8 +43,10 @@ public class SynchronousEntryFile implements EntryFile {
 	@Override
 	public long append(ByteBuffer data) {
 		FileChannel channel = null;
+		FileOutputStream fileOutputStream = null;
 		try {
-			channel = new FileOutputStream(fileName, true).getChannel();
+			fileOutputStream = new FileOutputStream(fileName, true);
+			channel = fileOutputStream.getChannel();
 			return entryReader.append(data, channel);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -56,14 +58,23 @@ public class SynchronousEntryFile implements EntryFile {
 					throw new RuntimeException(e);
 				}
 			}
+			if (fileOutputStream != null) {
+				try {
+					fileOutputStream.close();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
 		}
 	}
 
 	@Override
 	public ByteBuffer readEntry(long position) {
 		FileChannel channel = null;
+		FileInputStream fileInputStream = null;
 		try {
-			channel = new FileInputStream(fileName).getChannel();
+			fileInputStream = new FileInputStream(fileName);
+			channel = fileInputStream.getChannel();
 			return entryReader.readEntry(position, channel);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -75,14 +86,23 @@ public class SynchronousEntryFile implements EntryFile {
 					throw new RuntimeException(e);
 				}
 			}
+			if (fileInputStream != null) {
+				try {
+					fileInputStream.close();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
 		}
 	}
 
 	@Override
 	public long size() {
 		FileChannel channel = null;
+		FileInputStream fileInputStream = null;
 		try {
-			channel = new FileInputStream(fileName).getChannel();
+			fileInputStream = new FileInputStream(fileName);
+			channel = fileInputStream.getChannel();
 			return channel.size();
 		} catch (Exception e) {
 			return 0;
@@ -90,6 +110,13 @@ public class SynchronousEntryFile implements EntryFile {
 			if (channel != null) {
 				try {
 					channel.close();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			if (fileInputStream != null) {
+				try {
+					fileInputStream.close();
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
