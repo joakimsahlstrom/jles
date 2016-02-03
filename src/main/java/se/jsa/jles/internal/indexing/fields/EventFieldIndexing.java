@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.jsa.jles.internal.indexing;
-
-import java.util.Iterator;
+package se.jsa.jles.internal.indexing.fields;
 
 import se.jsa.jles.internal.EventId;
-import se.jsa.jles.internal.EventTypeId;
-import se.jsa.jles.internal.TypedEventRepo;
+import se.jsa.jles.internal.EventSerializer;
+import se.jsa.jles.internal.FieldConstraint;
+import se.jsa.jles.internal.indexing.fields.EventFieldIndex.EventFieldId;
 
-public interface EventIndexPreparation {
-	TypedEventRepo getTypedEventRepo(EventTypeId eventTypeId);
-	Iterator<EventId> readIndicies(EventTypeId eventTypeId);
-	void schedule(Runnable runnable);
+public interface EventFieldIndexing {
+	
+	void onNewEvent(long eventId, EventSerializer ed, Object event);
+
+	boolean isIndexing(EventFieldId eventFieldId);
+	Iterable<EventId> getIterable(EventFieldId eventFieldId, FieldConstraint fieldConstraint);
+	
+	void stop();
+	
 }

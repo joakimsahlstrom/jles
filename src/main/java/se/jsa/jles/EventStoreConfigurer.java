@@ -15,37 +15,28 @@
  */
 package se.jsa.jles;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import se.jsa.jles.configuration.EntryFileFactoryConfiguration;
-import se.jsa.jles.configuration.EventFieldIndexFactory;
+import se.jsa.jles.configuration.EventFieldIndexingFactory;
+import se.jsa.jles.configuration.EventFieldIndexingFactory.EventFieldIndexConfiguration;
 import se.jsa.jles.configuration.ThreadingEnvironment;
-import se.jsa.jles.internal.EntryFile;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventFile;
-import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.eventdefinitions.EventDefinitionFile;
 import se.jsa.jles.internal.eventdefinitions.MappingEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.MemoryBasedEventDefinitions;
 import se.jsa.jles.internal.eventdefinitions.PersistingEventDefinitions;
-import se.jsa.jles.internal.fields.StorableLongField;
 import se.jsa.jles.internal.file.EntryFileNameGenerator;
 import se.jsa.jles.internal.file.InMemoryFileRepository;
 import se.jsa.jles.internal.indexing.EventIndexPreparation;
 import se.jsa.jles.internal.indexing.EventIndexPreparationImpl;
-import se.jsa.jles.internal.indexing.IndexFile;
 import se.jsa.jles.internal.indexing.Indexing;
-import se.jsa.jles.internal.indexing.events.EventIndex;
 import se.jsa.jles.internal.indexing.events.EventIndexing;
 import se.jsa.jles.internal.indexing.events.EventIndexingSingleFile;
-import se.jsa.jles.internal.indexing.fields.EventFieldIndex;
-import se.jsa.jles.internal.indexing.fields.EventFieldIndex.EventFieldId;
-import se.jsa.jles.internal.util.Objects;
 
 /**
  * Used for creating fully initialized {@link EventStore} instances
@@ -147,94 +138,18 @@ public class EventStoreConfigurer {
 	}
 
 	private Indexing createIndexing(EventDefinitions eventDefinitions, EventFile eventFile) {
-		EntryFile eventTypeIndexFile = entryFileFactory.createEntryFile(entryFileNameGenerator.getEventTypeIndexFileName());
-		IndexFile eventTypeIndex = new IndexFile(new StorableLongField(), eventTypeIndexFile);
-		Map<EventTypeId, EventIndex> eventIndicies = createEventIndicies(eventDefinitions);
-		EventIndexing eventIndexing = new EventIndexingSingleFile(eventTypeIndex, eventIndicies);
-		eventIndexing.prepare();
-
-		EventIndexingSingleFile.create(indexedEventTypes, entryFileFactory, entryFileNameGenerator, eventDefinitions);
-
-		EventIndexPreparation eventIndexPreparer = new EventIndexPreparationImpl(eventTypeIndex, eventDefinitions, eventFile);
-		Map<EventFieldIndex.EventFieldId, EventFieldIndex> eventFieldIndicies = createEventFieldIndicies(eventDefinitions, eventIndexPreparer);
-
-		return new Indexing(eventIndexing, eventFieldIndicies, threadingEnvironment.get() == ThreadingEnvironment.MULTITHREADED);
-	}
-
-	private Map<EventTypeId, EventIndex> createEventIndicies(EventDefinitions eventDefinitions) {
-		Map<EventTypeId, EventIndex> eventIndicies = new HashMap<EventTypeId, EventIndex>();
-		for (Class<?> indexedEventType : indexedEventTypes) {
-			for (EventTypeId eventTypeId : eventDefinitions.getEventTypeIds(indexedEventType)) {
-				EventIndex eventIndex = new EventIndex(entryFileFactory.createEntryFile(entryFileNameGenerator.getEventIndexFileName(eventTypeId)), eventTypeId);
-				eventIndicies.put(eventTypeId, eventIndex);
-			}
-		}
-		return eventIndicies;
-	}
-
-	private Map<EventFieldIndex.EventFieldId, EventFieldIndex> createEventFieldIndicies(EventDefinitions eventDefinitions, EventIndexPreparation preparation) {
-		EventFieldIndexFactory eventFieldIndexFactory = new EventFieldIndexFactory(preparation, entryFileNameGenerator, entryFileFactory);
-
-		Map<EventFieldIndex.EventFieldId, EventFieldIndex> eventFieldIndicies = new HashMap<EventFieldIndex.EventFieldId, EventFieldIndex>();
-		for (EventFieldIndexConfiguration eventFieldIndexConfiguration : indexedEventFields) {
-			for (EventTypeId eventTypeId : eventDefinitions.getEventTypeIds(eventFieldIndexConfiguration.getEventType())) {
-				EventFieldIndex eventFieldIndex = eventFieldIndexFactory.createEventFieldIndex(eventFieldIndexConfiguration, eventTypeId);
-				eventFieldIndicies.put(eventFieldIndexConfiguration.createEventFieldId(eventTypeId), eventFieldIndex);
-			}
-		}
-		return eventFieldIndicies;
+		EventIndexing eventIndexing = EventIndexingSingleFile.create(indexedEventTypes, entryFileFactory, entryFileNameGenerator, eventDefinitions);
+		EventIndexPreparation preparation = new EventIndexPreparationImpl(eventIndexing, eventDefinitions, eventFile);
+		
+		EventFieldIndexingFactory eventFieldIndexingFactory = new EventFieldIndexingFactory(preparation, entryFileNameGenerator, entryFileFactory);
+		return new Indexing(
+				eventIndexing, 
+				eventFieldIndexingFactory.createEventFieldIndicies(eventDefinitions, indexedEventFields), 
+				threadingEnvironment.get() == ThreadingEnvironment.MULTITHREADED);
 	}
 
 	public List<String> getFiles() {
 		return entryFileFactory.getFiles();
-	}
-
-	public class EventFieldIndexConfiguration {
-		private final Class<?> eventType;
-		private final String fieldName;
-		private final boolean inMemory;
-
-		public EventFieldIndexConfiguration(Class<?> eventType, String fieldName, boolean inMemory) {
-			this.eventType = Objects.requireNonNull(eventType);
-			this.fieldName = Objects.requireNonNull(fieldName);
-			this.inMemory = inMemory;
-		}
-
-		public boolean inMemory() {
-			return inMemory;
-		}
-
-		public EventFieldId createEventFieldId(EventTypeId eventTypeId) {
-			return new EventFieldId(eventTypeId, fieldName);
-		}
-
-		public String getFieldName() {
-			return fieldName;
-		}
-
-		public Class<?> getEventType() {
-			return eventType;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj == null) {
-				return false;
-			}
-			if (obj == this) {
-				return true;
-			}
-			if (!(obj instanceof EventStoreConfigurer.EventFieldIndexConfiguration)) {
-				return false;
-			}
-			EventStoreConfigurer.EventFieldIndexConfiguration other = (EventStoreConfigurer.EventFieldIndexConfiguration)obj;
-			return eventType.equals(other.eventType) && fieldName.equals(other.fieldName);
-		}
-
-		@Override
-		public int hashCode() {
-			return eventType.hashCode() * 977 + fieldName.hashCode();
-		}
 	}
 
 }

@@ -74,7 +74,7 @@ public class SimpleEventFieldIndex implements EventFieldIndex {
 	@Override
 	public void prepare(EventIndexPreparation preparation) {
 		Iterator<EventId> existingIndicies = getIterable(FieldConstraint.noConstraint()).iterator();
-		Iterator<EventId> sourceIndicies = preparation.getEventTypeIndex().readIndicies(new Indexing.EventTypeMatcher(getEventTypeId())).iterator();
+		Iterator<EventId> sourceIndicies = preparation.readIndicies(getEventTypeId());
 		while (existingIndicies.hasNext()) {
 			if (!sourceIndicies.hasNext()) {
 				throw new RuntimeException("Index for eventType " + getEventTypeId() + " contains more indexes than the source event type index");

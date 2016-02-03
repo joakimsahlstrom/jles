@@ -99,9 +99,9 @@ public class InMemoryEventFieldIndex implements EventFieldIndex {
 	private final Iterator<EventId> eventIndicies;
 	private final TypedEventRepo typedEventRepo;
 
-	public InMemoryEventFieldIndex(EventFieldId eventFieldId, TypedEventRepo typedEventRepo, IndexFile eventTypeIndex) {
+	public InMemoryEventFieldIndex(EventFieldId eventFieldId, TypedEventRepo typedEventRepo, Iterator<EventId> eventIndicies) {
 		this.eventFieldId = Objects.requireNonNull(eventFieldId);
-		this.eventIndicies = eventTypeIndex.readIndicies(new Indexing.EventTypeMatcher(eventFieldId.getEventTypeId())).iterator();
+		this.eventIndicies = Objects.requireNonNull(eventIndicies);
 		this.typedEventRepo = Objects.requireNonNull(typedEventRepo);
 	}
 

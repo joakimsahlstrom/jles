@@ -51,9 +51,13 @@ public class EventFile {
 
 	public Object readEvent(long position, EventDeserializer ed) {
 		ByteBuffer input = entryFile.readEntry(position);
-
-		Object result = ed.deserializeEvent(input);
-		return result;
+		
+		try {
+			Object result = ed.deserializeEvent(input);
+			return result;
+		} catch (RuntimeException e) {
+			throw new RuntimeException("Could not deserialize event. Position=" + position + " deserializer=" + ed, e);
+		}
 	}
 
 	public Object readEventField(long position, EventDeserializer ed, EventField eventField) {

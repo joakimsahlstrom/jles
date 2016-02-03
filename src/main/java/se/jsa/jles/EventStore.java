@@ -40,7 +40,7 @@ import se.jsa.jles.internal.indexing.IndexFile;
 import se.jsa.jles.internal.indexing.Indexing;
 import se.jsa.jles.internal.indexing.events.EventIndex;
 import se.jsa.jles.internal.indexing.events.EventIndexingSingleFile;
-import se.jsa.jles.internal.indexing.fields.EventFieldIndex;
+import se.jsa.jles.internal.indexing.fields.EventFieldIndexingImpl;
 import se.jsa.jles.internal.util.Objects;
 
 
@@ -68,7 +68,7 @@ public class EventStore {
 					 new EventIndexingSingleFile(
 							 new IndexFile(new StorableLongField(), eventTypeIndexFile),
 							 Collections.<EventTypeId, EventIndex>emptyMap()),
-					 Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>emptyMap(),
+					 EventFieldIndexingImpl.noIndexing(),
 					 threadingEnvironment == ThreadingEnvironment.MULTITHREADED),
 			 new MappingEventDefinitions(new MemoryBasedEventDefinitions()),
 			 threadingEnvironment);

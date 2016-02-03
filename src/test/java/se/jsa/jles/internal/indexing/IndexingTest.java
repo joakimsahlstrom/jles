@@ -36,6 +36,7 @@ import se.jsa.jles.internal.file.SynchronousEntryFile;
 import se.jsa.jles.internal.indexing.events.EventIndex;
 import se.jsa.jles.internal.indexing.events.EventIndexingSingleFile;
 import se.jsa.jles.internal.indexing.fields.EventFieldIndex;
+import se.jsa.jles.internal.indexing.fields.EventFieldIndexingImpl;
 import se.jsa.jles.internal.indexing.fields.SimpleEventFieldIndex;
 import se.jsa.jles.internal.testevents.TestEvent;
 import se.jsa.jles.internal.util.Objects;
@@ -122,7 +123,7 @@ public class IndexingTest {
 				new EventIndexingSingleFile(
 						new IndexFile(new StorableLongField(), eventTypeIndexFile),
 						Collections.<EventTypeId, EventIndex>emptyMap()),
-				Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>singletonMap(eventFieldIndex.getFieldId(), eventFieldIndex),
+				new EventFieldIndexingImpl(Collections.<EventFieldIndex.EventFieldId, EventFieldIndex>singletonMap(eventFieldIndex.getFieldId(), eventFieldIndex)),
 				false);
 	}
 

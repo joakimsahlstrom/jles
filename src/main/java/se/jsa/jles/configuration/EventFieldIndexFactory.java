@@ -15,15 +15,16 @@
  */
 package se.jsa.jles.configuration;
 
-import se.jsa.jles.EventStoreConfigurer.EventFieldIndexConfiguration;
+import se.jsa.jles.configuration.EventFieldIndexingFactory.EventFieldIndexConfiguration;
 import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.fields.EventFieldFactory;
 import se.jsa.jles.internal.file.EntryFileNameGenerator;
+import se.jsa.jles.internal.indexing.EventIndexPreparation;
+import se.jsa.jles.internal.indexing.Indexing;
 import se.jsa.jles.internal.indexing.fields.EventFieldIndex;
+import se.jsa.jles.internal.indexing.fields.EventFieldIndex.EventFieldId;
 import se.jsa.jles.internal.indexing.fields.InMemoryEventFieldIndex;
 import se.jsa.jles.internal.indexing.fields.SimpleEventFieldIndex;
-import se.jsa.jles.internal.indexing.fields.EventFieldIndex.EventFieldId;
-import se.jsa.jles.internal.indexing.EventIndexPreparation;
 import se.jsa.jles.internal.util.Objects;
 
 public class EventFieldIndexFactory {
@@ -52,7 +53,7 @@ public class EventFieldIndexFactory {
 			return new InMemoryEventFieldIndex(
 					new EventFieldId(eventTypeId, eventFieldIndexConfiguration.getFieldName()),
 					preparation.getTypedEventRepo(eventTypeId),
-					preparation.getEventTypeIndex());
+					preparation.readIndicies(eventTypeId));
 		} else {
 			return new SimpleEventFieldIndex(
 					eventTypeId,

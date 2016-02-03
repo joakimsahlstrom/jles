@@ -1,23 +1,29 @@
 package se.jsa.jles.internal.indexing;
 
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventFile;
+import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.InternalTypedEventRepo;
 import se.jsa.jles.internal.TypedEventRepo;
+import se.jsa.jles.internal.indexing.events.EventIndexing;
 import se.jsa.jles.internal.util.Objects;
 
 public class EventIndexPreparationImpl implements EventIndexPreparation {
-	private final IndexFile eventTypeIndex;
+	private final EventIndexing eventIndexing;
 	private final EventDefinitions eventDefinitions;
 	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 	private final EventFile eventFile;
 
-	public EventIndexPreparationImpl(IndexFile eventTypeIndex, EventDefinitions eventDefinitions, EventFile eventFile) {
-		this.eventTypeIndex = Objects.requireNonNull(eventTypeIndex);
+	public EventIndexPreparationImpl(
+			EventIndexing eventIndexing, 
+			EventDefinitions eventDefinitions,
+			EventFile eventFile) {
+		this.eventIndexing = Objects.requireNonNull(eventIndexing);
 		this.eventDefinitions = Objects.requireNonNull(eventDefinitions);
 		this.eventFile = Objects.requireNonNull(eventFile);
 	}
@@ -28,8 +34,8 @@ public class EventIndexPreparationImpl implements EventIndexPreparation {
 	}
 
 	@Override
-	public IndexFile getEventTypeIndex() {
-		return eventTypeIndex;
+	public Iterator<EventId> readIndicies(EventTypeId eventTypeId) {
+		return eventIndexing.getIndexEntryIterable(eventTypeId).iterator();
 	}
 
 	@Override

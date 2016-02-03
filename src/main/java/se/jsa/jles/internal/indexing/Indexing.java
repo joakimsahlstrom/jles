@@ -16,7 +16,6 @@
 package se.jsa.jles.internal.indexing;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -36,6 +35,7 @@ import se.jsa.jles.internal.indexing.events.EventIndex;
 import se.jsa.jles.internal.indexing.events.EventIndexing;
 import se.jsa.jles.internal.indexing.fields.EventFieldIndex;
 import se.jsa.jles.internal.indexing.fields.EventFieldIndex.EventFieldId;
+import se.jsa.jles.internal.indexing.fields.EventFieldIndexing;
 import se.jsa.jles.internal.util.Objects;
 
 /**
@@ -45,7 +45,7 @@ import se.jsa.jles.internal.util.Objects;
  */
 public class Indexing {
 	private final EventIndexing eventIndexing;
-	private final Map<EventFieldId, EventFieldIndex> eventFieldIndicies;
+	private final EventFieldIndexing eventFieldIndexing;
 	private final IndexUpdater indexUpdater;
 
 	/**
@@ -54,13 +54,13 @@ public class Indexing {
 	 * @param eventFieldIndicies A Map with the {@link EventFieldIndex}es that should exist for corresponding event fields
 	 * @param multiThreadedEnvironment <code>true</code> if this {@link Indexing} is living in a multithreaded environment (and thus must be thread safe)
 	 */
-	public Indexing(EventIndexing eventIndexing, Map<EventFieldId, EventFieldIndex> eventFieldIndicies, boolean multiThreadedEnvironment) {
+	public Indexing(EventIndexing eventIndexing, EventFieldIndexing eventFieldIndicies, boolean multiThreadedEnvironment) {
 		this.eventIndexing = Objects.requireNonNull(eventIndexing);
-		this.eventFieldIndicies = Objects.requireNonNull(eventFieldIndicies);
+		this.eventFieldIndexing = Objects.requireNonNull(eventFieldIndicies);
 		this.indexUpdater = createIndexUpdater(eventIndexing, eventFieldIndicies, multiThreadedEnvironment);
 	}
 
-	private static IndexUpdater createIndexUpdater(EventIndexing eventIndexing, Map<EventFieldId, EventFieldIndex> eventFieldIds, boolean multiThreadedEnvironment) {
+	private static IndexUpdater createIndexUpdater(EventIndexing eventIndexing, EventFieldIndexing eventFieldIds, boolean multiThreadedEnvironment) {
 		return multiThreadedEnvironment
 				? new ThreadsafeIndexUpdater(eventIndexing, eventFieldIds)
 				: new SimpleIndexUpdater(eventIndexing, eventFieldIds);
@@ -83,15 +83,15 @@ public class Indexing {
 	 * @return
 	 */
 	public Iterable<EventId> readIndicies(EventTypeId eventTypeId, FieldConstraint constraint, TypedEventRepo typedEventRepo) {
-		if (!constraint.hasConstraint()) {
-			return eventIndexing.getIndexEntryIterable(eventTypeId);
-		}
-		EventFieldId eventFieldId = new EventFieldId(eventTypeId, constraint.getFieldName());
-		if (eventFieldIndicies.containsKey(eventFieldId)) {
-			return eventFieldIndicies.get(eventFieldId).getIterable(constraint);
+		if (constraint.hasConstraint()) {
+			EventFieldId eventFieldId = new EventFieldId(eventTypeId, constraint.getFieldName());
+			if (eventFieldIndexing.isIndexing(eventFieldId)) {
+				return eventFieldIndexing.getIterable(eventFieldId, constraint);
+			} else {
+				return new FallbackFilteringEventIdIterable(eventIndexing.getIndexEntryIterable(eventTypeId), constraint, typedEventRepo);	
+			}
 		} else {
-			Iterable<EventId> baseIter = eventIndexing.getIndexEntryIterable(eventTypeId);
-			return new FallbackFilteringEventIdIterable(baseIter, constraint, typedEventRepo);
+			return eventIndexing.getIndexEntryIterable(eventTypeId);
 		}
 	}
 
@@ -110,14 +110,13 @@ public class Indexing {
 	 */
 	public void stop() {
 		eventIndexing.stop();
-		for (EventFieldIndex efi : eventFieldIndicies.values()) {
-			efi.close();
-		}
+		eventFieldIndexing.stop();
+		indexUpdater.stop();
 	}
 
 	@Override
 	public String toString() {
-		return "Indexing [eventIndexing=" + eventIndexing + ", eventFieldIndicies=" + eventFieldIndicies + ", indexUpdater=" + indexUpdater + "]";
+		return "Indexing [eventIndexing=" + eventIndexing + ", eventFieldIndexing=" + eventFieldIndexing + ", indexUpdater=" + indexUpdater + "]";
 	}
 
 	// ----- Helper classes -----
@@ -143,21 +142,17 @@ public class Indexing {
 
 	private static class SimpleIndexUpdater implements IndexUpdater {
 		private final EventIndexing eventIndexing;
-		private final Map<EventFieldId, EventFieldIndex> eventFieldIds;
+		private final EventFieldIndexing eventFieldIndexing;
 
-		public SimpleIndexUpdater(EventIndexing eventIndexing, Map<EventFieldId, EventFieldIndex> eventFieldIds) {
+		public SimpleIndexUpdater(EventIndexing eventIndexing, EventFieldIndexing eventFieldIndexing) {
 			this.eventIndexing = Objects.requireNonNull(eventIndexing);
-			this.eventFieldIds = Objects.requireNonNull(eventFieldIds);
+			this.eventFieldIndexing = Objects.requireNonNull(eventFieldIndexing);
 		}
 
 		@Override
 		public void onNewEvent(long eventId, EventSerializer ed, Object event) {
 			eventIndexing.onNewEvent(eventId, ed, event);
-			for (EventFieldIndex efi : eventFieldIds.values()) {
-				if (efi.indexes(ed.getEventTypeId())) {
-					efi.onNewEvent(eventId, event);
-				}
-			}
+			eventFieldIndexing.onNewEvent(eventId, ed, event);
 		}
 
 		@Override
@@ -167,18 +162,18 @@ public class Indexing {
 
 		@Override
 		public String toString() {
-			return "SimpleIndexUpdater [eventIndexing=" + eventIndexing + ", eventFieldIds=" + eventFieldIds + "]";
+			return "SimpleIndexUpdater [eventIndexing=" + eventIndexing + ", eventFieldIds=" + eventFieldIndexing + "]";
 		}
 	}
 
 	private static class ThreadsafeIndexUpdater implements IndexUpdater {
 		final EventIndexing eventIndexing;
-		final Map<EventFieldId, EventFieldIndex> eventFieldIndicies;
+		final EventFieldIndexing eventFieldIndexing;
 		private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-		public ThreadsafeIndexUpdater(EventIndexing eventIndexing, Map<EventFieldId, EventFieldIndex> eventFieldIndicies) {
+		public ThreadsafeIndexUpdater(EventIndexing eventIndexing, EventFieldIndexing eventFieldIndexing) {
 			this.eventIndexing = Objects.requireNonNull(eventIndexing);
-			this.eventFieldIndicies = Objects.requireNonNull(eventFieldIndicies);
+			this.eventFieldIndexing = Objects.requireNonNull(eventFieldIndexing);
 		}
 
 		@Override
@@ -220,11 +215,7 @@ public class Indexing {
 			@Override
 			public Void call() throws Exception {
 				eventIndexing.onNewEvent(eventId, ed, event);
-				for (EventFieldIndex efi : eventFieldIndicies.values()) {
-					if (efi.indexes(ed.getEventTypeId())) {
-						efi.onNewEvent(eventId, event);
-					}
-				}
+				eventFieldIndexing.onNewEvent(eventId, ed, event);
 				return null;
 			}
 		}
