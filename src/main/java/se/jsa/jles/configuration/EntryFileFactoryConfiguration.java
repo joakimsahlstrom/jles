@@ -61,6 +61,14 @@ public class EntryFileFactoryConfiguration implements EntryFileCreator {
 		files.add(fileName);
 		return flippingEntryFile;
 	}
+	
+	@Override
+	public boolean fileExists(String fileName) {
+		if (fileChannelFactory == null) {
+			return inMemoryFileRepository.fileExists(fileName);
+		}
+		return fileChannelFactory.fileExits(fileName);
+	}
 
 	public List<String> getFiles() {
 		return files;

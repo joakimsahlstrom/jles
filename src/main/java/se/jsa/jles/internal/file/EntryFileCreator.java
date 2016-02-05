@@ -19,4 +19,5 @@ import se.jsa.jles.internal.EntryFile;
 
 public interface EntryFileCreator {
 	EntryFile createEntryFile(String fileName);
+	boolean fileExists(String fileName);
 }

@@ -15,9 +15,7 @@
  */
 package se.jsa.jles;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +26,7 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Test;
 
+import se.jsa.jles.EventStoreConfigurer.IndexType;
 import se.jsa.jles.EventStoreTest.EmptyEvent;
 import se.jsa.jles.EventStoreTest.EmptyEvent2;
 import se.jsa.jles.EventStoreTest.EmptyEvent3;
@@ -39,6 +38,7 @@ public class IndexingTest {
 
 	private final EventStoreConfigurer configurer = EventStoreConfigurer
 			.createMemoryOnlyConfigurer()
+			.indexing(IndexType.SINGLE_FILE)
 			.addIndexing(EmptyEvent3.class)
 			.addInMemoryIndexing(TestEvent.class, "Name");
 
@@ -110,6 +110,7 @@ public class IndexingTest {
 		es.write(new TestEvent("a", 1, true));
 		es.write(new TestEvent("a", 2, true));
 		es.stop();
+		Thread.sleep(100);
 
 		es = configurer
 				.addIndexing(TestEvent.class, "Id")
@@ -140,7 +141,7 @@ public class IndexingTest {
 
 	@Test
 	public void indexPerformanceTest() throws Exception {
-		List<Object> events = createEEvents(5000, 0.01d);
+		List<Object> events = createEEvents(20000, 0.01d);
 
 		for (Object event : events) {
 			es.write(event);
@@ -157,6 +158,32 @@ public class IndexingTest {
 		long unindexedRead = end2 - start2;
 		long indexedRead = end3 - start3;
 		assertTrue("Indexed read should be at least a factor 2 faster under conditions given in this test case (" + indexedRead + " vs " + unindexedRead + ")", indexedRead * 2 < unindexedRead);
+	}
+	
+	@Test
+	public void canMigrateToMultiIndexFile() throws Exception {
+		es.write(new TestEvent("a", 0, true));
+		es.write(new MyEvent(1));
+		es.write(new TestEvent("a", 1, true));
+		es.write(new MyEvent(2));
+		es.write(new TestEvent("a", 2, true));
+		es.stop();
+
+		es = configurer
+				.indexing(IndexType.MULTI_FILE)
+				.configure();
+		
+		Iterator<Object> events = es.readEvents(EventQuery.select(TestEvent.class)).iterator();
+		assertEquals(0L, ((TestEvent)events.next()).getId());
+		assertEquals(1L, ((TestEvent)events.next()).getId());
+		assertEquals(2L, ((TestEvent)events.next()).getId());
+		assertFalse(events.hasNext());
+
+		events = es.readEvents(EventQuery.select(MyEvent.class)).iterator();
+		assertEquals(1, ((MyEvent)events.next()).getNum());
+		assertEquals(2, ((MyEvent)events.next()).getNum());
+		assertFalse(events.hasNext());
+		System.out.println(es.report());
 	}
 
 	private static Random random = new Random(System.nanoTime());

@@ -56,7 +56,7 @@ public class EventFile {
 			Object result = ed.deserializeEvent(input);
 			return result;
 		} catch (RuntimeException e) {
-			throw new RuntimeException("Could not deserialize event. Position=" + position + " deserializer=" + ed, e);
+			throw new RuntimeException("Could not deserialize event. Position=" + position + " deserializer=" + ed + " entryFile.size=" + entryFile.size(), e);
 		}
 	}
 

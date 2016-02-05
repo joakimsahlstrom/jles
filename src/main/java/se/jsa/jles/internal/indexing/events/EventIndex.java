@@ -42,19 +42,12 @@ public class EventIndex {
 		this.eventTypeId = Objects.requireNonNull(eventTypeId);
 	}
 
-	public static IndexKeyMatcher ALWAYS_MATCHER = new IndexKeyMatcher() {
-		@Override
-		public boolean accepts(Object t) {
-			return true;
-		}
-	};
-
 	public EventRepoReport report() {
 		return indexFile.report();
 	}
 
 	public Iterable<EventId> readIndicies() {
-		return indexFile.readIndicies(ALWAYS_MATCHER);
+		return indexFile.readIndicies(IndexKeyMatcher.ALWAYS_MATCHER);
 	}
 
 	public void writeIndex(long eventId) {

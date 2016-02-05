@@ -33,6 +33,10 @@ import se.jsa.jles.internal.indexing.Indexing;
 import se.jsa.jles.internal.indexing.Indexing.EventTypeMatcher;
 import se.jsa.jles.internal.util.Objects;
 
+/**
+ * @deprecated Use {@link EventIndexingMultiFile} instead
+ */
+@Deprecated
 public class EventIndexingSingleFile implements EventIndexing {
 
 	private final IndexFile eventTypeIndexFile;
@@ -52,7 +56,7 @@ public class EventIndexingSingleFile implements EventIndexing {
 		Map<EventTypeId, EventIndex> eventIndicies = createEventIndicies(indexedEventTypes, entryFileCreator, entryFileNameGenerator, eventDefinitions);
 
 		EventIndexingSingleFile eventIndexing = new EventIndexingSingleFile(eventTypeIndex, eventIndicies);
-		eventIndexing.prepare();
+		eventIndexing.prepare(eventDefinitions);
 
 		return eventIndexing;
 	}
@@ -73,7 +77,7 @@ public class EventIndexingSingleFile implements EventIndexing {
 	}
 
 	@Override
-	public void prepare() {
+	public void prepare(EventDefinitions eventDefinitions) {
 		Map<EventTypeId, Iterator<EventId>> existingIndicies = toIteratorMap(eventIndicies);
 		Iterator<EventIndexEntry> sourceIndicies = eventTypeIndexFile.readIndexEntries(new Indexing.EventTypeMatcher(eventIndicies.keySet())).iterator();
 

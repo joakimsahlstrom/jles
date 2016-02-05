@@ -33,4 +33,8 @@ public class InMemoryFileRepository {
 		}
 		return files.get(fileName);
 	}
+
+	public boolean fileExists(String fileName) {
+		return files.containsKey(fileName);
+	}
 }

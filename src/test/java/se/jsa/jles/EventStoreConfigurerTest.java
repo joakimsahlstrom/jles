@@ -21,6 +21,7 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
+import se.jsa.jles.EventStoreConfigurer.IndexType;
 import se.jsa.jles.internal.EventTypeId;
 import se.jsa.jles.internal.FieldConstraint;
 import se.jsa.jles.internal.fields.EventFieldFactory;
@@ -40,6 +41,7 @@ public class EventStoreConfigurerTest {
 		EventIndex eventIndex = new EventIndex(inMemoryFileRepository.getEntryFile(new EntryFileNameGenerator().getEventIndexFileName(new EventTypeId(0L))), new EventTypeId(0L));
 
 		EventStore initialEventStore = EventStoreConfigurer.createMemoryOnlyConfigurer(inMemoryFileRepository)
+			.indexing(IndexType.SINGLE_FILE)
 			.addIndexing(TestEvent.class)
 			.configure();
 		initialEventStore.write(new TestEvent("1", 1, true));
@@ -49,6 +51,7 @@ public class EventStoreConfigurerTest {
 
 
 		EventStore nonIndexingEventStore = EventStoreConfigurer.createMemoryOnlyConfigurer(inMemoryFileRepository)
+				.indexing(IndexType.SINGLE_FILE)
 				.configure();
 		nonIndexingEventStore.write(new TestEvent("2", 2, false));
 		nonIndexingEventStore.stop();
@@ -57,6 +60,7 @@ public class EventStoreConfigurerTest {
 
 
 		EventStore indexingEventStore = EventStoreConfigurer.createMemoryOnlyConfigurer(inMemoryFileRepository)
+				.indexing(IndexType.SINGLE_FILE)
 				.addIndexing(TestEvent.class)
 				.configure();
 		// Index is updated after event store is created
@@ -73,6 +77,7 @@ public class EventStoreConfigurerTest {
 				inMemoryFileRepository.getEntryFile(new EntryFileNameGenerator().getEventFieldIndexFileName(new EventTypeId(0L), "Id")));
 
 		EventStore initialEventStore = EventStoreConfigurer.createMemoryOnlyConfigurer(inMemoryFileRepository)
+			.indexing(IndexType.SINGLE_FILE)
 			.addIndexing(TestEvent.class, "Id")
 			.configure();
 		initialEventStore.write(new TestEvent("1", 1, true));
@@ -82,6 +87,7 @@ public class EventStoreConfigurerTest {
 
 
 		EventStore nonIndexingEventStore = EventStoreConfigurer.createMemoryOnlyConfigurer(inMemoryFileRepository)
+				.indexing(IndexType.SINGLE_FILE)
 				.configure();
 		nonIndexingEventStore.write(new TestEvent("2", 2, false));
 		nonIndexingEventStore.stop();
@@ -90,6 +96,7 @@ public class EventStoreConfigurerTest {
 
 
 		EventStore indexingEventStore = EventStoreConfigurer.createMemoryOnlyConfigurer(inMemoryFileRepository)
+				.indexing(IndexType.SINGLE_FILE)
 				.addIndexing(TestEvent.class, "Id")
 				.configure();
 		// Index is updated after event store is created

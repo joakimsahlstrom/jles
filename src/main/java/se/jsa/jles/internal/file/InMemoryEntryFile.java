@@ -43,7 +43,7 @@ public class InMemoryEntryFile implements EntryFile {
 
 	@Override
 	public ByteBuffer readEntry(long position) {
-		ByteBuffer result = entries.get(position);
+		ByteBuffer result = entries.get(position).duplicate();
 		result.rewind();
 		return result;
 	}
@@ -58,4 +58,8 @@ public class InMemoryEntryFile implements EntryFile {
 		// do nothing
 	}
 
+	@Override
+	public String toString() {
+		return "InMemoryEntryFile [position=" + position + ", entries=" + entries + "]";
+	}
 }

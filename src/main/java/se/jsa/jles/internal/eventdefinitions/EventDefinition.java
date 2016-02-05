@@ -88,20 +88,43 @@ class EventDefinition implements EventSerializer, EventDeserializer {
 		verifyEventTypeId(buffer.getLong());
 		buffer.position(12);
 
-		Object instance;
-		try {
-			Constructor<?> constructor = eventType.getConstructor();
-			instance = constructor.newInstance();
-			NullFieldMap nullFieldMap = NullFieldMap.buildFromBuffer(fields, buffer);
-			for (EventField pf : fields) {
+		Object instance = createEventInstance();
+		NullFieldMap nullFieldMap = readNullFieldMap(buffer);
+		for (EventField pf : fields) {
+			try {
 				if (!nullFieldMap.isFieldNull(pf)) {
 					pf.readFromBuffer(instance, buffer);
 				}
+			} catch (Exception e) {
+				throw new RuntimeException(
+						"Could not deserialize type: " + eventType 
+						+ ". Field: " + pf
+						+ ". Buffer.remaining: " + buffer.remaining(), e);
 			}
-		} catch (Exception e) {
-			throw new RuntimeException("Could not deserialize type: " + eventType + ". Found constructors: " + Arrays.asList(eventType.getConstructors()), e);
 		}
 		return getEventType().cast(instance);
+	}
+	
+	private Object createEventInstance() {
+		try {
+			Constructor<?> constructor = eventType.getConstructor();
+			return constructor.newInstance();
+		} catch (Exception e1) {
+			throw new RuntimeException(
+					"Could not create event type: " + eventType 
+					+ ". Found constructors: " + Arrays.asList(eventType.getConstructors()));
+		}
+	}
+
+	private NullFieldMap readNullFieldMap(ByteBuffer buffer) {
+		try {
+			return NullFieldMap.buildFromBuffer(fields, buffer);
+		} catch (Exception e) {
+			throw new RuntimeException(
+					"Could not read null field map for: " + eventType 
+					+ ". Fields: " + fields
+					+ ". Buffer: " + buffer, e);
+		}
 	}
 
 	@Override

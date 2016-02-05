@@ -37,6 +37,13 @@ public class IndexFile {
 
 	public interface IndexKeyMatcher {
 		boolean accepts(Object o);
+		
+		public static IndexKeyMatcher ALWAYS_MATCHER = new IndexKeyMatcher() {
+			@Override
+			public boolean accepts(Object t) {
+				return true;
+			}
+		};
 	}
 
 	final StorableField eventKeyField;

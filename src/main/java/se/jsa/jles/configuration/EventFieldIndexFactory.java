@@ -26,7 +26,7 @@ import se.jsa.jles.internal.indexing.fields.InMemoryEventFieldIndex;
 import se.jsa.jles.internal.indexing.fields.SimpleEventFieldIndex;
 import se.jsa.jles.internal.util.Objects;
 
-public class EventFieldIndexFactory {
+class EventFieldIndexFactory {
 
 	private final EventFieldFactory eventFieldFactory = new EventFieldFactory();
 	private final EventIndexPreparation preparation;

@@ -30,6 +30,7 @@ import se.jsa.jles.internal.fields.LongField;
 import se.jsa.jles.internal.fields.StorableLongField;
 import se.jsa.jles.internal.fields.StringField;
 import se.jsa.jles.internal.file.SynchronousEntryFile;
+import se.jsa.jles.internal.indexing.IndexFile.IndexKeyMatcher;
 import se.jsa.jles.internal.indexing.events.EventIndex;
 
 public class IndexFileTest {
@@ -52,7 +53,7 @@ public class IndexFileTest {
 	public void longEventIndexCanBeWrittenAndReadBack() throws Exception {
 		IndexFile indexFile = new IndexFile(new LongField(EventFileTest.SingleLongEvent.class, "Val"), new SynchronousEntryFile("test.if"));
 		indexFile.writeIndex(0, new EventFileTest.SingleLongEvent(23L));
-		Iterable<EventId> indexes = indexFile.readIndicies(EventIndex.ALWAYS_MATCHER);
+		Iterable<EventId> indexes = indexFile.readIndicies(IndexKeyMatcher.ALWAYS_MATCHER);
 		Iterator<EventId> iterator = indexes.iterator();
 		iterator.next();
 		assertFalse(iterator.hasNext());
@@ -65,7 +66,7 @@ public class IndexFileTest {
 		IndexFile indexFile = new IndexFile(new LongField(EventFileTest.SingleLongEvent.class, "Val"), new SynchronousEntryFile("test.if"));
 		indexFile.writeIndex(0, new EventFileTest.SingleLongEvent(23L));
 		indexFile.writeIndex(3, new EventFileTest.SingleLongEvent(100239923L));
-		Iterable<EventId> indexes = indexFile.readIndicies(EventIndex.ALWAYS_MATCHER);
+		Iterable<EventId> indexes = indexFile.readIndicies(IndexKeyMatcher.ALWAYS_MATCHER);
 		Iterator<EventId> iterator = indexes.iterator();
 
 		EventId ie1 = iterator.next();
@@ -84,7 +85,7 @@ public class IndexFileTest {
 		indexFile.writeIndex(0, event);
 		indexFile.writeIndex(3, new EventFileTest.SingleStringEvent("bapa"));
 		indexFile.writeIndex(27, new EventFileTest.SingleStringEvent("kanin�ra"));
-		Iterable<EventId> indexes = indexFile.readIndicies(EventIndex.ALWAYS_MATCHER);
+		Iterable<EventId> indexes = indexFile.readIndicies(IndexKeyMatcher.ALWAYS_MATCHER);
 		Iterator<EventId> iterator = indexes.iterator();
 
 		EventId ie1 = iterator.next();
@@ -105,7 +106,7 @@ public class IndexFileTest {
 		indexFile.writeIndex(1, 1201L);
 		indexFile.writeIndex(2, 12L);
 		indexFile.writeIndex(3, 13L);
-		Iterable<EventId> indexes = indexFile.readIndicies(EventIndex.ALWAYS_MATCHER);
+		Iterable<EventId> indexes = indexFile.readIndicies(IndexKeyMatcher.ALWAYS_MATCHER);
 		Iterator<EventId> iterator = indexes.iterator();
 
 		EventId ie1 = iterator.next();
@@ -125,7 +126,7 @@ public class IndexFileTest {
 	public void hasNext() throws Exception {
 		IndexFile indexFile = new IndexFile(new StorableLongField(), new SynchronousEntryFile("test.if"));
 
-		Iterator<EventId> iterator = indexFile.readIndicies(EventIndex.ALWAYS_MATCHER).iterator();
+		Iterator<EventId> iterator = indexFile.readIndicies(IndexKeyMatcher.ALWAYS_MATCHER).iterator();
 		assertFalse(iterator.hasNext());
 		assertFalse(iterator.hasNext());
 

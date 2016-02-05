@@ -16,13 +16,14 @@
 package se.jsa.jles.internal.indexing.events;
 
 import se.jsa.jles.EventRepoReport;
+import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventId;
 import se.jsa.jles.internal.EventSerializer;
 import se.jsa.jles.internal.EventTypeId;
 
 public interface EventIndexing {
 
-	void prepare();
+	void prepare(EventDefinitions eventDefinitions);
 	void onNewEvent(long eventId, EventSerializer ed, Object event);
 	Iterable<EventId> getIndexEntryIterable(EventTypeId eventTypeId);
 

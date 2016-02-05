@@ -127,6 +127,11 @@ public class ConventionbasedEventResolver implements EventResolver {
 			Object deserializeEventField = deserializer.deserializeEventField(input, eventField);
 			return eventField.mapFieldValue(deserializeEventField);
 		}
+
+		@Override
+		public String toString() {
+			return "ConventionbasedEventDeserializer [deserializer=" + deserializer + "]";
+		}
 	}
 
 	private class ConventionbasedEventSerializer implements EventSerializer {
@@ -146,6 +151,11 @@ public class ConventionbasedEventResolver implements EventResolver {
 		@Override
 		public EventTypeId getEventTypeId() {
 			return serializer.getEventTypeId();
+		}
+
+		@Override
+		public String toString() {
+			return "ConventionbasedEventSerializer [serializer=" + serializer + "]";
 		}
 	}
 

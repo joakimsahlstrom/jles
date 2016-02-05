@@ -38,5 +38,8 @@ public class EntryFileNameGenerator {
 	public String getEventIndexFileName(EventTypeId eventTypeId) {
 		return "events_" + eventTypeId.toLong() + ".if";
 	}
-
+	
+	public String getMultiFileIndexName(EventTypeId eventTypeId) {
+		return "mfi_events_" + eventTypeId.toLong() + ".if";
+	}
 }

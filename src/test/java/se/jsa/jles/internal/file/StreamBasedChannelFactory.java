@@ -15,6 +15,7 @@
  */
 package se.jsa.jles.internal.file;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -47,6 +48,11 @@ public class StreamBasedChannelFactory implements FileChannelFactory {
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	@Override
+	public boolean fileExits(String fileName) {
+		return new File(fileName).exists();
 	}
 
 	public void close() {

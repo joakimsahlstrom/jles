@@ -21,4 +21,5 @@ import java.io.FileOutputStream;
 public interface FileChannelFactory {
 	FileOutputStream getOutputChannel(String fileName);
 	FileInputStream getInputChannel(String fileName);
+	boolean fileExits(String fileName);
 }
