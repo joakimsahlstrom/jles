@@ -24,7 +24,7 @@ import se.jsa.jles.configuration.EntryFileFactoryConfiguration;
 import se.jsa.jles.configuration.EventFieldIndexingFactory;
 import se.jsa.jles.configuration.EventFieldIndexingFactory.EventFieldIndexConfiguration;
 import se.jsa.jles.configuration.EventIndexingConfiguration;
-import se.jsa.jles.configuration.EventIndexingMultiFileConfiguration;
+import se.jsa.jles.configuration.EventIndexingConfigurationMultiFile;
 import se.jsa.jles.configuration.ThreadingEnvironment;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventFile;
@@ -57,7 +57,7 @@ public class EventStoreConfigurer {
 	private final AtomicReference<ThreadingEnvironment> threadingEnvironment = new AtomicReference<ThreadingEnvironment>(ThreadingEnvironment.MULTITHREADED);
 	private final EntryFileFactoryConfiguration entryFileFactory;
 	
-	private EventIndexingConfiguration eventIndexConfiguration = EventIndexingMultiFileConfiguration.create();
+	private EventIndexingConfiguration eventIndexConfiguration = EventIndexingConfigurationMultiFile.create();
 	private boolean useFileBasedEventDefinitions;
 
 	private EventStoreConfigurer(InMemoryFileRepository inMemoryFileRepository) {

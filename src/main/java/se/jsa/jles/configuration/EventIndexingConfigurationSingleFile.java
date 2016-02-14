@@ -24,19 +24,19 @@ import se.jsa.jles.internal.file.EntryFileNameGenerator;
 import se.jsa.jles.internal.indexing.events.EventIndexing;
 import se.jsa.jles.internal.indexing.events.EventIndexingSingleFile;
 
-public final class EventIndexingSingleFileConfiguration implements EventIndexingConfiguration {
+public final class EventIndexingConfigurationSingleFile implements EventIndexingConfiguration {
 
 	private final Set<Class<?>> indexedEventTypes = new HashSet<Class<?>>();
 
-	private EventIndexingSingleFileConfiguration() {
+	private EventIndexingConfigurationSingleFile() {
 		// hide this
 	}
 	
-	public static EventIndexingSingleFileConfiguration create() {
-		return new EventIndexingSingleFileConfiguration();
+	public static EventIndexingConfigurationSingleFile create() {
+		return new EventIndexingConfigurationSingleFile();
 	}
 	
-	public EventIndexingSingleFileConfiguration addIndexing(Class<?> eventType) {
+	public EventIndexingConfigurationSingleFile addIndexing(Class<?> eventType) {
 		indexedEventTypes.add(eventType);
 		return this;
 	}

@@ -32,8 +32,8 @@ import se.jsa.jles.EventStoreTest.EmptyEvent;
 import se.jsa.jles.EventStoreTest.EmptyEvent2;
 import se.jsa.jles.EventStoreTest.EmptyEvent3;
 import se.jsa.jles.EventStoreTest.TestEvent;
-import se.jsa.jles.configuration.EventIndexingMultiFileConfiguration;
-import se.jsa.jles.configuration.EventIndexingSingleFileConfiguration;
+import se.jsa.jles.configuration.EventIndexingConfigurationMultiFile;
+import se.jsa.jles.configuration.EventIndexingConfigurationSingleFile;
 import se.jsa.jles.internal.testevents.MyEvent;
 import se.jsa.jles.internal.testevents.ObjectTestEvent;
 
@@ -41,7 +41,7 @@ public class IndexingTest {
 
 	private final EventStoreConfigurer configurer = EventStoreConfigurer
 			.createMemoryOnlyConfigurer()
-			.eventIndexing(EventIndexingSingleFileConfiguration.create().addIndexing(EmptyEvent3.class))
+			.eventIndexing(EventIndexingConfigurationSingleFile.create().addIndexing(EmptyEvent3.class))
 			.addInMemoryIndexing(TestEvent.class, "Name");
 
 	private EventStore es = configurer.configure();
@@ -89,7 +89,7 @@ public class IndexingTest {
 		es.stop();
 
 		es = configurer
-				.eventIndexing(EventIndexingSingleFileConfiguration.create()
+				.eventIndexing(EventIndexingConfigurationSingleFile.create()
 						.addIndexing(EmptyEvent3.class)
 						.addIndexing(TestEvent.class)
 						.addIndexing(MyEvent.class)
@@ -175,7 +175,7 @@ public class IndexingTest {
 		es.stop();
 
 		es = configurer
-				.eventIndexing(EventIndexingMultiFileConfiguration.create())
+				.eventIndexing(EventIndexingConfigurationMultiFile.create())
 				.configure();
 		
 		Iterator<Object> events = es.readEvents(EventQuery.select(TestEvent.class)).iterator();

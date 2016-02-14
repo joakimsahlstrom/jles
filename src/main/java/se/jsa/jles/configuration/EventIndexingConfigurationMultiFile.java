@@ -21,14 +21,14 @@ import se.jsa.jles.internal.file.EntryFileNameGenerator;
 import se.jsa.jles.internal.indexing.events.EventIndexing;
 import se.jsa.jles.internal.indexing.events.EventIndexingMultiFile;
 
-public final class EventIndexingMultiFileConfiguration implements EventIndexingConfiguration {
+public final class EventIndexingConfigurationMultiFile implements EventIndexingConfiguration {
 
-	private EventIndexingMultiFileConfiguration() {
+	private EventIndexingConfigurationMultiFile() {
 		// hide this
 	}
 	
 	public static EventIndexingConfiguration create() {
-		return new EventIndexingMultiFileConfiguration();
+		return new EventIndexingConfigurationMultiFile();
 	}
 	
 	@Override
