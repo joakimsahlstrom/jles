@@ -22,13 +22,13 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import se.jsa.jles.EventStoreConfigurer.IndexType;
+import se.jsa.jles.configuration.EventIndexingSingleFileConfiguration;
 import se.jsa.jles.internal.testevents.MyEvent;
 import se.jsa.jles.internal.testevents.MyEvent2;
 
 public class EventQueryTest {
 
-	EventStore eventStore = EventStoreConfigurer.createMemoryOnlyConfigurer().indexing(IndexType.SINGLE_FILE).configure();
+	EventStore eventStore = EventStoreConfigurer.createMemoryOnlyConfigurer().eventIndexing(EventIndexingSingleFileConfiguration.create()).configure();
 
 	@Test
 	public void canQueryForAllEventsOfOneType() throws Exception {

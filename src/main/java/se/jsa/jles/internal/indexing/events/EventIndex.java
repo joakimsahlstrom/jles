@@ -94,6 +94,11 @@ public class EventIndex {
 		public boolean isNull(Object event) {
 			return false;
 		}
+
+		@Override
+		public String toString() {
+			return "NullEventTypeField [eventTypeId=" + eventTypeId + "]";
+		}
 	}
 
 	public void close() {

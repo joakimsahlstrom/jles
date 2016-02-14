@@ -25,8 +25,8 @@ import java.util.Iterator;
 import org.junit.After;
 import org.junit.Test;
 
-import se.jsa.jles.EventStoreConfigurer.IndexType;
 import se.jsa.jles.EventStoreTest.EmptyEvent;
+import se.jsa.jles.configuration.EventIndexingSingleFileConfiguration;
 import se.jsa.jles.internal.file.StreamBasedChannelFactory;
 import se.jsa.jles.internal.testevents.Name;
 import se.jsa.jles.internal.testevents.NonSerializableEvent;
@@ -34,7 +34,7 @@ import se.jsa.jles.internal.testevents.NonSerializableEvent;
 public class EventStoreSessionTest {
 
 	private final StreamBasedChannelFactory fileChannelFactory = new StreamBasedChannelFactory();
-	private final EventStoreConfigurer configurer = EventStoreConfigurer.createFileBasedConfigurer(fileChannelFactory).indexing(IndexType.SINGLE_FILE);
+	private final EventStoreConfigurer configurer = EventStoreConfigurer.createFileBasedConfigurer(fileChannelFactory).eventIndexing(EventIndexingSingleFileConfiguration.create());
 	private EventStore eventStore = configurer.configure();
 
 	@After

@@ -23,6 +23,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import se.jsa.jles.configuration.EntryFileFactoryConfiguration;
 import se.jsa.jles.configuration.EventFieldIndexingFactory;
 import se.jsa.jles.configuration.EventFieldIndexingFactory.EventFieldIndexConfiguration;
+import se.jsa.jles.configuration.EventIndexingConfiguration;
+import se.jsa.jles.configuration.EventIndexingMultiFileConfiguration;
 import se.jsa.jles.configuration.ThreadingEnvironment;
 import se.jsa.jles.internal.EventDefinitions;
 import se.jsa.jles.internal.EventFile;
@@ -36,8 +38,6 @@ import se.jsa.jles.internal.indexing.EventIndexPreparation;
 import se.jsa.jles.internal.indexing.EventIndexPreparationImpl;
 import se.jsa.jles.internal.indexing.Indexing;
 import se.jsa.jles.internal.indexing.events.EventIndexing;
-import se.jsa.jles.internal.indexing.events.EventIndexingMultiFile;
-import se.jsa.jles.internal.indexing.events.EventIndexingSingleFile;
 
 /**
  * Used for creating fully initialized {@link EventStore} instances
@@ -51,19 +51,13 @@ public class EventStoreConfigurer {
 		SUPERSAFE
 	}
 	
-	public enum IndexType {
-		SINGLE_FILE,
-		MULTI_FILE
-	}
-
 	private static EntryFileNameGenerator entryFileNameGenerator = new EntryFileNameGenerator();
 
-	private final Set<Class<?>> indexedEventTypes = new HashSet<Class<?>>();
 	private final Set<EventFieldIndexConfiguration> indexedEventFields = new HashSet<EventFieldIndexConfiguration>();
 	private final AtomicReference<ThreadingEnvironment> threadingEnvironment = new AtomicReference<ThreadingEnvironment>(ThreadingEnvironment.MULTITHREADED);
 	private final EntryFileFactoryConfiguration entryFileFactory;
-	private IndexType indexType = IndexType.MULTI_FILE;
-
+	
+	private EventIndexingConfiguration eventIndexConfiguration = EventIndexingMultiFileConfiguration.create();
 	private boolean useFileBasedEventDefinitions;
 
 	private EventStoreConfigurer(InMemoryFileRepository inMemoryFileRepository) {
@@ -86,14 +80,6 @@ public class EventStoreConfigurer {
 
 	public static EventStoreConfigurer createFileBasedConfigurer(FileChannelFactory fileChannelFactory) {
 		return new EventStoreConfigurer(fileChannelFactory);
-	}
-
-	public EventStoreConfigurer addIndexing(Class<?> eventType) {
-		if (indexType != IndexType.SINGLE_FILE) {
-			throw new IllegalStateException("Only available for IndexType." + IndexType.SINGLE_FILE);
-		}
-		indexedEventTypes.add(eventType);
-		return this;
 	}
 
 	public EventStoreConfigurer addIndexing(Class<?> eventType, String fieldName) {
@@ -126,8 +112,8 @@ public class EventStoreConfigurer {
 		return this;
 	}
 	
-	public EventStoreConfigurer indexing(IndexType indexing) {
-		this.indexType = indexing;
+	public EventStoreConfigurer eventIndexing(EventIndexingConfiguration eventIndexingConfiguration) {
+		this.eventIndexConfiguration = eventIndexingConfiguration;
 		return this;
 	}
 
@@ -153,7 +139,7 @@ public class EventStoreConfigurer {
 	}
 
 	private Indexing createIndexing(EventDefinitions eventDefinitions, EventFile eventFile) {
-		EventIndexing eventIndexing = createIndexing(eventDefinitions);
+		EventIndexing eventIndexing = eventIndexConfiguration.createIndexing(eventDefinitions, entryFileFactory, entryFileNameGenerator);
 		EventIndexPreparation preparation = new EventIndexPreparationImpl(eventIndexing, eventDefinitions, eventFile);
 		
 		EventFieldIndexingFactory eventFieldIndexingFactory = new EventFieldIndexingFactory(preparation, entryFileNameGenerator, entryFileFactory);
@@ -161,17 +147,6 @@ public class EventStoreConfigurer {
 				eventIndexing, 
 				eventFieldIndexingFactory.createEventFieldIndicies(eventDefinitions, indexedEventFields), 
 				threadingEnvironment.get() == ThreadingEnvironment.MULTITHREADED);
-	}
-
-	private EventIndexing createIndexing(EventDefinitions eventDefinitions) {
-		switch (indexType) {
-		case SINGLE_FILE:
-			return EventIndexingSingleFile.create(indexedEventTypes, entryFileFactory, entryFileNameGenerator, eventDefinitions);
-		case MULTI_FILE:
-			return EventIndexingMultiFile.create(entryFileFactory, entryFileNameGenerator, eventDefinitions);
-		default:
-			throw new RuntimeException("Unknown indexType=" + indexType);
-		}
 	}
 
 	public List<String> getFiles() {
