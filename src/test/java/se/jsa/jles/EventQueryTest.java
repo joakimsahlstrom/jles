@@ -62,7 +62,7 @@ public class EventQueryTest {
 		MyEvent2 expectedEvent2 = new MyEvent2(2);
 		eventStore.write(expectedEvent1);
 		eventStore.write(expectedEvent2);
-		Iterator<Object> iterator = eventStore.readEvents(EventQuery.select(MyEvent.class).join(MyEvent2.class)).iterator();
+		Iterator<Object> iterator = eventStore.readEvents(EventQuery.select(MyEvent.class).and(MyEvent2.class)).iterator();
 		assertEquals(expectedEvent1, iterator.next());
 		assertEquals(expectedEvent2, iterator.next());
 		assertFalse(iterator.hasNext());
@@ -83,7 +83,7 @@ public class EventQueryTest {
 		Iterator<Object> iterator = eventStore.readEvents(
 				EventQuery
 					.select(MyEvent.class).where("Num").is(1)
-					.join(MyEvent2.class).where("Num").is(4L)
+					.and(MyEvent2.class).where("Num").is(4L)
 					).iterator();
 		assertEquals(expectedEvent1, iterator.next());
 		assertEquals(expectedEvent2, iterator.next());

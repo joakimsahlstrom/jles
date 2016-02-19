@@ -77,7 +77,7 @@ public class EventStoreSessionTest {
 		assertEquals("2", 	nse2.getName().toString());
 		assertEquals(2, 	nse2.getDate().getTime());
 
-		assertEquals(3, size(eventStore.readEvents(EventQuery.select(NonSerializableEvent.class).join(EmptyEvent.class)).iterator()));
+		assertEquals(3, size(eventStore.readEvents(EventQuery.select(NonSerializableEvent.class).and(EmptyEvent.class)).iterator()));
 	}
 
 	private int size(Iterator<Object> readEvents) {

@@ -45,7 +45,7 @@ public final class EventQuery {
 		return new EventQueryWhere(this, fieldName);
 	}
 
-	public EventQuery join(Class<?> eventType) {
+	public EventQuery and(Class<?> eventType) {
 		return new EventQuery(eventType, Requirement.NONE, this);
 	}
 

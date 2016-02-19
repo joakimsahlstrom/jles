@@ -1,16 +1,13 @@
 # jles
-Joakims Lightweight Event Store
-A lightweight event store suiteable for embedded applications
-
-This framework is very much a work in progress but is currently used for one android app.
+A lightweight event store primarily suitable for embedded applications
 
 ## Features / usage
 ### Stores POJOs as events, given a small set of rules
 Example event:
 ```java
 public class UserRegisteredEvent {
-	long id;
-	String userName;
+	private long id;
+	private String userName;
 	
 	public UserRegisteredEvent() { // Required by jles
 	}
@@ -43,6 +40,7 @@ public void writeReadEvent() throws Exception {
 	EventStore eventStore = EventStoreConfigurer.createMemoryOnlyConfigurer().configure(); // Testing config
 	eventStore.write(new UserRegisteredEvent(1L, "test"));
 	
+	// Event reading is centered around java.lang.Iterable
 	Iterable<Object> readEvents = eventStore.readEvents(EventQuery.select(UserRegisteredEvent.class));
 	Iterator<Object> events = readEvents.iterator();
 	UserRegisteredEvent event = (UserRegisteredEvent) events.next();
@@ -52,21 +50,96 @@ public void writeReadEvent() throws Exception {
 }
 ```
 
-### Simple query language for event retrieval
-Multiple event types can be selected
-
 ### Supports queries over many events to support complex aggregates
-Guarantees event order
+Given that we have this event
+```java
+public class ChangeUserNameEvent {
+	private long id;
+	private String userName;
+	
+	// constructors, getters & setters...
+}
+```
+we can write queries like this
+```java
+eventStore.write(new UserRegisteredEvent(1L, "test"));
+eventStore.write(new ChangeUserNameEvent(1L, "test2"));
 
-### Iterators are "live" i.e. changes to underlying EventStore are reflected in active iterators
+Iterator<Object> events = eventStore.readEvents(EventQuery
+	.select(UserRegisteredEvent.class)
+	.and(ChangeUserNameEvent.class))
+	.iterator();
+assertEquals("test", ((UserRegisteredEvent) events.next()).getUserName());
+assertEquals("test2", ((ChangeUserNameEvent) events.next()).getUserName());
+assertFalse(events.hasNext());
+```
+Event order is guaranteed to remain as they were received by (the first sync point in) jles
+
+### Simple query language for event retrieval
+We can add field comparisons to our queries, given the example above it is likely that we would query like this:
+```java
+Iterable<Object> readEvents = eventStore.readEvents(EventQuery
+	// capital I in Id as everything in the method name after get... is matches as is
+	.select(UserRegisteredEvent.class).where("Id").is(1L)
+	.and(ChangeUserNameEvent.class).where("Id").is(1L));
+```
+
+In addition to .is(Object) these comparisons are supported; 
+* .in(Object...) 
+* .isLessThan(Number) 
+* .isGreaterThan(Number)
+
+Field comparison type is not verified. Null values are supported for boxed types and thus .is(null) is supported. 
+
+### Iterators are "live" 
+I.e. changes to underlying EventStore are reflected in active iterators
+```java
+Iterator<Object> events = eventStore.readEvents(EventQuery
+	.select(UserRegisteredEvent.class).where("Id").is(1L)
+	.and(ChangeUserNameEvent.class).where("Id").is(1L))
+	.iterator();
+assertEquals("test", ((UserRegisteredEvent) events.next()).getUserName());
+assertFalse(events.hasNext());
+
+eventStore.write(new ChangeUserNameEvent(1L, "test2"));
+assertTrue(events.hasNext());
+assertEquals("test2", ((ChangeUserNameEvent) events.next()).getUserName());
+assertFalse(events.hasNext());
+```
+
+### Event indexing gives good overall performance
+Events are indexed by type by default, this provides reasonable performance out of the box with minimal disc footprint
+
+
+### Event fields can be indexed individually for improved performance
+```java
+EventStore eventStore = EventStoreConfigurer.createMemoryOnlyConfigurer()
+	.addIndexing(UserRegisteredEvent.class, "Id")
+	.addIndexing(ChangeUserNameEvent.class, "Id")
+	.configure();
+
+// Iterating over this query will now execute faster
+Iterator<Object> events = eventStore.readEvents(EventQuery
+	.select(UserRegisteredEvent.class).where("Id").is(1L)
+	.and(ChangeUserNameEvent.class).where("Id").is(1L))
+	.iterator();
+```
+
+Indexing can be added at any time, the index data will then be constructed on event store startup
+
+For high performance, in-memory indexing can be used
+```java
+EventStore eventStore = EventStoreConfigurer.createMemoryOnlyConfigurer()
+	.addInMemoryIndexing(UserRegisteredEvent.class, "Id")
+	.addInMemoryIndexing(ChangeUserNameEvent.class, "Id")
+	.configure();
+```
+
+This indexing is loaded eagerly in a background thread at event store startup
 
 ### Can run on multiple platforms by providing different FileChannelFactories
 Ex: android vs windows
 
-### Event indexing gives good overall performance
-Events are indexed by type by default
-### Event fields can be indexed individually for improved performance
-Can also be indexed in-memory
 ### Guaranteeing data integrity by storing event definitions
 ### Support event class evolution by convention based serialization support
 ### Totally immutable data store reduces error rates

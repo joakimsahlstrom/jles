@@ -288,7 +288,7 @@ public class EventStoreTest {
 		assertEquals(expectedTestEvents, readEvents);
 		readEvents = TestUtil.collect(eventStore.readEvents(EventQuery.select(EmptyEvent.class)));
 		assertEquals(expectedEmptyEvents, readEvents);
-		readEvents = TestUtil.collect(eventStore.readEvents(EventQuery.select(TestEvent.class).join(EmptyEvent.class)));
+		readEvents = TestUtil.collect(eventStore.readEvents(EventQuery.select(TestEvent.class).and(EmptyEvent.class)));
 		assertEquals(events, readEvents);
 	}
 
@@ -318,7 +318,7 @@ public class EventStoreTest {
 			eventStore.write(e);
 		}
 
-		List<?> readEvents = TestUtil.collect(eventStore.readEvents(EventQuery.select(TestEvent.class).join(EmptyEvent.class)));
+		List<?> readEvents = TestUtil.collect(eventStore.readEvents(EventQuery.select(TestEvent.class).and(EmptyEvent.class)));
 		assertEquals(expectedEvents, readEvents);
 	}
 

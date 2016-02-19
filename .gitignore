@@ -28,6 +28,7 @@ test.def
 test.if
 test.ef
 _todo.txt
+.readme*
 
 # External tool builders
 .externalToolBuilders/
