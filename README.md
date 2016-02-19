@@ -50,17 +50,8 @@ public void writeReadEvent() throws Exception {
 }
 ```
 
-### Supports queries over many events to support complex aggregates
-Given that we have this event
-```java
-public class ChangeUserNameEvent {
-	private long id;
-	private String userName;
-	
-	// constructors, getters & setters...
-}
-```
-we can write queries like this
+### Supports queries for multiple event types
+Events can be queried like this
 ```java
 eventStore.write(new UserRegisteredEvent(1L, "test"));
 eventStore.write(new ChangeUserNameEvent(1L, "test2"));
@@ -73,7 +64,7 @@ assertEquals("test", ((UserRegisteredEvent) events.next()).getUserName());
 assertEquals("test2", ((ChangeUserNameEvent) events.next()).getUserName());
 assertFalse(events.hasNext());
 ```
-Event order is guaranteed to remain as they were received by (the first sync point in) jles
+Event order is guaranteed to remain as they were received by (the first synch point in) jles
 
 ### Simple query language for event retrieval
 We can add field comparisons to our queries, given the example above it is likely that we would query like this:
@@ -84,7 +75,7 @@ Iterable<Object> readEvents = eventStore.readEvents(EventQuery
 	.and(ChangeUserNameEvent.class).where("Id").is(1L));
 ```
 
-In addition to .is(Object) these comparisons are supported; 
+In addition to .is(Object) these comparisons are supported
 * .in(Object...) 
 * .isLessThan(Number) 
 * .isGreaterThan(Number)
@@ -92,7 +83,7 @@ In addition to .is(Object) these comparisons are supported;
 Field comparison type is not verified. Null values are supported for boxed types and thus .is(null) is supported. 
 
 ### Iterators are "live" 
-I.e. changes to underlying EventStore are reflected in active iterators
+I.e. changes to underlying EventStore are reflected in iterators
 ```java
 Iterator<Object> events = eventStore.readEvents(EventQuery
 	.select(UserRegisteredEvent.class).where("Id").is(1L)
