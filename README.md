@@ -99,10 +99,10 @@ Iterator<Object> events = eventStore.readEvents(EventQuery
 	.and(ChangeUserNameEvent.class).where("Id").is(1L))
 	.iterator();
 assertEquals("test", ((UserRegisteredEvent) events.next()).getUserName());
-assertFalse(events.hasNext());
+assertFalse(events.hasNext()); // no more events
 
 eventStore.write(new ChangeUserNameEvent(1L, "test2"));
-assertTrue(events.hasNext());
+assertTrue(events.hasNext()); // more events!
 assertEquals("test2", ((ChangeUserNameEvent) events.next()).getUserName());
 assertFalse(events.hasNext());
 ```
@@ -138,12 +138,30 @@ EventStore eventStore = EventStoreConfigurer.createMemoryOnlyConfigurer()
 This indexing is loaded eagerly in a background thread at event store startup
 
 ### Can run on multiple platforms by providing different FileChannelFactories
-Ex: android vs windows
+Provide custom FileChannelFactory:s to give jles file system access
+```java
+EventStore eventStore = EventStoreConfigurer.createFileBasedConfigurer(myFileChannelFactory).configure();
+```
 
-### Guaranteeing data integrity by storing event definitions
+### Guarantees data integrity by storing event definitions
+Whenever jles encounters an event type that is new to it, the definition of the event is then written to file.
+These definitions are then loaded the next time the event store is started. If the current class definitions does
+not confirm to the definitions that are stored the event store will throw an exception and exit.
+
 ### Support event class evolution by convention based serialization support
-### Totally immutable data store reduces error rates
+todo
+
+### Add-only data store reduces error rates
+todo
+
 ### Can be configured to run in single/multi-threaded environment
+Jles expects a multithreaded environment by default, can be configured to expect single threaded environment.
+Results in slightly better performance but no protection against multithreading issues.
+
+```java
+EventStore eventStore = EventStoreConfigurer.createMemoryOnlyConfigurer().singleThreadedEnvironment().configure()
+```
 
 ## Todo
+* Support multiple requirements in queries
 * Allow events to contain arrays of primitives
