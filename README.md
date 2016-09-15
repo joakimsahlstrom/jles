@@ -156,3 +156,4 @@ EventStore eventStore = EventStoreConfigurer.createMemoryOnlyConfigurer().single
 ## Todo
 * Support multiple requirements in queries
 * Allow events to contain arrays of primitives
+* ReactiveStreams support
